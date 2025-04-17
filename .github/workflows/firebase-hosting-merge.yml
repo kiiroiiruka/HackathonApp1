@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: 
           npm ci
-          npx expo export
+          npx expo export --output-dir dist
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}

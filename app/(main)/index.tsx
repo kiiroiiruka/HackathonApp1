@@ -13,6 +13,7 @@ import { useFriendUserStore } from '@/store/friendData';
 import Header from '@/components/ui/header/Header';
 import SelectTab from '@/components/ui/selectionUi/SelectTab';
 import { useRouter } from 'expo-router';
+
 const MainScreen: React.FC = () => {
   const users = useFriendUserStore((state) => state.users);
   const router=useRouter()

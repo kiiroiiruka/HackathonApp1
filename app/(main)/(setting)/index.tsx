@@ -2,111 +2,102 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMeInfoStore } from '@/store/meData';
-
+import { useNavigation } from 'expo-router';
+import { meDataUpdateByStudentId} from '@/firebase/update/meDataUpdate';//自分のデータの変更をバクエンド側に反映させる。
+import { studentIdAtom } from '@/atom/studentIdAtom';
+import { useAtom } from 'jotai';
 const SettingScreen: React.FC = () => {
+  const navigation = useNavigation();
   const router = useRouter();
-  const { userInfo } = useMeInfoStore(); // Zustand から userInfo を取得
-  const [location, setLocation] = useState(userInfo.location || ''); // 初期値は Zustand の値
-  const [freeUntil, setFreeUntil] = useState(userInfo.time || '');  // 初期値は Zustand の値
-  const [message, setMessage] = useState(userInfo.message || '');   // 初期値は Zustand の値
-  const [isFree, setIsFree] = useState(userInfo.time === '' ? true : false); // 初期状態は「暇」
+  const { userInfo } = useMeInfoStore();
+  const [location, setLocation] = useState(userInfo.location || '');
+  const [freeUntil, setFreeUntil] = useState(userInfo.time || '');
+  const [message, setMessage] = useState(userInfo.message || '');
+  const [meDId,setMeId]=useAtom(studentIdAtom)
 
-  // Zustand actions
   const { updateLocation, updateTime, updateMessage } = useMeInfoStore();
+  
+  //変更をバックエンド側に反映させる。userId: string, location:string,message:string,status:string)
+  const handleSaveAndGoBack = async () => {
+    await meDataUpdateByStudentId(meDId, location,message,freeUntil);//バックエンド側にデータのへんこうを反映させる。
+    router.back();//前の画面に戻る。
+  };
 
-  // timeが変更されたときにisFreeの状態を更新
-  useEffect(() => {
-    if (userInfo.time === '') {
-      setIsFree(true);
-    } else {
-      setIsFree(false);
-    }
-  }, [userInfo.time]);
-
-  // 状態を保存する関数（活動状態も含めて保存）
+  // 保存ボタン処理
   const handleSave = () => {
-    const timeToSet = isFree ? freeUntil : '活動中';
-
-    // Zustand へ location, message, time を更新
     updateLocation(location);
     updateMessage(message);
-    updateTime(timeToSet);
+    updateTime(freeUntil);
 
-    Alert.alert('情報が保存されました', `場所: ${location}\nメッセージ: ${message}\n時間: ${timeToSet}`);
+    Alert.alert('情報が保存されました', `場所: ${location}\nメッセージ: ${message}\n時間: ${freeUntil}`);
   };
 
-  // 活動中解除ボタン
-  const handleSetIdle = () => {
-    // time を空白に設定
-    updateTime('');
-    setIsFree(true); // 「暇」に切り替え
-    Alert.alert('状態が「暇」に変更されました');
+  // 活動状態トグル処理
+  const toggleActiveStatus = () => {
+    if (freeUntil === '活動中') {
+      updateTime('');
+      setFreeUntil('');
+      Alert.alert('状態が「暇」に変更されました');
+    } else {
+      updateTime('活動中');
+      setFreeUntil('活動中');
+      Alert.alert('状態が「活動中」に変更されました');
+    }
   };
 
-  // 暇状態を活動中に変更するボタン
-  const handleSetActive = () => {
-    // time を「活動中」に設定
-    updateTime('活動中');
-    setIsFree(false); // 「活動中」に切り替え
-    Alert.alert('状態が「活動中」に変更されました');
+  // 入力ハンドラー
+  const handleFreeUntilChange = (newTime: string) => {
+    setFreeUntil(newTime);
+    updateTime(newTime);
   };
 
   return (
     <View style={styles.container}>
-      {/* ← 戻るボタン */}
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-        <Text style={styles.backButtonText}>← 戻る</Text>
+      <TouchableOpacity onPress={() =>{handleSaveAndGoBack()}} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← 保存して戻る</Text>
       </TouchableOpacity>
 
       <Text style={styles.title}>今の状態を登録しよう</Text>
 
-      {/* 状態に応じたメッセージ表示 */}
+      {/* 状態表示 */}
       <Text
         style={[
           styles.statusText,
-          isFree ? styles.freeStatus : styles.busyStatus,
+          freeUntil === '活動中' ? styles.busyStatus : styles.freeStatus,
         ]}
       >
-        {isFree ? '暇です' : '活動中です'}
+        {freeUntil === '活動中' ? '活動中です' : '暇です'}
       </Text>
-
-      {/* 保存ボタン */}
-      <TouchableOpacity
-        style={styles.saveButton}
-        onPress={handleSave}
-      >
-        <Text style={styles.buttonText}>一言メッセージと現在地を保存する</Text>
-      </TouchableOpacity>
 
       <TextInput
         style={styles.input}
         placeholder="今の場所（例: 渋谷）"
         value={location}
-        onChangeText={setLocation} // 入力変更時に状態更新
+        onChangeText={(text) => {
+          setLocation(text);
+          updateLocation(text);
+        }}
       />
 
-      {/* 暇な時だけ表示 */}
       <TextInput
         style={styles.input}
         placeholder="一言メッセージ（例: カフェいきたい）"
         value={message}
-        onChangeText={setMessage} // 入力変更時に状態更新
+        onChangeText={(text) => {
+          setMessage(text);
+          updateMessage(text);
+        }}
       />
 
       <TextInput
-        style={[
-          styles.input,
-          !isFree && styles.disabledInput,
-        ]}
+        style={styles.input}
         placeholder="何時まで暇？（例: 18:00）"
-        value={isFree ? freeUntil : '活動中'}
-        onChangeText={setFreeUntil} // 入力変更時に状態更新
-        keyboardType="numeric"
-        editable={isFree}
-        placeholderTextColor={isFree ? 'gray' : '#aaa'}
+        value={freeUntil}
+        onChangeText={handleFreeUntilChange}
+        keyboardType="default"
       />
 
-      <View style={{flexDirection:"row"}}>
+      <View style={{ marginTop: 20,flexDirection:"row" }}>
         <Text style={styles.title}>ユーザー情報</Text>
         <Text>UID: {userInfo.uid}</Text>
         <Text>ユーザー名: {userInfo.username}</Text>
@@ -115,13 +106,16 @@ const SettingScreen: React.FC = () => {
         <Text>時間: {userInfo.time}</Text>
       </View>
 
-      {/* 動的なボタン表示 */}
+      {/* 状態トグルボタン */}
       <TouchableOpacity
-        style={[styles.saveButton, { backgroundColor: isFree ? '#FF6347' : '#1E90FF' }]} // 色変更
-        onPress={isFree ? handleSetActive : handleSetIdle}
+        style={[
+          styles.saveButton,
+          { backgroundColor: freeUntil === '活動中' ? '#FF6347' : '#1E90FF' },
+        ]}
+        onPress={toggleActiveStatus}
       >
         <Text style={styles.buttonText}>
-          {isFree ? '暇状態を活動中に変更' : '活動中解除'}
+          {freeUntil === '活動中' ? '活動中解除' : '暇状態を活動中に変更'}
         </Text>
       </TouchableOpacity>
     </View>
@@ -129,10 +123,6 @@ const SettingScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  disabledInput: {
-    backgroundColor: '#f2f2f2',
-    color: '#aaa',
-  },
   container: {
     flex: 1,
     paddingHorizontal: 30,
@@ -174,25 +164,25 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   freeStatus: {
-    color: 'green', // 暇な時は緑色
+    color: 'green',
   },
   busyStatus: {
-    color: 'red', // 活動中の時は赤色
+    color: 'red',
   },
   saveButton: {
     width: 200,
     height: 50,
-    borderRadius: 25, // 角丸にする
+    borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
     marginTop: 20,
-    backgroundColor: '#FF6347', // グラデーション効果
+    backgroundColor: '#FF6347',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
-    elevation: 4, // Android用のシャドウ
+    elevation: 4,
   },
   buttonText: {
     color: '#fff',

@@ -1,4 +1,3 @@
-// filepath: c:\TK\github\HackathonApp1\@types\env.d.ts
 declare module '@env' {
   export const API_KEY: string;
   export const AUTH_DOMAIN: string;

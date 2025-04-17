@@ -22,8 +22,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: 
-        - npm ci
-        - npx expo export:web
+          npm ci
+          npx expo export:web
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}

@@ -2,19 +2,19 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { API_KEY, AUTH_DOMAIN, PROJECT_ID, STORAGE_BUCKET, MESSAGING_SENDER_ID, APP_ID } from '@env';
+
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCoD6rPY0PndhCSBazFEVvl1Tfh1B-ZCVc",
-  authDomain: "hackathonapp1-64ab3.firebaseapp.com",
-  projectId: "hackathonapp1-64ab3",
-  storageBucket: "hackathonapp1-64ab3.appspot.com",
-  messagingSenderId: "838810716103",
-  appId: "1:838810716103:web:80652c4d36567052e03be2",
-}
+  apiKey: API_KEY,
+  authDomain: AUTH_DOMAIN,
+  projectId: PROJECT_ID,
+  storageBucket: STORAGE_BUCKET,
+  messagingSenderId: MESSAGING_SENDER_ID,
+  appId: APP_ID,
+};
 
-// Firebase 初期化
 const app = initializeApp(firebaseConfig);
 
-// 各サービスのインスタンスをエクスポート
 export const auth = getAuth(app);
 export const db = getFirestore(app);

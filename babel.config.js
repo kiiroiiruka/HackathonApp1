@@ -10,5 +10,8 @@ module.exports = {
       safe: false,
       allowUndefined: true,
     }],
+    ['@babel/plugin-transform-private-methods', { loose: true }], // プライベートメソッドの変換プラグイン
+    ['@babel/plugin-transform-class-properties', { loose: true }], // クラスプロパティの変換プラグイン
+    ['@babel/plugin-transform-private-property-in-object', { loose: true }], // プライベートプロパティの変換プラグイン
   ],
 };

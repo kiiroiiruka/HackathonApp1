@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env: # 環境変数を設定
       EXPO_ROUTER_APP_ROOT: './app'
+      EXPO_ROUTER_IMPORT_MODE: eager
       API_KEY: ${{ secrets.API_KEY }}
       AUTH_DOMAIN: ${{ secrets.AUTH_DOMAIN }}
       PROJECT_ID: ${{ secrets.PROJECT_ID }}

@@ -23,21 +23,32 @@ const MainScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <Header title="暇やつ探そうぜ？">
-      <View style={{flex:1}}>
-        {/* 🔽 選択肢を SelectTab に渡す */}
-        <TouchableOpacity style={{marginVertical:"auto",marginLeft:"auto"}} onPress={()=>router.push("./(setting)")}>
-            <Text>{"自分の情報設定"}</Text>
+        <View style={{ flex: 1 }}>
+          {/* 自分の情報設定ボタン */}
+          <TouchableOpacity
+            style={{ marginVertical: 'auto', marginLeft: 'auto' }}
+            onPress={() => router.push('./(setting)')}
+          >
+            <Text>{'自分の情報設定'}</Text>
           </TouchableOpacity>
+
+          {/* チャット画面への遷移ボタン */}
+          <TouchableOpacity
+            style={styles.chatButton}
+            onPress={() => router.push('./(chat)')}
+          >
+            <Text style={styles.chatButtonText}>{'チャットへ移動'}</Text>
+          </TouchableOpacity>
+
           <SelectTab
             options={['友達', '暇な奴だけ']}
             selected={selectedTab}
             setSelected={setSelectedTab}
           />
-
         </View>
       </Header>
 
-      {/* 🔽 選択状態に応じて表示を切り替えることもできる（任意） */}
+{/* 🔽 選択状態に応じて表示を切り替えることもできる（任意） */}
       <FlatList
         data={
           selectedTab === '暇な奴だけ'
@@ -65,13 +76,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  headerExtras: {
-    marginTop: 8,
+  chatButton: {
+    marginVertical: 10,
+    padding: 10,
+    backgroundColor: '#007bff',
+    borderRadius: 5,
     alignItems: 'center',
   },
-  dateText: {
-    color: 'white',
-    fontSize: 12,
+  chatButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   listContent: {
     paddingBottom: 20,

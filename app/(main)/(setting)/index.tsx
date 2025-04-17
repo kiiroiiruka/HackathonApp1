@@ -23,14 +23,6 @@ const SettingScreen: React.FC = () => {
     router.back();//前の画面に戻る。
   };
 
-  // 保存ボタン処理
-  const handleSave = () => {
-    updateLocation(location);
-    updateMessage(message);
-    updateTime(freeUntil);
-
-    Alert.alert('情報が保存されました', `場所: ${location}\nメッセージ: ${message}\n時間: ${freeUntil}`);
-  };
 
   // 活動状態トグル処理
   const toggleActiveStatus = () => {
@@ -125,14 +117,12 @@ const SettingScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 30,
     backgroundColor: '#fff',
     paddingTop: 50,
+    
   },
   backButton: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 50 : 20,
-    left: 20,
+
     zIndex: 10,
     padding: 10,
   },

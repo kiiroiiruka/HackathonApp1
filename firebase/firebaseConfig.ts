@@ -2,7 +2,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-
+//envファイルがうまくいかなかったため取りあえずここに直で書く。
 const firebaseConfig = {
   apiKey: "AIzaSyCoD6rPY0PndhCSBazFEVvl1Tfh1B-ZCVc",
   authDomain: "hackathonapp1-64ab3.firebaseapp.com",

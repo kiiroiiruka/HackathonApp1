@@ -6,7 +6,7 @@ import { Platform } from 'react-native';
 import { createUser } from '../../firebase/add/createUser';
 import { studentIdAtom } from '@/atom/studentIdAtom';
 import { useAtom } from 'jotai';
-import { fetchUserInfoAndSet } from '@/firebase/take/meDataset';
+import { fetchUserInfoAndSet } from '@/firebase/get/meDataset';
 const SignUpScreen: React.FC = () => {
   const [username, setUsername] = useState('');
   const [studentId, setStudentId] = useState(''); // ← 追加

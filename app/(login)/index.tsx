@@ -4,11 +4,11 @@ import { useRouter } from 'expo-router'; // expo-routerを使って遷移
 import AsyncStorage from '@react-native-async-storage/async-storage'; // ローカルストレージを使う
 import { signInWithEmailAndPassword, updateEmail } from 'firebase/auth';
 import { auth } from '../../firebase/firebaseConfig'; // ← あなたのパスに合わせてね
-import { getStudentIdByEmail } from '@/firebase/take/studentNumberAcquisition';
+import { getStudentIdByEmail } from '@/firebase/get/studentNumberAcquisition';
 import { studentIdAtom } from '@/atom/studentIdAtom';
 import { useAtom } from 'jotai';
-import { fetchFriendsFromStudentIdArray } from '@/firebase/take/friendInfoAcquisition';
-import { fetchUserInfoAndSet } from '@/firebase/take/meDataset';
+import { fetchFriendsFromStudentIdArray } from '@/firebase/get/friendInfoAcquisition';
+import { fetchUserInfoAndSet } from '@/firebase/get/meDataset';
 const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

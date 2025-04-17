@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { Platform, View, Text, StyleSheet } from "react-native"; // これを使ってプラットフォームを判別
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import { getStudentIdByEmail } from "@/firebase/take/studentNumberAcquisition";
+import { getStudentIdByEmail } from "@/firebase/get/studentNumberAcquisition";
 import { studentIdAtom } from "@/atom/studentIdAtom";
 import { useAtom } from "jotai";
-import { fetchFriendsFromStudentIdArray } from "@/firebase/take/friendInfoAcquisition";
+import { fetchFriendsFromStudentIdArray } from "@/firebase/get/friendInfoAcquisition";
 const AuthGate = () => {
   const router = useRouter();
   const [,setStudentId]=useAtom(studentIdAtom)

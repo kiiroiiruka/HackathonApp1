@@ -23,10 +23,15 @@ jobs:
           echo "EXPO_PUBLIC_APP_ID=${{ secrets.FIREBASE_APP_ID }}" >> .env
           echo "EXPO_PUBLIC_DATABASE_URL=${{ secrets.FIREBASE_DATABASE_URL }}" >> .env
           echo "EXPO_PUBLIC_MEASUREMENT_ID=${{ secrets.FIREBASE_MEASUREMENT_ID }}" >> .env
+      - run: |
+          echo "ビルド前の.envの中身:"
           cat .env
-          cat .env
+      - run: |
           npm ci &&
           npx expo export --output-dir dist
+      - run: |
+          echo "ビルド後の.envの中身:"
+          cat .env
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}

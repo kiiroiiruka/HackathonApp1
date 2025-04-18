@@ -1,7 +1,7 @@
 // firebaseConfig.ts
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import {  getFirestore } from 'firebase/firestore';
 import { getDatabase } from 'firebase/database';
 const firebaseConfig = {
   apiKey: process.env.API_KEY,

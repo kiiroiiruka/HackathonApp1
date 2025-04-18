@@ -6,15 +6,28 @@ on:
   push:
     branches:
       - main
+      - deploy-test
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+    env: # 環境変数を設定
+      EXPO_ROUTER_APP_ROOT: './app'
+      EXPO_ROUTER_IMPORT_MODE: eager
+      API_KEY: ${{ secrets.API_KEY }}
+      AUTH_DOMAIN: ${{ secrets.AUTH_DOMAIN }}
+      PROJECT_ID: ${{ secrets.PROJECT_ID }}
+      STORAGE_BUCKET: ${{ secrets.STORAGE_BUCKET }}
+      MESSAGING_SENDER_ID: ${{ secrets.MESSAGING_SENDER_ID }}
+      APP_ID: ${{ secrets.APP_ID }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      MEASUREMENT_ID: ${{ secrets.MEASUREMENT_ID }}
     steps:
       - uses: actions/checkout@v4
-      - run: npm ci && npm run build
+      - run: 
+          npm ci &&
+          npx expo export --output-dir dist
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_HACKATHONAPP1_64AB3 }}
           channelId: live
-          projectId: hackathonapp1-64ab3

@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMeInfoStore } from '@/store/meData';
-import { useNavigation } from 'expo-router';
 import { meDataUpdateByStudentId} from '@/firebase/update/meDataUpdate';//自分のデータの変更をバクエンド側に反映させる。
 import { studentIdAtom } from '@/atom/studentIdAtom';
 import { useAtom } from 'jotai';
 const SettingScreen: React.FC = () => {
-  const navigation = useNavigation();
   const router = useRouter();
   const { userInfo } = useMeInfoStore();
   const [location, setLocation] = useState(userInfo.location || '');
@@ -88,15 +86,6 @@ const SettingScreen: React.FC = () => {
         onChangeText={handleFreeUntilChange}
         keyboardType="default"
       />
-
-      <View style={{ marginTop: 20,flexDirection:"row" }}>
-        <Text style={styles.title}>ユーザー情報</Text>
-        <Text>UID: {userInfo.uid}</Text>
-        <Text>ユーザー名: {userInfo.username}</Text>
-        <Text>場所: {userInfo.location}</Text>
-        <Text>メッセージ: {userInfo.message}</Text>
-        <Text>時間: {userInfo.time}</Text>
-      </View>
 
       {/* 状態トグルボタン */}
       <TouchableOpacity

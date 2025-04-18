@@ -32,20 +32,6 @@ const MainScreen: React.FC = () => {
             selected={selectedTab}
             setSelected={setSelectedTab}
           />
-          <TouchableOpacity
-            style={styles.settingsButtonSmall}
-            onPress={() => router.push('./(setting)')}
-          >
-            <Ionicons name="settings-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
-            <Text style={styles.settingsButtonTextSmall}>位置情報設定</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.settingsButtonSmall}
-            onPress={() => router.push('./(addFriend)')}
-          >
-            <Ionicons name="settings-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
-            <Text style={styles.settingsButtonTextSmall}>友達追加</Text>
-          </TouchableOpacity>
         </View>
       </Header>
 
@@ -68,17 +54,44 @@ const MainScreen: React.FC = () => {
         )}
         contentContainerStyle={styles.listContent}
       />
+      {/* 🔽 フッターボタン配置 */}
+  <View style={styles.footer}>
+    <TouchableOpacity
+      style={styles.settingsButtonSmall}
+      onPress={() => router.push('./(setting)')}
+    >
+      <Ionicons name="settings-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
+      <Text style={styles.settingsButtonTextSmall}>位置情報設定</Text>
+    </TouchableOpacity>
+    <TouchableOpacity
+      style={styles.settingsButtonSmall}
+      onPress={() => router.push('./(addFriend)')}
+    >
+      <Ionicons name="person-add-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
+      <Text style={styles.settingsButtonTextSmall}>友達追加</Text>
+    </TouchableOpacity>
+  </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    padding: 12,
+    borderTopWidth: 1,
+    borderColor: '#ccc',
+    backgroundColor: '#fff',
+  },
   settingsButtonSmall: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'center',
     backgroundColor: '#007AFF',
     paddingVertical: 6,
+
     paddingHorizontal: 12,
     borderRadius: 16,
     shadowColor: '#000',
@@ -86,7 +99,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 3,
-    marginVertical: 12,
   },
   
   settingsButtonTextSmall: {

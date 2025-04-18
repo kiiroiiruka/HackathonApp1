@@ -1,5 +1,11 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+} from 'react-native';
 
 type Props = {
   options: string[];
@@ -8,23 +14,78 @@ type Props = {
 };
 
 const SelectTab: React.FC<Props> = ({ options, selected, setSelected }) => {
+  const animatedValues = useRef(options.map(() => new Animated.Value(0))).current;
+
+  useEffect(() => {
+    const selectedIndex = options.indexOf(selected);
+
+    animatedValues.forEach((val, index) => {
+      Animated.timing(val, {
+        toValue: index === selectedIndex ? 1 : 0,
+        duration: 250,
+        useNativeDriver: false,
+      }).start();
+    });
+  }, [selected]);
+
   return (
     <View style={styles.container}>
-      {options.map((option) => {
-        const isSelected = selected === option;
+      {options.map((option, index) => {
+        const isFirst = index === 0;
+        const isLast = index === options.length - 1;
+
+        const bgColor = animatedValues[index].interpolate({
+          inputRange: [0, 1],
+          outputRange: ['#E8F5E9', '#2ECC71'],
+        });
+
+        const textColor = animatedValues[index].interpolate({
+          inputRange: [0, 1],
+          outputRange: ['#2ECC71', '#fff'],
+        });
+
+        const scale = animatedValues[index].interpolate({
+          inputRange: [0, 1],
+          outputRange: [1, 1.05],
+        });
+
+        // borderWidth のアニメーション
+        const borderWidth = animatedValues[index].interpolate({
+          inputRange: [0, 1],
+          outputRange: [2, 2.5], // スケールに合わせて少し太く補正
+        });
+
         return (
           <TouchableOpacity
             key={option}
-            style={[
-              styles.tab,
-              isSelected && styles.activeTab,
-              isSelected && styles.scaleUp,
-            ]}
             onPress={() => setSelected(option)}
+            activeOpacity={0.8}
           >
-            <Text style={isSelected ? styles.activeText : styles.tabText}>
-              {option}
-            </Text>
+            <Animated.View
+              style={[
+                styles.tab,
+                isFirst && styles.firstTab,
+                isLast && styles.lastTab,
+                {
+                  backgroundColor: bgColor,
+                  transform: [{ scale }],
+                  alignSelf: 'center',
+                  borderWidth: borderWidth, // borderWidth のアニメーションを追加
+                },
+              ]}
+            >
+              <Animated.Text
+                style={[
+                  styles.tabText,
+                  {
+                    color: textColor,
+                    fontWeight: selected === option ? 'bold' : 'normal',
+                  },
+                ]}
+              >
+                {option}
+              </Animated.Text>
+            </Animated.View>
           </TouchableOpacity>
         );
       })}
@@ -36,32 +97,30 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginVertical: 12,
+    overflow: 'hidden',
+    marginHorizontal: 16,
+    marginBottom: 8,
   },
   tab: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    marginHorizontal: 5,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#2ECC71', // 緑系
-    backgroundColor: '#E8F5E9', // 薄い緑
-    transform: [{ scale: 1 }],
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    marginHorizontal: 4,
   },
-  activeTab: {
-    backgroundColor: '#2ECC71', // 明るい緑
+  firstTab: {
+    borderTopLeftRadius: 8,
+    borderBottomLeftRadius: 8,
   },
-  scaleUp: {
-    transform: [{ scale: 1.07 }],
+  lastTab: {
+    borderTopRightRadius: 8,
+    borderBottomRightRadius: 8,
   },
   tabText: {
-    color: '#2ECC71',
-    fontSize: 14,
-  },
-  activeText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
+    fontSize: 12,
+    textAlign: 'center',
   },
 });
 

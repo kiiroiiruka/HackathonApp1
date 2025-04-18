@@ -4,13 +4,15 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, Dimensions } from '
 type Props = {
   studentIds: string[];
   alreadyAddedIds: string[];
+  onFriendToggle: (studentId: string, isAdded: boolean) => void;  // onFriendToggle の追加
 };
 
-const StudentList: React.FC<Props> = ({ studentIds, alreadyAddedIds }) => {
+const StudentList: React.FC<Props> = ({ studentIds, alreadyAddedIds, onFriendToggle }) => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const handlePress = (id: string) => {
+  const handlePress = (id: string, isAdded: boolean) => {
     setSelectedId(id);
+    onFriendToggle(id, isAdded);  // 追加/削除処理を親に通知
   };
 
   const renderItem = ({ item }: { item: string }) => {
@@ -20,12 +22,9 @@ const StudentList: React.FC<Props> = ({ studentIds, alreadyAddedIds }) => {
       <View style={styles.card}>
         <Text style={styles.studentId}>{item}</Text>
         <TouchableOpacity
-          onPress={() => handlePress(item)}
+          onPress={() => handlePress(item, isAdded)}  // ここで渡す値を修正
           disabled={isAdded}
-          style={[
-            styles.button,
-            isAdded ? styles.addedButton : styles.addButton,
-          ]}
+          style={[styles.button, isAdded ? styles.addedButton : styles.addButton]}
         >
           <Text style={styles.buttonText}>
             {isAdded ? '追加済み' : '追加'}

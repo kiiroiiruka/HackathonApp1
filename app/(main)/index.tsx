@@ -39,6 +39,13 @@ const MainScreen: React.FC = () => {
             <Ionicons name="settings-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
             <Text style={styles.settingsButtonTextSmall}>位置情報設定</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.settingsButtonSmall}
+            onPress={() => router.push('./(addFriend)')}
+          >
+            <Ionicons name="settings-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
+            <Text style={styles.settingsButtonTextSmall}>友達追加</Text>
+          </TouchableOpacity>
         </View>
       </Header>
 

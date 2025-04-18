@@ -1,20 +1,20 @@
 // firebaseConfig.ts
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-//envファイルがうまくいかなかったため取りあえずここに直で書く。
+import {  getFirestore } from 'firebase/firestore';
+import { getDatabase } from 'firebase/database';
 const firebaseConfig = {
-  apiKey: "AIzaSyCoD6rPY0PndhCSBazFEVvl1Tfh1B-ZCVc",
-  authDomain: "hackathonapp1-64ab3.firebaseapp.com",
-  projectId: "hackathonapp1-64ab3",
-  storageBucket: "hackathonapp1-64ab3.appspot.com",
-  messagingSenderId: "838810716103",
-  appId: "1:838810716103:web:80652c4d36567052e03be2",
-}
+  apiKey: process.env.API_KEY,
+  authDomain: process.env.AUTH_DOMAIN,
+  projectId: process.env.PROJECT_ID,
+  storageBucket: process.env.STORAGE_BUCKET,
+  messagingSenderId: process.env.MESSAGING_SENDER_ID,
+  appId: process.env.APP_ID,
+};
 
 // Firebase 初期化
 const app = initializeApp(firebaseConfig);
 
-// 各サービスのインスタンスをエクスポート
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const realtimeDb = getDatabase(app); // Realtime Databaseのエクスポート

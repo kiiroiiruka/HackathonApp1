@@ -14,13 +14,26 @@ import Header from '@/components/ui/header/Header';
 import SelectTab from '@/components/ui/selectionUi/SelectTab';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons'; // ← アイコン追加！
-
+import { fetchFriendsFromStudentIdArray } from '@/firebase/get/friendInfoAcquisition';
+import { useFocusEffect } from'expo-router'//expo-routerを活用している場合はこっちをimportすればOK
+import { useCallback } from 'react'
+import { useAtom } from 'jotai';
+import { mailAddressAtom } from '@/atom/mailAddressAtom';
+import { ActivityIndicator } from 'react-native';
 const MainScreen: React.FC = () => {
   const users = useFriendUserStore((state) => state.users);
-  const router=useRouter()
   // 🔽 ここで選択状態を管理（デフォルトは「友達」）
   const [selectedTab, setSelectedTab] = useState<string>('友達');
-
+  const [mail,]=useAtom(mailAddressAtom)
+  const [loading, setLoading] = useState(false);
+  const router=useRouter()
+  
+  useFocusEffect(
+    useCallback(() => {
+      fetchFriendsFromStudentIdArray(mail)//ページ開くたびに最新の情報に更新させてセットする
+    }, [])
+  )
+  
   return (
     <SafeAreaView style={styles.container}>
       <Header title="暇やつ探そうぜ？">
@@ -32,6 +45,24 @@ const MainScreen: React.FC = () => {
             selected={selectedTab}
             setSelected={setSelectedTab}
           />
+          <TouchableOpacity
+            onPress={async () => {
+              setLoading(true);  // ローディング開始
+              await fetchFriendsFromStudentIdArray(mail); // データ取得
+              setTimeout(() => setLoading(false), 1000); // 1秒後に解除
+            }}
+            disabled={loading}
+            style={[
+              styles.reloadButton,
+              loading && styles.reloadButtonDisabled, // ロード中なら薄く
+            ]}
+          >
+            {loading ? (
+              <ActivityIndicator color="#888" size="small" />
+            ) : (
+              <Text style={styles.reloadText}>リロードする</Text>
+            )}
+          </TouchableOpacity>
         </View>
       </Header>
 
@@ -76,6 +107,21 @@ const MainScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  reloadButton: {
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+    marginLeft: 10,
+    marginBottom: 10,
+  },
+  reloadButtonDisabled: {
+    opacity: 0.5,
+  },
+  reloadText: {
+    fontSize: 14,
+    color: '#333',
+  },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-around',

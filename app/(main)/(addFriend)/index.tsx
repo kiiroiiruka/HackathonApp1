@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { getAllStudentIds } from '@/firebase/get/allInUserStudentNumber';
 import { getFriendsByStudentId } from '@/firebase/get/friendStudentNumber';
 import { updateFriendsOfUser } from '@/firebase/update/meFriendChange';  // 修正された関数をインポート
-
+import SubHeader from '@/components/ui/header/SubScreenHeader'
 import { useAtom } from 'jotai';
 import { studentIdAtom } from '@/atom/studentIdAtom';
 
@@ -39,12 +39,7 @@ export default function App() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.backText}>← 戻る</Text>
-        </TouchableOpacity>
-      </View>
-
+      <SubHeader title="友達の追加・削除" onBack={() => router.back()} />
       <View style={{ flex: 1 }}>
         <StudentList
           studentIds={allStudents}   // すべての学籍番号リスト
@@ -57,14 +52,25 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    paddingTop: 10,
-    paddingLeft: 16,
-    paddingBottom: 10,
-    backgroundColor: '#f2f2f2',
-  },
-  backText: {
-    fontSize: 16,
-    color: '#007AFF',
-  },
-});
+    header: {
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      backgroundColor: '#f2f2f2',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    backText: {
+      fontSize: 16,
+      color: '#007AFF',
+    },
+    titleWrapper: {
+      flex: 1,
+      alignItems: 'center',
+    },
+    title: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: '#333',
+    },
+  });

@@ -2,7 +2,6 @@ import { db } from '@/firebase/firebaseConfig';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useFriendUserStore } from '@/store/friendData';
 
-// Firestoreの構成に基づき、学籍番号から友達情報を引き出してZustandに入れる
 export const fetchFriendsFromStudentIdArray = async (email: string) => {
   try {
     // 自分のユーザードキュメントを取得（メールアドレスから）
@@ -36,7 +35,7 @@ export const fetchFriendsFromStudentIdArray = async (email: string) => {
       .map((doc) => {
         const data = doc.data();
         return {
-          uid: doc.id,
+          uid:data.studentId,
           username: data.username ?? '',
           location: data.location ?? '',
           message: data.message ?? '',

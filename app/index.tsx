@@ -6,9 +6,13 @@ import { getStudentIdByEmail } from "@/firebase/get/studentNumberAcquisition";
 import { studentIdAtom } from "@/atom/studentIdAtom";
 import { useAtom } from "jotai";
 import { fetchFriendsFromStudentIdArray } from "@/firebase/get/friendInfoAcquisition";
+import { mailAddressAtom } from "@/atom/mailAddressAtom"; 
 const AuthGate = () => {
   const router = useRouter();
   const [,setStudentId]=useAtom(studentIdAtom)
+  const [,setMail]=useAtom(mailAddressAtom)
+
+
   const [loadingMessage, setLoadingMessage] = useState<string>("ようこそ!");
   useEffect(() => {
     const checkStoredCredentials = async () => {
@@ -31,12 +35,12 @@ const AuthGate = () => {
           console.log("ローカルストレージ内に入っているメールアドレスは", storedEmail);
           console.log("ローカルstorage内に入っているパスワードは", storedPassword);
         }
-
+        
         if (storedEmail && storedPassword) {
-
           //ここでメールアドレスを引数的に受け取って、返り値でそのメールアドレスに対応する学籍番号を返す関数を起動
           const studentId = await getStudentIdByEmail(storedEmail);
           await fetchFriendsFromStudentIdArray(storedEmail);//ここでFriendでつながっている友達の情報をフロントにセットさせる
+          setMail(storedEmail)//メールアドレスフロントにセット
           if(studentId)setStudentId(studentId)
           console.log("取得した学籍番号:", studentId);
         

@@ -5,6 +5,7 @@ import { useMeInfoStore } from '@/store/meData';
 import { meDataUpdateByStudentId} from '@/firebase/update/meDataUpdate';//自分のデータの変更をバクエンド側に反映させる。
 import { studentIdAtom } from '@/atom/studentIdAtom';
 import { useAtom } from 'jotai';
+import SubHeader from '@/components/ui/header/SubScreenHeader'
 const SettingScreen: React.FC = () => {
   const router = useRouter();
   const { userInfo } = useMeInfoStore();
@@ -43,12 +44,7 @@ const SettingScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() =>{handleSaveAndGoBack()}} style={styles.backButton}>
-        <Text style={styles.backButtonText}>← 保存して戻る</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.title}>今の状態を登録しよう</Text>
-
+      <SubHeader title="今の状態を登録しよう" onBack={handleSaveAndGoBack} />
       {/* 状態表示 */}
       <Text
         style={[
@@ -104,10 +100,31 @@ const SettingScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  header: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    backgroundColor: '#f2f2f2',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  
+  backButtonText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: '500',
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: 50,
+
     
   },
   backButton: {
@@ -115,11 +132,7 @@ const styles = StyleSheet.create({
     zIndex: 10,
     padding: 10,
   },
-  backButtonText: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '500',
-  },
+
   title: {
     fontSize: 22,
     fontWeight: '600',

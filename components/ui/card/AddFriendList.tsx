@@ -8,11 +8,10 @@ type Props = {
 };
 
 const StudentList: React.FC<Props> = ({ studentIds, alreadyAddedIds, onFriendToggle }) => {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+
 
   const handlePress = (id: string, isAdded: boolean) => {
-    setSelectedId(id);
-    onFriendToggle(id, isAdded);  // 追加/削除処理を親に通知
+    onFriendToggle(id, isAdded); // ← ここで反転させるのもアリ
   };
 
   const renderItem = ({ item }: { item: string }) => {
@@ -22,12 +21,11 @@ const StudentList: React.FC<Props> = ({ studentIds, alreadyAddedIds, onFriendTog
       <View style={styles.card}>
         <Text style={styles.studentId}>{item}</Text>
         <TouchableOpacity
-          onPress={() => handlePress(item, isAdded)}  // ここで渡す値を修正
-          disabled={isAdded}
-          style={[styles.button, isAdded ? styles.addedButton : styles.addButton]}
+          onPress={() => handlePress(item, !isAdded)}
+          style={[styles.button, isAdded ? styles.removeButton : styles.addButton]}
         >
           <Text style={styles.buttonText}>
-            {isAdded ? '追加済み' : '追加'}
+            {isAdded ? '削除' : '追加'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -42,9 +40,6 @@ const StudentList: React.FC<Props> = ({ studentIds, alreadyAddedIds, onFriendTog
         renderItem={renderItem}
         contentContainerStyle={styles.list}
       />
-      {selectedId && (
-        <Text style={styles.selectedText}>押された番号：{selectedId}</Text>
-      )}
     </View>
   );
 };
@@ -58,6 +53,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 16,
     backgroundColor: '#f9f9f9',
+  },
+  removeButton: {
+    backgroundColor: '#F44336',  // 赤系（削除っぽい色）
   },
   list: {
     paddingVertical: 20,

@@ -7,6 +7,7 @@ import { createUser } from '../../firebase/add/createUser';
 import { studentIdAtom } from '@/atom/studentIdAtom';
 import { useAtom } from 'jotai';
 import { fetchUserInfoAndSet } from '@/firebase/get/meDataset';
+import { mailAddressAtom } from '@/atom/mailAddressAtom';
 const SignUpScreen: React.FC = () => {
   const [username, setUsername] = useState('');
   const [studentId, setStudentId] = useState(''); // ← 追加
@@ -14,7 +15,7 @@ const SignUpScreen: React.FC = () => {
   const [password, setPassword] = useState('');
   const [id,setId]=useAtom(studentIdAtom)
   const router = useRouter();
-  
+  const [,setMail]=useAtom(mailAddressAtom)
 
   const handleSignUp = async () => {
     if (!username || !studentId || !email || !password) {
@@ -25,10 +26,10 @@ const SignUpScreen: React.FC = () => {
     try {
       const result = await createUser(email, password, username,studentId); // ここで必要なら studentId も送れるように変更
       await fetchUserInfoAndSet(email)//自分のデータをフロントにセットする
+      setMail(email)//mailアドレス保持
       if (result.success) {
         setId(studentId)
         console.log("学籍番号をここにほじさせる",studentId)
-        
         if (Platform.OS === 'web') {
           localStorage.setItem('email', email);
           localStorage.setItem('password', password);

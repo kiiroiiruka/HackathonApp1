@@ -6,6 +6,7 @@ import { getStudentIdByEmail } from "@/firebase/get/studentNumberAcquisition";
 import { studentIdAtom } from "@/atom/studentIdAtom";
 import { useAtom } from "jotai";
 import { fetchFriendsFromStudentIdArray } from "@/firebase/get/friendInfoAcquisition";
+import 'expo-router/entry';
 const AuthGate = () => {
   const router = useRouter();
   const [,setStudentId]=useAtom(studentIdAtom)

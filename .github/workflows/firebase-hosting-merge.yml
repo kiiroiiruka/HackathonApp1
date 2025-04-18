@@ -24,6 +24,7 @@ jobs:
           echo "EXPO_PUBLIC_DATABASE_URL=${{ secrets.FIREBASE_DATABASE_URL }}" >> .env
           echo "EXPO_PUBLIC_MEASUREMENT_ID=${{ secrets.FIREBASE_MEASUREMENT_ID }}" >> .env
           cat .env
+          cat .env
           npm ci &&
           npx expo export --output-dir dist
       - uses: FirebaseExtended/action-hosting-deploy@v0

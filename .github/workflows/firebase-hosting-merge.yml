@@ -31,7 +31,7 @@ jobs:
           echo "ビルド後の.envの中身:"
           cat .env
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: build-artifacts
           path: dist/ # ビルド成果物を保存するディレクトリ

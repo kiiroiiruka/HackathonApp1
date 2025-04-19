@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
   header: {
     paddingVertical: 10,
     paddingHorizontal: 16,
-    backgroundColor: 'white',
+    backgroundColor: 'rgb(197, 233, 255)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

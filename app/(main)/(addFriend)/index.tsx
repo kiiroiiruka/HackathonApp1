@@ -61,7 +61,7 @@ export default function App() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <SubHeader title="友達の追加・削除" onBack={() => router.back()} />
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1}}>
         <StudentList
           studentIds={allStudents}   // すべての学籍番号リスト
           alreadyAddedIds={addedStudents}  // 追加された友達の学籍番号リスト
@@ -71,27 +71,3 @@ export default function App() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-    header: {
-      paddingVertical: 10,
-      paddingHorizontal: 16,
-      backgroundColor: '#f2f2f2',
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    },
-    backText: {
-      fontSize: 16,
-      color: '#007AFF',
-    },
-    titleWrapper: {
-      flex: 1,
-      alignItems: 'center',
-    },
-    title: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: '#333',
-    },
-  });

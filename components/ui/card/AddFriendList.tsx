@@ -46,19 +46,18 @@ const StudentList: React.FC<Props> = ({ studentIds, alreadyAddedIds, onFriendTog
 
 export default StudentList;
 
-const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor:"rgba(254, 179, 93, 0.56)"
   },
   removeButton: {
     backgroundColor: '#F44336',  // 赤系（削除っぽい色）
   },
   list: {
     paddingVertical: 20,
+    marginHorizontal:16
   },
   card: {
     flexDirection: 'row',
@@ -74,6 +73,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,
+ 
   },
   studentId: {
     fontSize: 16,

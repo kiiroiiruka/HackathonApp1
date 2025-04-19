@@ -1,5 +1,5 @@
 import React, { useState,useCallback  } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, Platform,ScrollView, KeyboardAvoidingView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMeInfoStore } from '@/store/meData';
 import { meDataUpdateByStudentId} from '@/firebase/update/meDataUpdate';//自分のデータの変更をバクエンド側に反映させる。
@@ -57,63 +57,73 @@ const SettingScreen: React.FC = () => {
   };
 
   return (
-    <View style={{flex:1,backgroundColor:"white"}}>
-      <SubHeader title="今の状態を登録しよう" onBack={()=>router.back()} />
-      <View style={styles.container}>
-        {/* 状態表示 */}
-        <Text
-          style={[
-            styles.statusText,
-            freeUntil === '活動中' ? styles.busyStatus : styles.freeStatus,
-          ]}
+    <View style={{flex:1, backgroundColor:"white"}}>
+      <SubHeader title="今の状態を登録しよう" onBack={() => router.back()} />
+    
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={80} // 必要に応じて調整
+      >
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
         >
-          {freeUntil === '活動中' ? '活動中です' : '暇です'}
-        </Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="今の場所（例: 渋谷）"
-          value={location}
-          onChangeText={(text) => setLocation(text)}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="一言メッセージ（例: カフェいきたい）"
-          value={message}
-          onChangeText={(text) => setMessage(text)}
-        />
-
-        {freeUntil !== '活動中'&&
-        <TextInput
-          style={styles.input}
-          placeholder="何時まで暇？（例: 18:00）"
-          value={freeUntil}
-          onChangeText={handleFreeUntilChange}
-        />}
-
-        {/* 状態トグルボタン */}
-        <TouchableOpacity
-          style={[
-            styles.roundButton,
-            { backgroundColor: freeUntil === '活動中' ? '#FF6347' : 'rgb(49, 199, 149)' },
-          ]}
-          onPress={toggleActiveStatus}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.roundButtonText}>
-            {freeUntil === '活動中' ? '活動中解除' : '活動中にする'}
+          {/* ↓中身はそのままでOK */}
+          <Text
+            style={[
+              styles.statusText,
+              freeUntil === '活動中' ? styles.busyStatus : styles.freeStatus,
+            ]}
+          >
+            {freeUntil === '活動中' ? '活動中です' : '暇です'}
           </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={change}
-          style={styles.saveButton}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.saveButtonText}>変更内容を保存する</Text>
-        </TouchableOpacity>
-      </View>
+    
+          <TextInput
+            style={styles.input}
+            placeholder="今の場所（例: 渋谷）"
+            value={location}
+            onChangeText={(text) => setLocation(text)}
+          />
+    
+          <TextInput
+            style={styles.input}
+            placeholder="一言メッセージ（例: カフェいきたい）"
+            value={message}
+            onChangeText={(text) => setMessage(text)}
+          />
+    
+          {freeUntil !== '活動中' && (
+            <TextInput
+              style={styles.input}
+              placeholder="何時まで暇？（例: 18:00）"
+              value={freeUntil}
+              onChangeText={handleFreeUntilChange}
+            />
+          )}
+    
+          <TouchableOpacity
+            style={[
+              styles.roundButton,
+              { backgroundColor: freeUntil === '活動中' ? '#FF6347' : 'rgb(49, 199, 149)' },
+            ]}
+            onPress={toggleActiveStatus}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.roundButtonText}>
+              {freeUntil === '活動中' ? '活動中解除' : '活動中にする'}
+            </Text>
+          </TouchableOpacity>
+    
+          <TouchableOpacity
+            onPress={change}
+            style={styles.saveButton}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.saveButtonText}>変更内容を保存する</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 };
@@ -132,6 +142,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 6,
+    
   },
   
   roundButtonText: {
@@ -185,6 +196,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
     padding:10, 
+    
   },
   backButton: {
     zIndex: 10,

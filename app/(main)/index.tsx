@@ -86,48 +86,48 @@ const MainScreen: React.FC = () => {
         </View>
       </Header>
 
-    {/* 🔽 選択状態に応じて表示を切り替えることもできる（任意） */}
-    <FlatList
-      data={
-        selectedTab === '暇な奴だけ'
-          ? users.filter((u) => !u.time.includes('活動中'))
-          : users
-      }
-      keyExtractor={(item) => item.uid}
-      renderItem={({ item }) => (
-        <StateInCurrentFriend
-          username={item.username}
-          location={item.location}
-          message={item.message}
-          time={item.time}
-          studentId={item.uid}
-        />
-      )}
-      ListEmptyComponent={
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>条件に当てはまるユーザーが存在しません</Text>
-        </View>
-      }
-      contentContainerStyle={styles.listContent}
-    />
+      {/* 🔽 選択状態に応じて表示を切り替えることもできる（任意） */}
+      <FlatList
+        data={
+          selectedTab === '暇な奴だけ'
+            ? users.filter((u) => !u.time.includes('活動中'))
+            : users
+        }
+        keyExtractor={(item) => item.uid}
+        renderItem={({ item }) => (
+          <StateInCurrentFriend
+            username={item.username}
+            location={item.location}
+            message={item.message}
+            time={item.time}
+            studentId={item.uid}
+          />
+        )}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>条件に当てはまるユーザーが存在しません</Text>
+          </View>
+        }
+        contentContainerStyle={styles.listContent}
+      />
 
       {/* 🔽 フッターボタン配置 */}
-  <View style={styles.footer}>
-    <TouchableOpacity
-      style={styles.settingsButtonSmall}
-      onPress={() => router.push('./(setting)')}
-    >
-      <Ionicons name="settings-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
-      <Text style={styles.settingsButtonTextSmall}>位置情報設定</Text>
-    </TouchableOpacity>
-    <TouchableOpacity
-      style={styles.settingsButtonSmall}
-      onPress={() => router.push('./(addFriend)')}
-    >
-      <Ionicons name="person-add-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
-      <Text style={styles.settingsButtonTextSmall}>友達追加</Text>
-    </TouchableOpacity>
-  </View>
+      <View style={styles.footer}>
+        <TouchableOpacity
+          style={styles.settingsButtonSmall}
+          onPress={() => router.push('./(setting)')}
+        >
+          <Ionicons name="settings-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
+          <Text style={styles.settingsButtonTextSmall}>暇情報設定</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.settingsButtonSmall}
+          onPress={() => router.push('./(addFriend)')}
+        >
+          <Ionicons name="person-add-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
+          <Text style={styles.settingsButtonTextSmall}>友達追加</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };

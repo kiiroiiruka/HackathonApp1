@@ -84,12 +84,13 @@ const SettingScreen: React.FC = () => {
           onChangeText={(text) => setMessage(text)}
         />
 
+        {freeUntil !== '活動中'&&
         <TextInput
           style={styles.input}
           placeholder="何時まで暇？（例: 18:00）"
           value={freeUntil}
           onChangeText={handleFreeUntilChange}
-        />
+        />}
 
         {/* 状態トグルボタン */}
         <TouchableOpacity

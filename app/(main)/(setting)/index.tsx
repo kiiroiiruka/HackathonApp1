@@ -63,7 +63,6 @@ const SettingScreen: React.FC = () => {
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={80} // 必要に応じて調整
       >
         <ScrollView
           contentContainerStyle={styles.container}

@@ -1,5 +1,4 @@
 import 'dotenv/config'; // dotenv パッケージをインポート
-console.log("testhyaowfyg",process.env); // 環境変数をコンソールに出力
 export default {
   expo: {
     name: 'A',

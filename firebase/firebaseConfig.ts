@@ -10,6 +10,7 @@ const firebaseConfig = {
   projectId: 'hackathonapp1-64ab3',
   storageBucket: 'hackathonapp1-64ab3.appspot.com',
   messagingSenderId: '838810716103',
+  databaseURL: "https://hackathonapp1-64ab3-default-rtdb.asia-southeast1.firebasedatabase.app",
   appId: '1:838810716103:web:80652c4d36567052e03be2',
 };
 

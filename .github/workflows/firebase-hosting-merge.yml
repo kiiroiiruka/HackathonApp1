@@ -36,7 +36,7 @@ jobs:
       - uses: expo/expo-github-action@v5
         with:
           expo-token: "ZcieLHpULJRaub0Q83r-VWWYyRs29k8JHzdBbEoI" # Expoの認証トークンを設定
-          expo-cache: true # キャッシュを有効化
+          expo-cache: false
 
       # Expoプロジェクトをビルド
       - run: |

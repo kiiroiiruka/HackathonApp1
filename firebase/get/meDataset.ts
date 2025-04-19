@@ -17,7 +17,7 @@ export const fetchUserInfoAndSet = async (email: string) => {
 
     // 状態にセットする用のUserInfo型オブジェクトを作成
     const userInfo = {
-      uid: userDoc.id, // ドキュメントIDをuidとして使用
+      uid: data.studentId, // ドキュメントIDをuidとして使用
       username: data.username ?? '',
       location: data.location ?? '',
       message: data.message ?? '',

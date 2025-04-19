@@ -83,6 +83,7 @@ const MainScreen: React.FC = () => {
               <Text style={styles.reloadText}>リロードする</Text>
             )}
           </TouchableOpacity>
+          
         </View>
       </Header>
 
@@ -119,6 +120,13 @@ const MainScreen: React.FC = () => {
         >
           <Ionicons name="settings-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
           <Text style={styles.settingsButtonTextSmall}>暇情報設定</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.settingsButtonSmall}
+          onPress={() => router.push('./(openchat)')}
+        >
+         <Ionicons name="chatbubble-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
+          <Text style={styles.settingsButtonTextSmall}>全体チャット</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.settingsButtonSmall}

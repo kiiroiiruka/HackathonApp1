@@ -8,9 +8,6 @@ const Layout = () => {
       <Stack>
         {/* 他のページへのリンクが必要なら、Stack.Screenで定義できます */}
         <Stack.Screen name="index" options={{ headerShown:false }} />
-        <Stack.Screen name="(setting)" options={{ headerShown:false }} />
-        <Stack.Screen name="(addFriend)" options={{ headerShown:false }} />
-        <Stack.Screen name="(meInfoChange)" options={{ headerShown:false }} />
       </Stack>
     </View>
   );

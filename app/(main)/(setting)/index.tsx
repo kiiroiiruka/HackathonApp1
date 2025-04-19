@@ -121,6 +121,13 @@ const SettingScreen: React.FC = () => {
           >
             <Text style={styles.saveButtonText}>変更内容を保存する</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            onPress={()=>{router.push("./photoCamera")}}
+            style={{margin:"auto",backgroundColor:"rgb(199, 158, 53)",padding:10,borderRadius:10,marginTop:5}}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.saveButtonText}>写真を付ける</Text>
+          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>

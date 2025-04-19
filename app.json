@@ -8,13 +8,19 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+
     "ios": {
+      "infoPlist": {
+        "NSCameraUsageDescription": "カメラを使用して写真を撮ります"
+      },
       "supportsTablet": true,   
       "bundleIdentifier": "com.kiiro.MobileApp6", 
       "googleServicesFile": "./GoogleService-Info.plist",
       "buildNumber": "1.0.0"
+      
     },
     "android": {
+      "permissions": ["CAMERA"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"

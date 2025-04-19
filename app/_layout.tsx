@@ -17,7 +17,7 @@ const Layout = () => {
     if (current === '(main)') {
       return '#2196f3';
     }
-    if (current === '(setting)'||current==='(addFriend)'||current==='signUp') {
+    if (current !== '(login)') {
       return 'rgb(197, 233, 255)'
     }
     return 'white';

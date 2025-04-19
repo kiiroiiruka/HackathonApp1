@@ -16,17 +16,23 @@ const StudentList: React.FC<Props> = ({ studentIds, alreadyAddedIds, onFriendTog
 
   const renderItem = ({ item }: { item: string }) => {
     const isAdded = alreadyAddedIds.includes(item);
-
+  
+    const lastDoubleHyphenIndex = item.lastIndexOf('--');
+    const mainId = lastDoubleHyphenIndex !== -1 ? item.slice(0, lastDoubleHyphenIndex) : item;
+    const suffix = lastDoubleHyphenIndex !== -1 ? item.slice(lastDoubleHyphenIndex) : '';
+  
     return (
       <View style={styles.card}>
-        <Text style={styles.studentId}>{item}</Text>
+        <View style={styles.idContainer}>
+          <Text style={styles.mainId}>{mainId}</Text>
+          {suffix !== '' && <Text style={styles.suffix}>{suffix}</Text>}
+        </View>
+  
         <TouchableOpacity
           onPress={() => handlePress(item, !isAdded)}
           style={[styles.button, isAdded ? styles.removeButton : styles.addButton]}
         >
-          <Text style={styles.buttonText}>
-            {isAdded ? '削除' : '追加'}
-          </Text>
+          <Text style={styles.buttonText}>{isAdded ? '削除' : '追加'}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -48,6 +54,20 @@ export default StudentList;
 
 
 const styles = StyleSheet.create({
+  idContainer: {
+    flexDirection: 'column',
+  },
+  mainId: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+  },
+  suffix: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: '#999',
+    marginTop: 4,
+  },
   container: {
     flex: 1,
     backgroundColor:"rgba(254, 179, 93, 0.56)"

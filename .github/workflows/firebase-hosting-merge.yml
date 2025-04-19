@@ -30,7 +30,7 @@ jobs:
       # Node.js 環境をセットアップ
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
 
       # Expo CLI を使用してビルド
       - uses: expo/expo-github-action@v5

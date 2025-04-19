@@ -7,11 +7,12 @@ import { studentIdAtom } from "@/atom/studentIdAtom";
 import { useAtom } from "jotai";
 import { fetchFriendsFromStudentIdArray } from "@/firebase/get/friendInfoAcquisition";
 import { mailAddressAtom } from "@/atom/mailAddressAtom"; 
+import { errorFlagAtom } from "@/atom/flag/errorFlag";
 const AuthGate = () => {
   const router = useRouter();
   const [,setStudentId]=useAtom(studentIdAtom)
   const [,setMail]=useAtom(mailAddressAtom)
-
+  const [,errorFlag]=useAtom(errorFlagAtom)
 
   const [loadingMessage, setLoadingMessage] = useState<string>("ようこそ!");
   useEffect(() => {
@@ -38,12 +39,20 @@ const AuthGate = () => {
         
         if (storedEmail && storedPassword) {
           //ここでメールアドレスを引数的に受け取って、返り値でそのメールアドレスに対応する学籍番号を返す関数を起動
+          
+          //ーーー↓メールアドレスの情報を基に自分の学籍番号をフロントにセット↓ーーー
           const studentId = await getStudentIdByEmail(storedEmail);
-          await fetchFriendsFromStudentIdArray(storedEmail);//ここでFriendでつながっている友達の情報をフロントにセットさせる
+          if(studentId===false)errorFlag(false)//通信エラー
+          else setStudentId(studentId)//データのセット
+          //ーーー↑メールアドレスの情報を基に自分の学籍番号をフロントにセット↑ーーー
+          
+          //ーーー↓自分が友達に設定しているuserの情報をフロントにセット↓ーーー
+          const flag=await fetchFriendsFromStudentIdArray(storedEmail);//ここでFriendでつながっている友達の情報をフロントにセットさせる
+          if(flag===false)errorFlag(false)//通信エラー
+          //ーーー↑自分が友達に設定しているuserの情報をフロントにセット↑ーーー
+          
           setMail(storedEmail)//メールアドレスフロントにセット
-          if(studentId)setStudentId(studentId)
           console.log("取得した学籍番号:", studentId);
-        
           // ホームへ遷移（履歴を置き換える）
           router.replace("./(main)"); // 修正: これが適切なパスの形式か確認
         } else {

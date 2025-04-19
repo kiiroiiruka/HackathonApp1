@@ -50,8 +50,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    paddingHorizontal: 16,
-    marginTop: 8,
+    paddingTop: 16,
   },
   headerContainer: {
 

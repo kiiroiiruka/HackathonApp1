@@ -20,6 +20,7 @@ export const fetchFriendsFromStudentIdArray = async (email: string) => {
 
     if (!Array.isArray(friendStudentIds) || friendStudentIds.length === 0) {
       console.warn('friends配列が空です');
+      useFriendUserStore.getState().loadUsersFromData([]); // ← Zustandのusersを空にする
       return;
     }
 
@@ -46,10 +47,12 @@ export const fetchFriendsFromStudentIdArray = async (email: string) => {
     // Zustand にセット
     const setFriendUserStore = useFriendUserStore.getState().loadUsersFromData;
     setFriendUserStore(friendUsers);
+    console.log(friendUsers)
 
     console.log('学籍番号に対応する友達をZustandにセットしました');
-
+    return true
   } catch (error) {
     console.error('友達の情報取得に失敗しました:', error);
+    return false
   }
 };

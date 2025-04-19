@@ -27,9 +27,9 @@ export const meDataUpdateByStudentId = async (
       status,
     });
 
-    return { success: true };
+    return true
   } catch (error) {
     console.error("ユーザーデータの更新中にエラーが発生しました:", error);
-    return { success: false, error };
+    return false
   }
 };

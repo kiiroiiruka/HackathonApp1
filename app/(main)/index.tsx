@@ -20,20 +20,34 @@ import { useCallback } from 'react'
 import { useAtom } from 'jotai';
 import { mailAddressAtom } from '@/atom/mailAddressAtom';
 import { ActivityIndicator } from 'react-native';
+import { isBackendFunctionActiveAtom } from '@/atom/setting/backendFunctionBoot';
+import { errorFlagAtom } from '@/atom/flag/errorFlag';
 const MainScreen: React.FC = () => {
   const users = useFriendUserStore((state) => state.users);
   // 🔽 ここで選択状態を管理（デフォルトは「友達」）
   const [selectedTab, setSelectedTab] = useState<string>('友達');
   const [mail,]=useAtom(mailAddressAtom)
   const [loading, setLoading] = useState(false);
+  const [,errorFlag]=useAtom(errorFlagAtom)
   const router=useRouter()
   
   useFocusEffect(
     useCallback(() => {
-      fetchFriendsFromStudentIdArray(mail)//ページ開くたびに最新の情報に更新させてセットする
+      const fetchData = async () => {
+        if (isBackendFunctionActiveAtom) {
+          //ーーー↓自分が友達に設定しているuserの情報をフロントにセット↓ーーー
+          const flag = await fetchFriendsFromStudentIdArray(mail); // 自分以外の人のデータをセットする
+          if (flag === false)errorFlag(false);//通信エラー
+          //ーーー↑自分が友達に設定しているuserの情報をフロントにセット↑ーーー
+        }
+      };
+      fetchData(); // 非同期関数を即時呼び出し
+      return () => {
+        // クリーンアップ処理があればここに書く
+      };
     }, [])
-  )
-  
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <Header title="暇やつ探そうぜ？">
@@ -48,7 +62,13 @@ const MainScreen: React.FC = () => {
           <TouchableOpacity
             onPress={async () => {
               setLoading(true);  // ローディング開始
-              await fetchFriendsFromStudentIdArray(mail); // データ取得
+              if(isBackendFunctionActiveAtom){
+                //ーーー↓自分が友達に設定しているuserの情報をフロントにセット↓ーーー
+                const flag=await fetchFriendsFromStudentIdArray(mail); // データ取得
+                if(flag===false)errorFlag(false);//通信エラー
+                console.log(users)
+                //ーーー↑自分が友達に設定しているuserの情報をフロントにセット↑ーーー
+              }
               setTimeout(() => setLoading(false), 1000); // 1秒後に解除
             }}
             disabled={loading}
@@ -66,25 +86,31 @@ const MainScreen: React.FC = () => {
         </View>
       </Header>
 
-{/* 🔽 選択状態に応じて表示を切り替えることもできる（任意） */}
-      <FlatList
-        data={
-          selectedTab === '暇な奴だけ'
-            ? users.filter((u) => !u.time.includes('活動中'))
-            : users
-        }
-        keyExtractor={(item) => item.uid}
-        renderItem={({ item }) => (
-          <StateInCurrentFriend
-            username={item.username}
-            location={item.location}
-            message={item.message}
-            time={item.time}
-            studentId={item.uid}
-          />
-        )}
-        contentContainerStyle={styles.listContent}
-      />
+    {/* 🔽 選択状態に応じて表示を切り替えることもできる（任意） */}
+    <FlatList
+      data={
+        selectedTab === '暇な奴だけ'
+          ? users.filter((u) => !u.time.includes('活動中'))
+          : users
+      }
+      keyExtractor={(item) => item.uid}
+      renderItem={({ item }) => (
+        <StateInCurrentFriend
+          username={item.username}
+          location={item.location}
+          message={item.message}
+          time={item.time}
+          studentId={item.uid}
+        />
+      )}
+      ListEmptyComponent={
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>条件に当てはまるユーザーが存在しません</Text>
+        </View>
+      }
+      contentContainerStyle={styles.listContent}
+    />
+
       {/* 🔽 フッターボタン配置 */}
   <View style={styles.footer}>
     <TouchableOpacity
@@ -107,6 +133,16 @@ const MainScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#888',
+  },
   reloadButton: {
     backgroundColor: '#f0f0f0',
     paddingHorizontal: 12,

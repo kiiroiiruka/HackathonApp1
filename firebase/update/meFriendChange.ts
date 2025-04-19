@@ -30,8 +30,9 @@ export const updateFriendsOfUser = async (
     });
 
     console.log(`友達リストが${shouldAdd ? "追加" : "削除"}されました。`);
-
+    return true
   } catch (error) {
     console.error("friends 更新エラー:", error);
+    return false
   }
 };

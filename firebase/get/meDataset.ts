@@ -30,5 +30,6 @@ export const fetchUserInfoAndSet = async (email: string) => {
 
   } catch (error) {
     console.error('ユーザー情報の取得に失敗しました:', error);
+    return false
   }
 };

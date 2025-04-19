@@ -9,54 +9,75 @@ import { studentIdAtom } from '@/atom/studentIdAtom';
 import { useAtom } from 'jotai';
 import { fetchFriendsFromStudentIdArray } from '@/firebase/get/friendInfoAcquisition';
 import { fetchUserInfoAndSet } from '@/firebase/get/meDataset';
+import { errorFlagAtom } from '@/atom/flag/errorFlag';
 const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState(''); // エラーメッセージの状態
   const [id,setId]=useAtom(studentIdAtom)
+  const [,errorFlag]=useAtom(errorFlagAtom)
   const router = useRouter(); // ページ遷移をするためにrouterを使う
 
   const handleLogin = async () => {
     if (!email || !password) {
-      setErrorMessage('ユーザー名とパスワードを入力してください。');
+      setErrorMessage('メールアドレス\nまたはパスワードに間違いがあります');
       return;
     }
   
     try {
       // Firebase Auth でログイン処理
+
+      //ーーー↓自分が友達に設定しているuserの情報をフロントにセット↓ーーー
+      const flag=await fetchFriendsFromStudentIdArray(email)//自分以外の人のデータをセットする。
+      if(flag===false)errorFlag(false)//通信エラー
+      //ーーー↑自分が友達に設定しているuserの情報をフロントにセット↑ーーー
+
       await signInWithEmailAndPassword(auth, email, password);
+
+      //ーーー↓メールアドレスの情報を基に自分の学籍番号をフロントにセット↓ーーー
       const studentId = await getStudentIdByEmail(email);
-      await fetchFriendsFromStudentIdArray(email)//自分以外の人のデータをセットする。
-      await fetchUserInfoAndSet(email)//自分のデータをフロントにセットする。
-      if(studentId)setId(studentId)
+      if(studentId===false)errorFlag(false)//通信エラー
+      else setId(studentId)
+      //ーーー↑メールアドレスの情報を基に自分の学籍番号をフロントにセット↑ーーー
+
+      //ーーー↓メールアドレスを基に自分の情報をフロントにセット↓ーーー
+      const flag2=await fetchUserInfoAndSet(email)//自分のデータをフロントにセットする。
+      if(flag2===false)errorFlag(false)//通信エラー
+      //ーーー↑メールアドレスを基に自分の情報をフロントにセット↑ーーー      
 
       // ログイン成功時の処理（保存する？確認アラート）
       if (Platform.OS === 'web') {
-        const result = window.confirm('ログイン情報を保存しますか？');
+        // Web環境の場合
+        const message = 'ログインに成功しました! ログイン情報を保存しますか？次回以降ログイン情報を入力せずに利用できます※回線に不具合がある、もしくはログアウトした場合などは再度入力が必要になります';
+        const result = window.confirm(message);
+        
         if (result) {
-          localStorage.setItem('email', email);//ローカルストレージにメールアドレスを保持
-          localStorage.setItem('password', password);//ローカルストレージにメールアドレスを保持
+          // ユーザーがOKを選択した場合、ローカルストレージに保存
+          localStorage.setItem('email', email);
+          localStorage.setItem('password', password);
         }
-        router.replace('./(main)');
+        // メイン画面に遷移
+        router.replace('/(main)');
       } else {
+        // スマホ環境の場合
         Alert.alert(
-          '確認',
-          'ログイン情報を保存しますか？',
+          'ログインに成功しました!',
+          'ログイン情報を保存しますか？次回以降ログイン情報を入力せずに利用できます※回線に不具合がある、もしくはログアウトした場合などは再度入力が必要になります',
           [
-            { text: 'NO', onPress: () => router.replace('./(main)') },
+            { text: 'NO', onPress: () => router.replace('/(main)') },
             {
               text: 'OK',
               onPress: async () => {
-                await AsyncStorage.setItem('email',email);//ローカルストレージにメールアドレスを保持
-                await AsyncStorage.setItem('password', password);//ローカルストレージにパスワードを保持
-                router.replace('./(main)');
+                // ユーザーがOKを選択した場合、AsyncStorageに保存
+                await AsyncStorage.setItem('email', email);
+                await AsyncStorage.setItem('password', password);
+                router.replace('/(main)');
               },
             },
           ],
-          { cancelable: false }
+          { cancelable: false } // ユーザーがアラート外をタップしても閉じられないようにする
         );
       }
-  
     } catch (error: any) {
       console.error('ログイン失敗:', error);
       setErrorMessage('メールアドレスまたはパスワードが正しくありません。'); // エラーメッセージを表示

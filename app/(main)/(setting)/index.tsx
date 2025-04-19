@@ -6,6 +6,8 @@ import { meDataUpdateByStudentId} from '@/firebase/update/meDataUpdate';//自分
 import { studentIdAtom } from '@/atom/studentIdAtom';
 import { useAtom } from 'jotai';
 import SubHeader from '@/components/ui/header/SubScreenHeader'
+import { isBackendFunctionActiveAtom } from '@/atom/setting/backendFunctionBoot';
+import { errorFlagAtom } from '@/atom/flag/errorFlag';
 const SettingScreen: React.FC = () => {
   const router = useRouter();
   const { userInfo } = useMeInfoStore();
@@ -13,12 +15,19 @@ const SettingScreen: React.FC = () => {
   const [freeUntil, setFreeUntil] = useState(userInfo.time || '');
   const [message, setMessage] = useState(userInfo.message || '');
   const [meDId,setMeId]=useAtom(studentIdAtom)
+  const [backend,]=useAtom(isBackendFunctionActiveAtom)
+  const [,errorFlag]=useAtom(errorFlagAtom)
 
   const { updateLocation, updateTime, updateMessage } = useMeInfoStore();
   
   //変更をバックエンド側に反映させる。userId: string, location:string,message:string,status:string)
   const handleSaveAndGoBack = async () => {
-    await meDataUpdateByStudentId(meDId, location,message,freeUntil);//バックエンド側にデータのへんこうを反映させる。
+    if(backend){
+      //ーーー↓バックエンド側に自分のデータの変更内容を反映させる↓ーーー
+      const flag=await meDataUpdateByStudentId(meDId, location,message,freeUntil);//バックエンド側にデータのへんこうを反映させる。
+      if(flag===false)errorFlag(false)
+      //ーーー↑バックエンド側に自分のデータの変更内容を反映させる↑ーーー
+    }
     router.back();//前の画面に戻る。
   };
 
@@ -43,58 +52,60 @@ const SettingScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={{flex:1,backgroundColor:"white"}}>
       <SubHeader title="今の状態を登録しよう" onBack={handleSaveAndGoBack} />
-      {/* 状態表示 */}
-      <Text
-        style={[
-          styles.statusText,
-          freeUntil === '活動中' ? styles.busyStatus : styles.freeStatus,
-        ]}
-      >
-        {freeUntil === '活動中' ? '活動中です' : '暇です'}
-      </Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="今の場所（例: 渋谷）"
-        value={location}
-        onChangeText={(text) => {
-          setLocation(text);
-          updateLocation(text);
-        }}
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="一言メッセージ（例: カフェいきたい）"
-        value={message}
-        onChangeText={(text) => {
-          setMessage(text);
-          updateMessage(text);
-        }}
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="何時まで暇？（例: 18:00）"
-        value={freeUntil}
-        onChangeText={handleFreeUntilChange}
-        keyboardType="default"
-      />
-
-      {/* 状態トグルボタン */}
-      <TouchableOpacity
-        style={[
-          styles.saveButton,
-          { backgroundColor: freeUntil === '活動中' ? '#FF6347' : '#1E90FF' },
-        ]}
-        onPress={toggleActiveStatus}
-      >
-        <Text style={styles.buttonText}>
-          {freeUntil === '活動中' ? '活動中解除' : '暇状態を活動中に変更'}
+      <View style={styles.container}>
+        {/* 状態表示 */}
+        <Text
+          style={[
+            styles.statusText,
+            freeUntil === '活動中' ? styles.busyStatus : styles.freeStatus,
+          ]}
+        >
+          {freeUntil === '活動中' ? '活動中です' : '暇です'}
         </Text>
-      </TouchableOpacity>
+
+        <TextInput
+          style={styles.input}
+          placeholder="今の場所（例: 渋谷）"
+          value={location}
+          onChangeText={(text) => {
+            setLocation(text);
+            updateLocation(text);
+          }}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="一言メッセージ（例: カフェいきたい）"
+          value={message}
+          onChangeText={(text) => {
+            setMessage(text);
+            updateMessage(text);
+          }}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="何時まで暇？（例: 18:00）"
+          value={freeUntil}
+          onChangeText={handleFreeUntilChange}
+          keyboardType="default"
+        />
+
+        {/* 状態トグルボタン */}
+        <TouchableOpacity
+          style={[
+            styles.saveButton,
+            { backgroundColor: freeUntil === '活動中' ? '#FF6347' : '#1E90FF' },
+          ]}
+          onPress={toggleActiveStatus}
+        >
+          <Text style={styles.buttonText}>
+            {freeUntil === '活動中' ? '活動中解除' : '暇状態を活動中に変更'}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -122,13 +133,10 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
-
-    
+    backgroundColor: 'white',
+    padding:10, 
   },
   backButton: {
-
     zIndex: 10,
     padding: 10,
   },

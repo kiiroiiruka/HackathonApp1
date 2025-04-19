@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState,useCallback  } from 'react';
 import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMeInfoStore } from '@/store/meData';
@@ -8,6 +8,7 @@ import { useAtom } from 'jotai';
 import SubHeader from '@/components/ui/header/SubScreenHeader'
 import { isBackendFunctionActiveAtom } from '@/atom/setting/backendFunctionBoot';
 import { errorFlagAtom } from '@/atom/flag/errorFlag';
+
 const SettingScreen: React.FC = () => {
   const router = useRouter();
   const { userInfo } = useMeInfoStore();
@@ -17,43 +18,47 @@ const SettingScreen: React.FC = () => {
   const [meDId,setMeId]=useAtom(studentIdAtom)
   const [backend,]=useAtom(isBackendFunctionActiveAtom)
   const [,errorFlag]=useAtom(errorFlagAtom)
-
   const { updateLocation, updateTime, updateMessage } = useMeInfoStore();
   
-  //変更をバックエンド側に反映させる。userId: string, location:string,message:string,status:string)
-  const handleSaveAndGoBack = async () => {
-    if(backend){
-      //ーーー↓バックエンド側に自分のデータの変更内容を反映させる↓ーーー
-      const flag=await meDataUpdateByStudentId(meDId, location,message,freeUntil);//バックエンド側にデータのへんこうを反映させる。
-      if(flag===false)errorFlag(false)
-      //ーーー↑バックエンド側に自分のデータの変更内容を反映させる↑ーーー
+  const change = async () => {
+    if (backend) {
+      const flag = await meDataUpdateByStudentId(meDId, location, message, freeUntil);
+  
+      if (flag === false) {
+        errorFlag(false);
+      } else {
+        // 🟢 保存成功時に zustand 側も更新
+        updateLocation(location);
+        updateMessage(message);
+        updateTime(freeUntil);
+  
+        if (Platform.OS === 'web') {
+          window.alert('編集内容を保存しました');
+        } else {
+          Alert.alert('編集内容を保存しました');
+        }
+      }
     }
-    router.back();//前の画面に戻る。
   };
-
+  
 
   // 活動状態トグル処理
   const toggleActiveStatus = () => {
     if (freeUntil === '活動中') {
-      updateTime('');
       setFreeUntil('');
-      Alert.alert('状態が「暇」に変更されました');
     } else {
-      updateTime('活動中');
       setFreeUntil('活動中');
-      Alert.alert('状態が「活動中」に変更されました');
     }
   };
 
   // 入力ハンドラー
   const handleFreeUntilChange = (newTime: string) => {
     setFreeUntil(newTime);
-    updateTime(newTime);
   };
 
   return (
     <View style={{flex:1,backgroundColor:"white"}}>
-      <SubHeader title="今の状態を登録しよう" onBack={handleSaveAndGoBack} />
+      <SubHeader title="今の状態を登録しよう" onBack={()=>router.back()} />
       <View style={styles.container}>
         {/* 状態表示 */}
         <Text
@@ -69,20 +74,14 @@ const SettingScreen: React.FC = () => {
           style={styles.input}
           placeholder="今の場所（例: 渋谷）"
           value={location}
-          onChangeText={(text) => {
-            setLocation(text);
-            updateLocation(text);
-          }}
+          onChangeText={(text) => setLocation(text)}
         />
 
         <TextInput
           style={styles.input}
           placeholder="一言メッセージ（例: カフェいきたい）"
           value={message}
-          onChangeText={(text) => {
-            setMessage(text);
-            updateMessage(text);
-          }}
+          onChangeText={(text) => setMessage(text)}
         />
 
         <TextInput
@@ -90,20 +89,28 @@ const SettingScreen: React.FC = () => {
           placeholder="何時まで暇？（例: 18:00）"
           value={freeUntil}
           onChangeText={handleFreeUntilChange}
-          keyboardType="default"
         />
 
         {/* 状態トグルボタン */}
         <TouchableOpacity
           style={[
-            styles.saveButton,
-            { backgroundColor: freeUntil === '活動中' ? '#FF6347' : '#1E90FF' },
+            styles.roundButton,
+            { backgroundColor: freeUntil === '活動中' ? '#FF6347' : 'rgb(49, 199, 149)' },
           ]}
           onPress={toggleActiveStatus}
+          activeOpacity={0.8}
         >
-          <Text style={styles.buttonText}>
-            {freeUntil === '活動中' ? '活動中解除' : '暇状態を活動中に変更'}
+          <Text style={styles.roundButtonText}>
+            {freeUntil === '活動中' ? '活動中解除' : '活動中にする'}
           </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={change}
+          style={styles.saveButton}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.saveButtonText}>変更内容を保存する</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -111,6 +118,48 @@ const SettingScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  roundButton: {
+    width: 180,
+    height: 180,
+    borderRadius: 90, // 完全な円！
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center', // 中央配置
+    marginVertical: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6,
+  },
+  
+  roundButtonText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '700',
+    textAlign: 'center',
+    paddingHorizontal: 10,
+  },
+  saveButton: {
+    backgroundColor: '#2196F3', // 鮮やかなブルー
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5, // Android の影
+    marginTop: 20,
+  },
+  saveButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
   header: {
     paddingVertical: 10,
     paddingHorizontal: 16,
@@ -168,21 +217,6 @@ const styles = StyleSheet.create({
   },
   busyStatus: {
     color: 'red',
-  },
-  saveButton: {
-    width: 200,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'center',
-    marginTop: 20,
-    backgroundColor: '#FF6347',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
   },
   buttonText: {
     color: '#fff',

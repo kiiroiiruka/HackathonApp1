@@ -2,12 +2,10 @@ import { getDatabase, ref, get, child } from "firebase/database";
 
 const db = getDatabase(); // Realtime Databaseの初期化
 
-export const getChats = async (chatSpaceId: string | null) => {
+export const getChats = async (chatSpaceId: string) => {
   try {
     // 参照するノードを決定
-    const chatsRef = chatSpaceId
-      ? ref(db, `chat/${chatSpaceId}`)
-      : ref(db, "chat/openchats");
+    const chatsRef = ref(db, `chat/${chatSpaceId}`);
 
     // データを取得
     const snapshot = await get(chatsRef);

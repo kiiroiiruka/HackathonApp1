@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { createChat, getChats } from '@/firebase/firebaseFunction';
+import { studentIdAtom } from '@/atom/studentIdAtom';
+import { useAtom } from 'jotai';
 
 type Message = {
   id: string;
@@ -14,7 +16,7 @@ const ChatRoom = () => {
   const { id } = useLocalSearchParams(); // 動的ルートからチャットルームIDを取得
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [myId] = useState('myUniqueId'); // 自分のID（仮置き）
+  const [myId, setMeId] = useAtom(studentIdAtom); // 自分のID（仮置き）
 
   useEffect(() => {
     const fetchChatMessages = async () => {

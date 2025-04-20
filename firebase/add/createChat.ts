@@ -3,14 +3,9 @@ import { getDatabase, ref, push, set } from "firebase/database";
 const db = getDatabase(); // Realtime Databaseの初期化
 
 
-export const createChat= async (message: string, createdBy: string,room:string|null) => {
+export const createChat= async (message: string, createdBy: string,room:string) => {
   try {
-    if (!room) {
-      room="openchats"; // ルームIDがない場合はデフォルトのルームIDを使用
-    }
-    else {
-      room=room+"/chats"; // ルームIDがある場合はそのまま使用
-    }
+    room="openchats";
     const openChatsRef = ref(db, `chat/${room}`); // ルームIDを使用して参照を取得
     console.log("openChatsRef:", openChatsRef); // デバッグ用にログ出力
     // 新しいメッセージを作成

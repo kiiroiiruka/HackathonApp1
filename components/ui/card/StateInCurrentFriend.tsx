@@ -1,5 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Button } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useAtom } from 'jotai'; // jotaiをインポート
+import { getChatroomByPersons } from '@/firebase/get/getChatroom'; // ルーム取得関数をインポート
+import { createChatroom } from '@/firebase/add/createChatroom'; // チャットルーム作成関数をインポート
+import { studentIdAtom } from '@/atom/studentIdAtom'; // MyIdを管理するatomをインポート
 
 type UserCardProps = {
   username: string;
@@ -16,15 +21,41 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
   message,
   time,
 }) => {
+  const router = useRouter(); // ルーターを使用してページ遷移
+  const [myId] = useAtom(studentIdAtom); // jotaiからMyIdを取得
+
   const timeStyle = time === '活動中' ? styles.busyTime : styles.freeTime;
-  
+
   // location に対するチェック
   const locationText = location.trim() === '' ? '未記入' : location;
   const locationStyle = location.trim() === '' ? styles.emptyLocation : styles.filledLocation;
 
   // message に対するチェック
   const messageText = message.trim() === '' ? '未記入' : message;
-  const messageStyle = message.trim() === '' ? styles.emptyLocation : styles.filledLocation; // メッセージのスタイルも赤/緑に変更
+  const messageStyle = message.trim() === '' ? styles.emptyLocation : styles.filledLocation;
+
+  const handleChatNavigation = async () => {
+    try {
+      // MyIdとstudentIdを使ってチャットルームを検索
+      const chatroom = await getChatroomByPersons(myId, studentId);
+      if (chatroom) {
+        // チャットルームが見つかった場合、動的ルートに遷移
+        router.push(`/(chat)/${chatroom.id}`);
+      } else {
+        console.log('条件に一致するチャットルームが見つかりませんでした。新しいチャットルームを作成します。');
+        // チャットルームが見つからなかった場合、新しいチャットルームを作成
+        const result = await createChatroom(myId, studentId);
+        if (result.success) {
+          console.log('新しいチャットルームが作成されました:', result.chatroomId);
+          router.push(`/(chat)/${result.chatroomId}`); // 作成したチャットルームに遷移
+        } else {
+          console.error('チャットルーム作成エラー:', result.error);
+        }
+      }
+    } catch (error) {
+      console.error('チャットルーム取得エラー:', error);
+    }
+  };
 
   return (
     <View style={styles.card}>
@@ -48,6 +79,15 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
           </View>
         </View>
       </View>
+
+      {/* 中央にルームチャットボタンを追加 */}
+      <View style={styles.buttonContainer}>
+        <Button
+          title="ルームチャットに移動"
+          onPress={handleChatNavigation} // ボタン押下時にチャットルームを検索して遷移
+          color="#007AFF"
+        />
+      </View>
     </View>
   );
 };
@@ -63,19 +103,19 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     padding: 16,
-    minHeight: 150, // 最小の高さを指定
-    maxHeight: 220, // 最大の高さを指定
-    justifyContent: 'space-between', // 内容の配置を調整
+    minHeight: 150,
+    maxHeight: 220,
+    justifyContent: 'space-between',
   },
   content: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    flexWrap: 'wrap', // コンテンツがはみ出さないように
+    flexWrap: 'wrap',
   },
   leftSection: {
     flex: 1,
     paddingRight: 10,
-    justifyContent: 'space-around', // 中身を均等に配置
+    justifyContent: 'space-around',
   },
   label: {
     fontSize: 14,
@@ -86,7 +126,7 @@ const styles = StyleSheet.create({
   rightSection: {
     justifyContent: 'space-around',
     alignItems: 'flex-end',
-    minWidth: 120, // 最小幅を指定してバランスを取る
+    minWidth: 120,
   },
   highlightBox: {
     backgroundColor: '#e1f4ff',
@@ -106,16 +146,20 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   busyTime: {
-    color: '#ff3b30', // 活動中は赤
+    color: '#ff3b30',
   },
   freeTime: {
-    color: '#4cd964', // それ以外は緑
+    color: '#4cd964',
   },
   emptyLocation: {
-    color: '#ff3b30', // 未記入の場合は赤
+    color: '#ff3b30',
   },
   filledLocation: {
-    color: '#4cd964', // 記入されている場合は緑
+    color: '#4cd964',
+  },
+  buttonContainer: {
+    marginTop: 16,
+    alignItems: 'center',
   },
 });
 

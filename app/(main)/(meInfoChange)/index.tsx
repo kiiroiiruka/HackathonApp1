@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Image,
   TouchableOpacity,
 } from 'react-native';
 import { useMeInfoStore } from '@/store/meData';
@@ -17,7 +18,9 @@ import { useAtom } from 'jotai';
 import { studentIdAtom } from '@/atom/studentIdAtom';
 import { mailAddressAtom } from '@/atom/mailAddressAtom';
 import { updateUsernameByEmail } from '@/firebase/update/meNameChange';
-
+import { getProfileImageUriByEmail } from '@/firebase/get/getImage';
+import { useFocusEffect } from'expo-router'//expo-routerを活用している場合はこっちをimportすればOK
+import { useCallback } from 'react'
 const ProfileScreen = () => {
   const router = useRouter();
   const { userInfo, setUserInfo } = useMeInfoStore();
@@ -35,6 +38,19 @@ const ProfileScreen = () => {
     lastDoubleHyphenIndex !== -1 ? uid.slice(lastDoubleHyphenIndex) : '';
 
   const [username, setUsername] = useState(userInfo.username);
+  const [profileImageUri, setProfileImageUri] = useState<string | null>(null);
+
+  //画像情報を非同期的に取得
+  useFocusEffect(
+    useCallback(() => {
+      const fetchProfileImage = async () => {
+        const imageUri = await getProfileImageUriByEmail(mail);
+        setProfileImageUri(imageUri);
+      };
+  
+      fetchProfileImage();
+    }, [])
+  )
 
   const handleSave = async () => {
     if (!editableUidPart || !username) {
@@ -88,7 +104,23 @@ const ProfileScreen = () => {
           placeholder="ユーザー名を入力"
           placeholderTextColor="#999"
         />
-
+        
+        {/* プロフィール画像が取得できたら表示 */}
+        {profileImageUri ? (
+          <Image source={{ uri: profileImageUri }} style={styles.profileImage} />
+        ) : (
+          <View style={styles.profileImagePlaceholder}>
+            <Text style={styles.profileImageText}>アイコン画像なし</Text>
+          </View>
+        )}
+        
+        <TouchableOpacity
+          style={styles.iconEditButton}
+          onPress={() => router.push('/photoCamera')}
+        >
+          <Text style={styles.iconEditButtonText}>アイコン画像を変更する</Text>
+        </TouchableOpacity>
+        
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
           <Text style={styles.saveButtonText}>編集内容を保存する</Text>
         </TouchableOpacity>
@@ -100,6 +132,50 @@ const ProfileScreen = () => {
 export default ProfileScreen;
 
 const styles = StyleSheet.create({
+  profileImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    alignSelf: 'center',
+    marginVertical: 24,
+    borderWidth: 3,
+    borderColor: '#ddd',
+    backgroundColor: '#eee',
+  },
+  profileImagePlaceholder: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    alignSelf: 'center',
+    marginVertical: 24,
+    borderWidth: 3,
+    borderColor: '#ddd',
+    backgroundColor: '#eee',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileImageText: {
+    color: '#aaa',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  iconEditButton: {
+    marginTop: 20,
+    backgroundColor: '#4CAF50',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    shadowColor: '#4CAF50',
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  iconEditButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   container: {
     flex: 1,
     backgroundColor: '#f2f2f2',

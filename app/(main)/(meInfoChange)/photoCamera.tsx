@@ -2,11 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { View, Button, StyleSheet, Image, Text, Alert, TouchableOpacity } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-
-export default function ImagePickerScreen({ navigation }: { navigation: any }) {
+import SubHeader from '@/components/ui/header/SubScreenHeader';
+import { mailAddressAtom } from '@/atom/mailAddressAtom';
+import { useAtom } from 'jotai';
+import { updateProfileImageUriByEmail } from '@/firebase/update/imageSet';
+export default function ImagePickerScreen() {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true); // 設定ボタンの状態を管理
-
+  const [mail,]=useAtom(mailAddressAtom)
+  const router=useRouter()
   useEffect(() => {
     (async () => {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -32,37 +36,38 @@ export default function ImagePickerScreen({ navigation }: { navigation: any }) {
 
   const uploadImage = async () => {
     if (!imageUri) return;
-
+  
     const data = new FormData();
-
+  
     // Cloudinary に画像を送るためのデータを整える
     const fileName = imageUri.split('/').pop();
     const fileType = fileName?.split('.').pop();
-
+  
     data.append('file', {
       uri: imageUri,
       name: fileName,
       type: `image/${fileType}`,
     } as any);
-
+  
     // Cloudinaryのアップロード設定
     data.append('upload_preset', 'TeatImages'); // unsigned upload のプリセット名
     data.append('cloud_name', 'dy1ip2xgb'); // あなたの Cloudinary Cloud Name
-
+  
     // 画像を "media/pictures" フォルダにアップロード
     data.append('public_id', 'media/pictures/' + fileName); // public_idにターゲットフォルダを指定
-
+  
     try {
       const res = await fetch('https://api.cloudinary.com/v1_1/dy1ip2xgb/image/upload', {
         method: 'POST',
         body: data,
       });
-
+  
       const result = await res.json();
-
+      console.log("取得したURI",result)
+      // ここでsecure_urlを使って画像URLを更新
       if (result.secure_url) {
+        await updateProfileImageUriByEmail(mail,String(result.secure_url)); // 画像URLをFirestoreに保存
         Alert.alert('画像がアップロードされました！', `URL:\n${result.secure_url}`);
-        // アップロード後にURLを使って他の処理をすることも可能
       } else {
         console.log(result);
         Alert.alert('アップロード失敗', 'Cloudinaryからエラーが返されました。');
@@ -73,41 +78,33 @@ export default function ImagePickerScreen({ navigation }: { navigation: any }) {
     }
   };
 
-  const handleCancelImage = () => {
-    setImageUri(null); // 画像を取り消す
-    setIsButtonDisabled(true); // ボタンを無効化
-  };
-
   return (
-    <View style={styles.container}>
-      <Button title="📁 画像を選択する" onPress={pickImage} />
-
-      {imageUri ? (
-        <>
-          <Image source={{ uri: imageUri }} style={styles.preview} />
-
-          {/* 画像アップロードボタン */}
-          <TouchableOpacity
-            style={[styles.saveButton, isButtonDisabled ? styles.saveButtonDisabled : null]}
-            onPress={uploadImage}
-            disabled={isButtonDisabled}
-          >
-            <Text style={styles.saveButtonText}>選択した写真をアップロードする</Text>
-          </TouchableOpacity>
-
-          {/* 画像取り消しボタン */}
-          <TouchableOpacity style={styles.cancelButton} onPress={handleCancelImage}>
-            <Text style={styles.cancelButtonText}>選択した写真を取り消す</Text>
-          </TouchableOpacity>
-        </>
-      ) : (
-        <Text style={styles.infoText}>画像がまだ選ばれていません。</Text>
-      )}
-    </View>
-  );
+      <View style={styles.container}>
+        <SubHeader title="アイコン画像の変更" onBack={() => router.back()} />
+    
+        <Button title="📁 画像を選択する" onPress={pickImage} />
+    
+        {imageUri ? (
+          <>
+            <Image source={{ uri: imageUri }} style={styles.preview} />
+    
+            <TouchableOpacity
+              style={[styles.saveButton, isButtonDisabled ? styles.saveButtonDisabled : null]}
+              onPress={uploadImage}
+              disabled={isButtonDisabled}
+            >
+              <Text style={styles.saveButtonText}>アイコンを決定</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <Text style={styles.infoText}>画像がまだ選ばれていません。</Text>
+        )}
+      </View>
+    );
 }
 
 const styles = StyleSheet.create({
+  
   container: {
     flex: 1,
     alignItems: 'center',
@@ -117,9 +114,10 @@ const styles = StyleSheet.create({
     width: 300,
     height: 300,
     marginTop: 20,
-    borderRadius: 10,
+    borderRadius: 150, // ← ここを追加
     borderWidth: 3,
     borderColor: '#2196F3',
+    overflow: 'hidden', // 念のため追加（Androidでも切り抜きが効くように）
   },
   infoText: {
     marginTop: 20,

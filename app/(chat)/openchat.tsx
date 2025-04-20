@@ -42,11 +42,12 @@ const ChatScreen = () => {
       text: input,
       createdAt: Date.now(),
     };
+
     setMessages([...messages, newMessage]);
     setInput('');
+
     try {
-      console.log('新しいメッセージ:', newMessage); // 送信するメッセージをログに出力
-      await createChat.createChat(input, meId,null); // データを送信
+      await createChat.createChat(input, meId); // データを送信
       setSuccessMessage('データを送信しました'); // 成功メッセージをセット
 
       // 3秒後にメッセージを非表示にする

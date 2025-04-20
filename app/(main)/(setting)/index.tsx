@@ -77,12 +77,13 @@ const SettingScreen: React.FC = () => {
           >
             {freeUntil === '活動中' ? '活動中です' : '暇です'}
           </Text>
-    
+          <Text style={{margin:"auto",color:"red"}}>※全て10文字以内で入力してください</Text>
           <TextInput
             style={styles.input}
             placeholder="今の場所（例: 渋谷）"
             value={location}
             onChangeText={(text) => setLocation(text)}
+            maxLength={10}
           />
     
           <TextInput
@@ -90,6 +91,7 @@ const SettingScreen: React.FC = () => {
             placeholder="一言メッセージ（例: カフェいきたい）"
             value={message}
             onChangeText={(text) => setMessage(text)}
+            maxLength={10}
           />
     
           {freeUntil !== '活動中' && (
@@ -98,6 +100,7 @@ const SettingScreen: React.FC = () => {
               placeholder="何時まで暇？（例: 18:00）"
               value={freeUntil}
               onChangeText={handleFreeUntilChange}
+              maxLength={10}
             />
           )}
     
@@ -120,13 +123,6 @@ const SettingScreen: React.FC = () => {
             activeOpacity={0.8}
           >
             <Text style={styles.saveButtonText}>変更内容を保存する</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={()=>{router.push("./photoCamera")}}
-            style={{margin:"auto",backgroundColor:"rgb(199, 158, 53)",padding:10,borderRadius:10,marginTop:5}}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.saveButtonText}>写真を付ける</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>

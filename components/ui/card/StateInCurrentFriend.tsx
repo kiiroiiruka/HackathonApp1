@@ -1,10 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAtom } from 'jotai'; // jotaiをインポート
 import { getChatroomByPersons } from '@/firebase/get/getChatroom'; // ルーム取得関数をインポート
 import { createChatroom } from '@/firebase/add/createChatroom'; // チャットルーム作成関数をインポート
 import { studentIdAtom } from '@/atom/studentIdAtom'; // MyIdを管理するatomをインポート
+import { useEffect, useState } from 'react';
+import { getProfileImageUriByStudentId } from '@/firebase/get/getProfileImageUriByStudentId';
 
 type UserCardProps = {
   username: string;
@@ -22,7 +24,21 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
   time,
 }) => {
   const router = useRouter(); // ルーターを使用してページ遷移
-  const [myId] = useAtom(studentIdAtom); // jotaiからMyIdを取得
+  const [myId,] = useAtom(studentIdAtom); // jotaiからMyIdを取得
+  const [imageUri, setImageUri] = useState<string | null>(null);
+
+  // 末尾から最初に現れる '--' を探して、それを基準に分ける処理
+  const lastDoubleHyphenIndex = studentId.lastIndexOf('--');
+  const mainId = lastDoubleHyphenIndex !== -1 ? studentId.slice(0, lastDoubleHyphenIndex) : studentId; // '--' より前の部分
+  const subId = lastDoubleHyphenIndex !== -1 ? studentId.slice(lastDoubleHyphenIndex + 2) : ''; // '--' より後ろの部分
+
+  useEffect(() => {
+    const fetchImage = async () => {
+      const uri = await getProfileImageUriByStudentId(studentId);
+      setImageUri(uri);
+    };
+    fetchImage();
+  }, [studentId]);
 
   const timeStyle = time === '活動中' ? styles.busyTime : styles.freeTime;
 
@@ -62,9 +78,15 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
       <View style={styles.content}>
         {/* 左側の情報 */}
         <View style={styles.leftSection}>
-          <Text style={styles.label}>👤 {username}</Text>
-          <Text style={styles.label}>🎓 {studentId}</Text>
-          <Text style={[styles.label, messageStyle]}>💬 {messageText}</Text>
+          <Text>👤ユーザー名</Text>
+          <Text style={styles.label}> {username}</Text>
+          <Text>🎓学籍番号</Text>
+          <Text style={styles.label}>
+           {mainId}
+            {subId && <Text style={styles.subStudentId}>{"\n"}{subId}</Text>}
+          </Text>
+          <Text>💬一言メッセージ</Text>
+          <Text style={[styles.label, messageStyle]}>{messageText}</Text>
         </View>
 
         {/* 右側の情報 */}
@@ -82,17 +104,80 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
 
       {/* 中央にルームチャットボタンを追加 */}
       <View style={styles.buttonContainer}>
-        <Button
-          title="ルームチャットに移動"
-          onPress={handleChatNavigation} // ボタン押下時にチャットルームを検索して遷移
-          color="#007AFF"
-        />
+        {imageUri ? (
+          <Image source={{ uri: imageUri }} style={styles.profileImage} />
+        ) : (
+          <View style={styles.placeholder}>
+            <Text style={styles.placeholderText}>No Image</Text>
+          </View>
+        )}
+        
+        <TouchableOpacity style={styles.chatButton} onPress={handleChatNavigation}>
+          <Text style={styles.chatIcon}>💬</Text>
+          <Text style={styles.chatButtonText}>ルームチャットに移動</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  chatButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#007AFF',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 25,
+    marginLeft: 16,
+    elevation: 3, // Android shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  
+  chatIcon: {
+    fontSize: 16,
+    color: '#fff',
+    marginRight: 8,
+  },
+  subStudentId: {
+    fontSize: 11,
+    color: '#999',
+    fontWeight: '400',
+    marginTop: 4,
+  },
+  chatButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  
+  profileImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignSelf: 'center',
+    marginVertical: 10,
+  },
+  placeholder: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 10,
+    alignSelf: 'center',
+    backgroundColor: '#f2f2f2',
+  },
+  placeholderText: {
+    fontSize: 10,
+    color: '#999',
+    textAlign: 'center',
+  },
   card: {
     backgroundColor: '#fff',
     marginVertical: 8,
@@ -158,8 +243,10 @@ const styles = StyleSheet.create({
     color: '#4cd964',
   },
   buttonContainer: {
-    marginTop: 16,
     alignItems: 'center',
+    flexDirection:"row",
+    margin:"auto",
+    marginTop:-5
   },
 });
 

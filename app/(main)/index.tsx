@@ -26,7 +26,7 @@ const MainScreen: React.FC = () => {
   const users = useFriendUserStore((state) => state.users);
   // 🔽 ここで選択状態を管理（デフォルトは「友達」）
   const [selectedTab, setSelectedTab] = useState<string>('友達');
-  const [mail,]=useAtom(mailAddressAtom)
+  const [mail]=useAtom(mailAddressAtom)
   const [loading, setLoading] = useState(false);
   const [,errorFlag]=useAtom(errorFlagAtom)
   const router=useRouter()
@@ -34,11 +34,9 @@ const MainScreen: React.FC = () => {
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
-        if (isBackendFunctionActiveAtom) {
-          //ーーー↓自分が友達に設定しているuserの情報をフロントにセット↓ーーー
-          const flag = await fetchFriendsFromStudentIdArray(mail); // 自分以外の人のデータをセットする
-          if (flag === false)errorFlag(false);//通信エラー
-          //ーーー↑自分が友達に設定しているuserの情報をフロントにセット↑ーーー
+        if (mail && isBackendFunctionActiveAtom) {
+          const flag = await fetchFriendsFromStudentIdArray(mail);
+          if (flag === false) errorFlag(false);
         }
       };
       fetchData(); // 非同期関数を即時呼び出し

@@ -5,7 +5,6 @@ const db = getDatabase(); // Realtime Databaseの初期化
 
 export const createChat= async (message: string, createdBy: string,room:string) => {
   try {
-    room="openchats";
     const openChatsRef = ref(db, `chat/${room}`); // ルームIDを使用して参照を取得
     console.log("openChatsRef:", openChatsRef); // デバッグ用にログ出力
     // 新しいメッセージを作成

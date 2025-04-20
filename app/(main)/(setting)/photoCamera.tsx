@@ -7,7 +7,6 @@ export default function ImagePickerScreen({ navigation }: { navigation: any }) {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true); // 設定ボタンの状態を管理
 
-
   useEffect(() => {
     (async () => {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -33,30 +32,34 @@ export default function ImagePickerScreen({ navigation }: { navigation: any }) {
 
   const uploadImage = async () => {
     if (!imageUri) return;
-  
+
     const data = new FormData();
-  
+
     // Cloudinary に画像を送るためのデータを整える
     const fileName = imageUri.split('/').pop();
     const fileType = fileName?.split('.').pop();
-  
+
     data.append('file', {
       uri: imageUri,
       name: fileName,
       type: `image/${fileType}`,
     } as any);
-  
-    data.append('upload_preset', 'YOUR_UPLOAD_PRESET'); // unsigned upload のプリセット名
+
+    // Cloudinaryのアップロード設定
+    data.append('upload_preset', 'TeatImages'); // unsigned upload のプリセット名
     data.append('cloud_name', 'dy1ip2xgb'); // あなたの Cloudinary Cloud Name
-  
+
+    // 画像を "media/pictures" フォルダにアップロード
+    data.append('public_id', 'media/pictures/' + fileName); // public_idにターゲットフォルダを指定
+
     try {
       const res = await fetch('https://api.cloudinary.com/v1_1/dy1ip2xgb/image/upload', {
         method: 'POST',
         body: data,
       });
-  
+
       const result = await res.json();
-  
+
       if (result.secure_url) {
         Alert.alert('画像がアップロードされました！', `URL:\n${result.secure_url}`);
         // アップロード後にURLを使って他の処理をすることも可能
@@ -69,7 +72,6 @@ export default function ImagePickerScreen({ navigation }: { navigation: any }) {
       console.error(error);
     }
   };
-  
 
   const handleCancelImage = () => {
     setImageUri(null); // 画像を取り消す

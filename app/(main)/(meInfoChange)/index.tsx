@@ -9,6 +9,7 @@ import {
   Platform,
   Image,
   TouchableOpacity,
+  ScrollView
 } from 'react-native';
 import { useMeInfoStore } from '@/store/meData';
 import { useRouter } from 'expo-router';
@@ -47,7 +48,6 @@ const ProfileScreen = () => {
         const imageUri = await getProfileImageUriByEmail(mail);
         setProfileImageUri(imageUri);
       };
-  
       fetchProfileImage();
     }, [])
   )
@@ -79,52 +79,53 @@ const ProfileScreen = () => {
       behavior={Platform.select({ ios: 'padding', android: undefined })}
     >
       <SubHeader title="個人情報設定" onBack={() => router.back()} />
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.content}>
+          <Text style={styles.label}>学籍番号</Text>
+          <Text style={styles.subLabel}>（末尾は自動的に付与されます）</Text>
+          <View style={styles.uidRow}>
+            <TextInput
+              value={editableUidPart}
+              onChangeText={setEditableUidPart}
+              style={[styles.input, { flex: 1 }]}
+              placeholder="UIDの編集可能部分"
+              placeholderTextColor="#999"
+            />
+            {fixedUidPart !== '' && (
+              <Text style={styles.fixedText}>{fixedUidPart}</Text>
+            )}
+          </View>
 
-      <View style={styles.content}>
-        <Text style={styles.label}>学籍番号</Text>
-        <Text style={styles.subLabel}>（末尾は自動的に付与されます）</Text>
-        <View style={styles.uidRow}>
+          <Text style={styles.label}>ユーザー名</Text>
           <TextInput
-            value={editableUidPart}
-            onChangeText={setEditableUidPart}
-            style={[styles.input, { flex: 1 }]}
-            placeholder="UIDの編集可能部分"
+            value={username}
+            onChangeText={setUsername}
+            style={styles.input}
+            placeholder="ユーザー名を入力"
             placeholderTextColor="#999"
           />
-          {fixedUidPart !== '' && (
-            <Text style={styles.fixedText}>{fixedUidPart}</Text>
+          
+          {/* プロフィール画像が取得できたら表示 */}
+          {profileImageUri ? (
+            <Image source={{ uri: profileImageUri }} style={styles.profileImage} />
+          ) : (
+            <View style={styles.profileImagePlaceholder}>
+              <Text style={styles.profileImageText}>アイコン画像なし</Text>
+            </View>
           )}
+          
+          <TouchableOpacity
+            style={styles.iconEditButton}
+            onPress={() => router.push('/photoCamera')}
+          >
+            <Text style={styles.iconEditButtonText}>アイコン画像を変更する</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <Text style={styles.saveButtonText}>編集内容を保存する</Text>
+          </TouchableOpacity>
         </View>
-
-        <Text style={styles.label}>ユーザー名</Text>
-        <TextInput
-          value={username}
-          onChangeText={setUsername}
-          style={styles.input}
-          placeholder="ユーザー名を入力"
-          placeholderTextColor="#999"
-        />
-        
-        {/* プロフィール画像が取得できたら表示 */}
-        {profileImageUri ? (
-          <Image source={{ uri: profileImageUri }} style={styles.profileImage} />
-        ) : (
-          <View style={styles.profileImagePlaceholder}>
-            <Text style={styles.profileImageText}>アイコン画像なし</Text>
-          </View>
-        )}
-        
-        <TouchableOpacity
-          style={styles.iconEditButton}
-          onPress={() => router.push('/photoCamera')}
-        >
-          <Text style={styles.iconEditButtonText}>アイコン画像を変更する</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>編集内容を保存する</Text>
-        </TouchableOpacity>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 };
@@ -132,6 +133,10 @@ const ProfileScreen = () => {
 export default ProfileScreen;
 
 const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 40,
+  },
   profileImage: {
     width: 120,
     height: 120,

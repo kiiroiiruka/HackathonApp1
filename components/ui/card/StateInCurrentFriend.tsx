@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     padding: 16,
     minHeight: 150,
-    maxHeight: 220,
+    maxHeight: 250,
     justifyContent: 'space-between',
   },
   content: {

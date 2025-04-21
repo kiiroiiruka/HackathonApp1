@@ -8,7 +8,7 @@ import { getStudentIdByEmail } from '@/firebase/get/studentNumberAcquisition';
 import { studentIdAtom } from '@/atom/studentIdAtom';
 import { useAtom } from 'jotai';
 import { fetchFriendsFromStudentIdArray } from '@/firebase/get/friendInfoAcquisition';
-import { fetchUserInfoAndSet } from '@/firebase/get/meDataset';
+import { fetchUserInfoAndSetbyEmail } from '@/firebase/get/meDataset';
 import { errorFlagAtom } from '@/atom/flag/errorFlag';
 const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -41,7 +41,7 @@ const LoginScreen: React.FC = () => {
       //ーーー↑メールアドレスの情報を基に自分の学籍番号をフロントにセット↑ーーー
 
       //ーーー↓メールアドレスを基に自分の情報をフロントにセット↓ーーー
-      const flag2=await fetchUserInfoAndSet(email)//自分のデータをフロントにセットする。
+      const flag2=await fetchUserInfoAndSetbyEmail(email)//自分のデータをフロントにセットする。
       if(flag2===false)errorFlag(false)//通信エラー
       //ーーー↑メールアドレスを基に自分の情報をフロントにセット↑ーーー      
 

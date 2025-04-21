@@ -1,4 +1,6 @@
-import { getDatabase, ref, query, orderByChild, equalTo, get } from 'firebase/database';
+import { realtimeDb } from '@/firebase/firebaseConfig'; // FirebaseのRealtime Databaseをインポート
+import { getDatabase, ref, get } from 'firebase/database';
+import { getKeybyStudentId } from '@/firebase/get/meDataset'; // 必要な関数をインポート
 
 type Chatroom = {
   id: string; // チャットルームのID
@@ -26,19 +28,31 @@ const getAllChatrooms = async () => {
 };
 
 export const getChatroomByPersons = async (
-  personA: string,
-  personB: string
+  studentIdA: string,
+  studentIdB: string
 ): Promise<Chatroom | null> => {
   try {
+    // Firestoreからユーザー情報を取得
+    const userAId = await getKeybyStudentId(studentIdA);
+    const userBId = await getKeybyStudentId(studentIdB);
+
+    if (!userAId || !userBId) {
+      console.error('ユーザー情報が見つかりませんでした。');
+      return null;
+    }
+
+    console.log('取得したユーザー情報:', { userAId, userBId });
+
     const chatrooms = await getAllChatrooms(); // すべてのチャットルームを取得
     console.log('取得したチャットルーム:', chatrooms); // デバッグ用にログ出力
+
     if (chatrooms) {
       // 条件に一致するチャットルームを検索
       const matchingRoom = Object.values(chatrooms).find((room: any) => {
         const persons = room.person || [];
         return (
-          persons.includes(personA) &&
-          persons.includes(personB) &&
+          persons.includes(userAId) &&
+          persons.includes(userBId) &&
           persons.length === 2 // 必要に応じて人数をチェック
         );
       });

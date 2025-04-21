@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { createChat, getChats } from '@/firebase/firebaseFunction';
-import { studentIdAtom } from '@/atom/studentIdAtom';
-import { useAtom } from 'jotai';
+import { getChats } from '@/firebase/get/getChats'; // チャットルームの取得関数をインポート
+import { createChat } from '@/firebase/add/createChat'; // メッセージ送信関数をインポート
+import { useMeInfoStore } from '@/store/meData'; // Zustandのストアをインポート
 
 type Message = {
   id: string;
-  sender: string;
+  createdBy: string;
   text: string;
   timestamp: number;
 };
@@ -16,15 +16,20 @@ const ChatRoom = () => {
   const { id } = useLocalSearchParams(); // 動的ルートからチャットルームIDを取得
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [myId, setMeId] = useAtom(studentIdAtom); // 自分のID（仮置き）
+
+  // Zustandからユーザー情報を取得
+  const userInfo = useMeInfoStore((state) => state.userInfo);
 
   useEffect(() => {
     const fetchChatMessages = async () => {
-      if (!id) return;
+      if (!id) {
+        console.error('チャットルームIDが見つかりません。');
+        return;
+      }
 
       try {
         // チャットルームのメッセージを取得
-        const chatMessages = await getChats.getChats(id as string);
+        const chatMessages = await getChats(id as string);
         if (chatMessages) {
           const formattedMessages = Object.keys(chatMessages).map((key) => ({
             id: key,
@@ -43,18 +48,20 @@ const ChatRoom = () => {
   }, [id]);
 
   const sendMessage = async () => {
-    console.log('送信ボタンが押されました。'); // デバッグ用にログ出力
-    if (!input.trim()) return;
+    if (!input.trim()) {
+      console.error('メッセージが空です。');
+      return;
+    }
 
     try {
       const newMessage = {
-        sender: myId,
+        createdBy: userInfo.key, // Zustandから取得したユーザーIDを使用
         text: input,
         timestamp: Date.now(),
       };
 
       // メッセージを送信
-      const result = await createChat.createChat(newMessage.text, myId, id as string);
+      const result = await createChat(newMessage.text, userInfo.key, id as string);
       if (result.success) {
         if (result.messageId) {
           setMessages((prevMessages) => [
@@ -81,13 +88,13 @@ const ChatRoom = () => {
         renderItem={({ item }) => (
           <View
             style={
-              item.sender === myId
+              item.createdBy === userInfo.key
                 ? [styles.messageContainer, styles.myMessage]
                 : [styles.messageContainer, styles.otherMessage]
             }
           >
             <Text style={styles.messageSender}>
-              {item.sender === myId ? 'あなた' : item.sender}
+              {item.createdBy === userInfo.key ? 'あなた' : item.createdBy}
             </Text>
             <Text style={styles.messageText}>{item.text}</Text>
             <Text style={styles.messageTimestamp}>

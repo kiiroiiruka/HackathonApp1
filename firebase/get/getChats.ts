@@ -1,12 +1,12 @@
-import { getDatabase, ref, get, child } from "firebase/database";
+import { realtimeDb } from '../firebaseConfig';
+import { ref, get } from 'firebase/database';
 
-const db = getDatabase(); // Realtime Databaseの初期化
 
 export const getChats = async (chatSpaceId: string) => {
   try {
     // 参照するノードを決定
-    const chatsRef = ref(db, `chat/${chatSpaceId}`);
-
+    const chatsRef = ref( realtimeDb, `chat/${chatSpaceId}`);
+    console.log("chatsRef:", chatSpaceId); // デバッグ用にログ出力
     // データを取得
     const snapshot = await get(chatsRef);
 

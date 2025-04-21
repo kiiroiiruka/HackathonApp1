@@ -1,3 +1,4 @@
+import { realtimeDb } from '@/firebase/firebaseConfig';
 import { getDatabase, ref, push, set } from "firebase/database";
 
 const db = getDatabase(); // Realtime Databaseの初期化
@@ -5,7 +6,7 @@ const db = getDatabase(); // Realtime Databaseの初期化
 
 export const createChat= async (message: string, createdBy: string,room:string) => {
   try {
-    const openChatsRef = ref(db, `chat/${room}`); // ルームIDを使用して参照を取得
+    const openChatsRef = ref(db, `chat/${room}/chats`); // ルームIDを使用して参照を取得
     console.log("openChatsRef:", openChatsRef); // デバッグ用にログ出力
     // 新しいメッセージを作成
     const newMessageRef = push(openChatsRef); // 一意のキーを生成

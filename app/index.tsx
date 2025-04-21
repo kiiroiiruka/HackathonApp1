@@ -8,7 +8,7 @@ import { useAtom } from "jotai";
 import { fetchFriendsFromStudentIdArray } from "@/firebase/get/friendInfoAcquisition";
 import { mailAddressAtom } from "@/atom/mailAddressAtom"; 
 import { errorFlagAtom } from "@/atom/flag/errorFlag";
-import { fetchUserInfoAndSet } from "@/firebase/get/meDataset";
+import { fetchUserInfoAndSetbyEmail } from "@/firebase/get/meDataset";
 const AuthGate = () => {
   const router = useRouter();
   const [,setStudentId]=useAtom(studentIdAtom)
@@ -53,7 +53,7 @@ const AuthGate = () => {
           //ーーー↑自分が友達に設定しているuserの情報をフロントにセット↑ーーー
           
           //ーーー↓自分の位置情報の設定情報をフロントにセット↓ーーー
-          const flag2=await fetchUserInfoAndSet(storedEmail)
+          const flag2=await fetchUserInfoAndSetbyEmail(storedEmail)
           if(flag2===false)errorFlag(false)//通信エラー
           //ーーー↑自分の位置情報の設定情報をフロントにセット↑ーーー
 

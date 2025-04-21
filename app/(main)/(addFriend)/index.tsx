@@ -13,6 +13,7 @@ import { errorFlagAtom } from '@/atom/flag/errorFlag';
 export default function App() {
   const router = useRouter();
   const [allStudents, setAllStudents] = useState<string[]>([]);
+  const [userName, setUserName] = useState<string[]>([]);
   const [addedStudents, setAddedStudents] = useState<string[]>([]);
   const [userId, setId] = useAtom(studentIdAtom);
   const [backend,]=useAtom(isBackendFunctionActiveAtom)
@@ -64,6 +65,7 @@ export default function App() {
       <View style={{ flex: 1}}>
         <StudentList
           studentIds={allStudents}   // すべての学籍番号リスト
+          username={userName}
           alreadyAddedIds={addedStudents}  // 追加された友達の学籍番号リスト
           onFriendToggle={handleFriendToggle}  // 友達追加・削除の処理
         />

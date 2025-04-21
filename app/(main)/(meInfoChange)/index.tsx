@@ -106,6 +106,15 @@ const ProfileScreen = () => {
           />
           
           {/* プロフィール画像が取得できたら表示 */}
+          <Text style={{
+            textAlign: 'center',
+            alignSelf: 'center',
+            marginTop: 20,
+            fontSize: 14,
+            color: '#555'
+          }}>
+            ※アイコンの画像の変更内容の反映には{'\n'}時間がかかることがあります
+          </Text>
           {profileImageUri ? (
             <Image source={{ uri: profileImageUri }} style={styles.profileImage} />
           ) : (
@@ -116,7 +125,7 @@ const ProfileScreen = () => {
           
           <TouchableOpacity
             style={styles.iconEditButton}
-            onPress={() => router.push('/photoCamera')}
+            onPress={() => router.push('./photoCamera')}
           >
             <Text style={styles.iconEditButtonText}>アイコン画像を変更する</Text>
           </TouchableOpacity>

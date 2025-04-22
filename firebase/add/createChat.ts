@@ -8,12 +8,6 @@ export const createChat= async (message: string, createdBy: string,room:string) 
     const openChatsRef = ref(realtimeDb, `chat/${room}/chats`); // ルームIDを使用して参照を取得
     console.log("openChatsRef:", openChatsRef); // デバッグ用にログ出力
 
-    // person配列にShisaが含まれているか確認
-    if (await IsIncludeShisa(room)) {
-      console.log("Shisaがルームに含まれています。特別な処理を実行します。");
-      await generateTextWithShisa(message);
-      
-    }
 
     // 新しいメッセージを作成
     const newMessageRef = push(openChatsRef); // 一意のキーを生成
@@ -28,6 +22,22 @@ export const createChat= async (message: string, createdBy: string,room:string) 
     });
 
     console.log("メッセージが作成されました:", messageId);
+    
+    // person配列にShisaが含まれているか確認
+    if (await IsIncludeShisa(room)) {
+      console.log("Shisaがルームに含まれています。特別な処理を実行します。");
+      const shisaMessege=await generateTextWithShisa(message); 
+      const newMessageRefforAI = push(openChatsRef); // 一意のキーを生成
+      const messageIdforAI = newMessageRefforAI.key; // 生成されたキーを取得
+      console.log("新しいメッセージID:", messageIdforAI); // デバッグ用にログ出力
+      // メッセージデータを保存
+      await set(newMessageRefforAI, {
+        id: messageIdforAI,
+        text: shisaMessege,
+        createdBy:"Shisa",
+        createdAt: Date.now(),
+      });
+    }
     return { success: true, messageId };
   } catch (error) {
     console.error("オープンチャットメッセージ作成エラー:", error);

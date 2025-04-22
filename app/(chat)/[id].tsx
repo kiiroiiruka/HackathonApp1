@@ -32,10 +32,18 @@ const ChatRoom = () => {
       console.error('チャットルームIDが無効です。');
       return;
     }
+
     const unsubscribe = subscribeToChats(id, (chats) => {
-      console.log(chats)
-      setMessages(chats); // チャットメッセージを更新
+      if (Array.isArray(chats)) {
+        // chatsをcreatedAtで昇順にソート
+        const sortedChats = chats.sort((a, b) => a.createdAt - b.createdAt);
+        console.log('ソートされたchats:', sortedChats);
+        setMessages(sortedChats); // ソート後のチャットメッセージを更新
+      } else {
+        console.error('chatsが配列ではありません:', chats);
+      }
     });
+
     return () => unsubscribe();
   }, [id]);
 
@@ -54,20 +62,8 @@ const ChatRoom = () => {
       };
 
       // メッセージを送信
+      setInput('');
       const result = await createChat(newMessage.text, userInfo.key, id as string);
-      if (result.success) {
-        if (result.messageId) {
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            { id: result.messageId, ...newMessage },
-          ]);
-        } else {
-          console.error('メッセージIDが無効です。');
-        }
-        setInput(''); // 入力フィールドをクリア
-      } else {
-        console.error('メッセージ送信エラー:', result.error);
-      }
     } catch (error) {
       console.error('メッセージ送信中にエラーが発生しました:', error);
     }

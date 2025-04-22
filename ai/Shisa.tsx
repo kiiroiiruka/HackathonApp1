@@ -9,15 +9,21 @@ if (!OPENROUTER_API_KEY) {
 
 export const generateTextWithShisa = async (
   prompt: string,
-  maxTokens: number = 100
-): Promise<string> => {
+  maxTokens: number = 1000
+): Promise<string|boolean> => {
   try {
     const response = await axios.post(
       OPENROUTER_API_URL,
       {
-        model: 'shisa-v2-llama-3.3-70b', // 使用するモデル
-        prompt: prompt,
+        model: 'shisa-ai/shisa-v2-llama3.3-70b:free', 
+        messages: [
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
         max_tokens: maxTokens,
+        temperature: 0.7,
       },
       {
         headers: {
@@ -28,11 +34,11 @@ export const generateTextWithShisa = async (
     );
     console.log('Shisa AIからのレスポンス:', response.data); // レスポンスをデバッグ用にログ出力
     // レスポンスから生成されたテキストを取得
-    const generatedText = response.data.choices[0].text.trim();
+    const generatedText = response.data.choices[0].message.content.trim();
     console.log('生成されたテキスト:', generatedText); // 生成されたテキストをデバッグ用にログ出力
     return generatedText;
   } catch (error) {
     console.error('Shisa AIの呼び出し中にエラーが発生しました:', error);
-    throw new Error('Shisa AIの呼び出しに失敗しました。');
+    return false;
   }
 };

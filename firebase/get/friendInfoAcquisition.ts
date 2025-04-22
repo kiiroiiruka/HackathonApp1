@@ -43,6 +43,17 @@ export const fetchFriendsFromStudentIdArray = async (email: string) => {
           time: data.status ?? '',
         };
       });
+      // 恣意的な情報を追加
+      const ShisaInfo = {
+        uid: 'Shisa',
+        username: 'AIだよー',
+        location: 'サーバ',
+        message: 'hello',
+        time: '200',
+      };
+      
+      // friendUsersに追加情報を付加
+      friendUsers.push(ShisaInfo);
 
     // Zustand にセット
     const setFriendUserStore = useFriendUserStore.getState().loadUsersFromData;

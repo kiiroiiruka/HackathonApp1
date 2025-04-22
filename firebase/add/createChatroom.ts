@@ -1,6 +1,6 @@
 import { realtimeDb } from '@/firebase/firebaseConfig';
 import { getDatabase, ref, push, set } from "firebase/database";
-import { getKeybyStudentId } from "@/firebase/get/meDataset"; // 必要な関数をインポート
+import { getKeybyStudentId } from "@/firebase/fetch/meDataset"; // 必要な関数をインポート
 
 const db = getDatabase(); // Realtime Databaseの初期化
 

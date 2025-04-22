@@ -8,7 +8,7 @@ import { getStudentIdByEmail } from '@/firebase/get/studentNumberAcquisition';
 import { studentIdAtom } from '@/atom/studentIdAtom';
 import { useAtom } from 'jotai';
 import { fetchFriendsFromStudentIdArray } from '@/firebase/get/friendInfoAcquisition';
-import { fetchUserInfoAndSetbyEmail } from '@/firebase/get/meDataset';
+import { fetchUserInfoAndSetbyEmail } from '@/firebase/fetch/meDataset';
 import { errorFlagAtom } from '@/atom/flag/errorFlag';
 const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState('');

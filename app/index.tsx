@@ -8,7 +8,7 @@ import { useAtom } from "jotai";
 import { fetchFriendsFromStudentIdArray } from "@/firebase/get/friendInfoAcquisition";
 import { mailAddressAtom } from "@/atom/mailAddressAtom"; 
 import { errorFlagAtom } from "@/atom/flag/errorFlag";
-import { fetchUserInfoAndSetbyEmail } from "@/firebase/get/meDataset";
+import { fetchUserInfoAndSetbyEmail } from "@/firebase/fetch/meDataset";
 const AuthGate = () => {
   const router = useRouter();
   const [,setStudentId]=useAtom(studentIdAtom)

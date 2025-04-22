@@ -4,12 +4,13 @@ import { useLocalSearchParams } from 'expo-router';
 import { getChats } from '@/firebase/get/getChats'; // チャットルームの取得関数をインポート
 import { createChat } from '@/firebase/add/createChat'; // メッセージ送信関数をインポート
 import { useMeInfoStore } from '@/store/meData'; // Zustandのストアをインポート
+import { subscribeToChats } from '@/firebase/fetch/fetchChats'; // リアルタイムリスナーをインポート
 
 type Message = {
   id: string;
   createdBy: string;
   text: string;
-  timestamp: number;
+  createdAt: number;
 };
 
 const ChatRoom = () => {
@@ -21,33 +22,25 @@ const ChatRoom = () => {
   const userInfo = useMeInfoStore((state) => state.userInfo);
 
   useEffect(() => {
-    const fetchChatMessages = async () => {
-      if (!id) {
-        console.error('チャットルームIDが見つかりません。');
-        return;
-      }
+    if (!id) {
+      console.error('チャットルームIDが見つかりません。');
+      return;
+    }
 
-      try {
-        // チャットルームのメッセージを取得
-        const chatMessages = await getChats(id as string);
-        if (chatMessages) {
-          const formattedMessages = Object.keys(chatMessages).map((key) => ({
-            id: key,
-            ...chatMessages[key],
-          }));
-          setMessages(formattedMessages);
-        } else {
-          console.log('チャットルームが見つかりませんでした。');
-        }
-      } catch (error) {
-        console.error('チャットメッセージの取得中にエラーが発生しました:', error);
-      }
-    };
-
-    fetchChatMessages();
+    // リアルタイムリスナーを設定
+    if (typeof id !== 'string') {
+      console.error('チャットルームIDが無効です。');
+      return;
+    }
+    const unsubscribe = subscribeToChats(id, (chats) => {
+      console.log(chats)
+      setMessages(chats); // チャットメッセージを更新
+    });
+    return () => unsubscribe();
   }, [id]);
 
   const sendMessage = async () => {
+    console.log(messages)
     if (!input.trim()) {
       console.error('メッセージが空です。');
       return;
@@ -57,7 +50,7 @@ const ChatRoom = () => {
       const newMessage = {
         createdBy: userInfo.key, // Zustandから取得したユーザーIDを使用
         text: input,
-        timestamp: Date.now(),
+        createdAt: Date.now(),
       };
 
       // メッセージを送信
@@ -98,7 +91,7 @@ const ChatRoom = () => {
             </Text>
             <Text style={styles.messageText}>{item.text}</Text>
             <Text style={styles.messageTimestamp}>
-              {new Date(item.timestamp).toLocaleTimeString()}
+              {new Date(item.createdAt).toLocaleTimeString()}
             </Text>
           </View>
         )}

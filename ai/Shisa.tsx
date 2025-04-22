@@ -1,0 +1,38 @@
+import axios from 'axios';
+
+const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'; // OpenRouterのエンドポイント
+const OPENROUTER_API_KEY = process.env.EXPO_PUBLIC_OPENROUTER_API_KEY; // 環境変数からAPIキーを取得
+
+if (!OPENROUTER_API_KEY) {
+  console.error('OPENROUTER_API_KEYが設定されていません。環境変数を確認してください。');
+}
+
+export const generateTextWithShisa = async (
+  prompt: string,
+  maxTokens: number = 100
+): Promise<string> => {
+  try {
+    const response = await axios.post(
+      OPENROUTER_API_URL,
+      {
+        model: 'shisa-v2-llama-3.3-70b', // 使用するモデル
+        prompt: prompt,
+        max_tokens: maxTokens,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${OPENROUTER_API_KEY}`, // APIキーをヘッダーに設定
+        },
+      }
+    );
+    console.log('Shisa AIからのレスポンス:', response.data); // レスポンスをデバッグ用にログ出力
+    // レスポンスから生成されたテキストを取得
+    const generatedText = response.data.choices[0].text.trim();
+    console.log('生成されたテキスト:', generatedText); // 生成されたテキストをデバッグ用にログ出力
+    return generatedText;
+  } catch (error) {
+    console.error('Shisa AIの呼び出し中にエラーが発生しました:', error);
+    throw new Error('Shisa AIの呼び出しに失敗しました。');
+  }
+};

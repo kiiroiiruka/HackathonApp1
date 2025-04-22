@@ -1,6 +1,6 @@
 import { realtimeDb } from '@/firebase/firebaseConfig'; // FirebaseのRealtime Databaseをインポート
 import { getDatabase, ref, get } from 'firebase/database';
-import { getKeybyStudentId } from '@/firebase/get/meDataset'; // 必要な関数をインポート
+import { getKeybyStudentId } from '@/firebase/fetch/meDataset'; // 必要な関数をインポート
 
 type Chatroom = {
   id: string; // チャットルームのID

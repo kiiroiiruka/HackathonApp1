@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,9 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Image,
   TouchableOpacity,
+  ScrollView
 } from 'react-native';
 import { useMeInfoStore } from '@/store/meData';
 import { useRouter } from 'expo-router';
@@ -17,7 +19,9 @@ import { useAtom } from 'jotai';
 import { studentIdAtom } from '@/atom/studentIdAtom';
 import { mailAddressAtom } from '@/atom/mailAddressAtom';
 import { updateUsernameByEmail } from '@/firebase/update/meNameChange';
-
+import { getProfileImageUriByEmail } from '@/firebase/get/getImage';
+import { useFocusEffect } from'expo-router'//expo-routerを活用している場合はこっちをimportすればOK
+import { useCallback } from 'react'
 const ProfileScreen = () => {
   const router = useRouter();
   const { userInfo, setUserInfo } = useMeInfoStore();
@@ -35,6 +39,18 @@ const ProfileScreen = () => {
     lastDoubleHyphenIndex !== -1 ? uid.slice(lastDoubleHyphenIndex) : '';
 
   const [username, setUsername] = useState(userInfo.username);
+  const [profileImageUri, setProfileImageUri] = useState<string | null>(null);
+
+  //画像情報を非同期的に取得
+  useFocusEffect(
+    useCallback(() => {
+      const fetchProfileImage = async () => {
+        const imageUri = await getProfileImageUriByEmail(mail);
+        setProfileImageUri(imageUri);
+      };
+      fetchProfileImage();
+    }, [])
+  )
 
   const handleSave = async () => {
     if (!editableUidPart || !username) {
@@ -63,36 +79,62 @@ const ProfileScreen = () => {
       behavior={Platform.select({ ios: 'padding', android: undefined })}
     >
       <SubHeader title="個人情報設定" onBack={() => router.back()} />
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.content}>
+          <Text style={styles.label}>学籍番号</Text>
+          <Text style={styles.subLabel}>（末尾は自動的に付与されます）</Text>
+          <View style={styles.uidRow}>
+            <TextInput
+              value={editableUidPart}
+              onChangeText={setEditableUidPart}
+              style={[styles.input, { flex: 1 }]}
+              placeholder="UIDの編集可能部分"
+              placeholderTextColor="#999"
+            />
+            {fixedUidPart !== '' && (
+              <Text style={styles.fixedText}>{fixedUidPart}</Text>
+            )}
+          </View>
 
-      <View style={styles.content}>
-        <Text style={styles.label}>学籍番号</Text>
-        <Text style={styles.subLabel}>（末尾は自動的に付与されます）</Text>
-        <View style={styles.uidRow}>
+          <Text style={styles.label}>ユーザー名</Text>
           <TextInput
-            value={editableUidPart}
-            onChangeText={setEditableUidPart}
-            style={[styles.input, { flex: 1 }]}
-            placeholder="UIDの編集可能部分"
+            value={username}
+            onChangeText={setUsername}
+            style={styles.input}
+            placeholder="ユーザー名を入力"
             placeholderTextColor="#999"
           />
-          {fixedUidPart !== '' && (
-            <Text style={styles.fixedText}>{fixedUidPart}</Text>
+          
+          {/* プロフィール画像が取得できたら表示 */}
+          <Text style={{
+            textAlign: 'center',
+            alignSelf: 'center',
+            marginTop: 20,
+            fontSize: 14,
+            color: '#555'
+          }}>
+            ※アイコンの画像の変更内容の反映には{'\n'}時間がかかることがあります
+          </Text>
+          {profileImageUri ? (
+            <Image source={{ uri: profileImageUri }} style={styles.profileImage} />
+          ) : (
+            <View style={styles.profileImagePlaceholder}>
+              <Text style={styles.profileImageText}>アイコン画像なし</Text>
+            </View>
           )}
+          
+          <TouchableOpacity
+            style={styles.iconEditButton}
+            onPress={() => router.push('./photoCamera')}
+          >
+            <Text style={styles.iconEditButtonText}>アイコン画像を変更する</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <Text style={styles.saveButtonText}>編集内容を保存する</Text>
+          </TouchableOpacity>
         </View>
-
-        <Text style={styles.label}>ユーザー名</Text>
-        <TextInput
-          value={username}
-          onChangeText={setUsername}
-          style={styles.input}
-          placeholder="ユーザー名を入力"
-          placeholderTextColor="#999"
-        />
-
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>編集内容を保存する</Text>
-        </TouchableOpacity>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 };
@@ -100,6 +142,54 @@ const ProfileScreen = () => {
 export default ProfileScreen;
 
 const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 40,
+  },
+  profileImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    alignSelf: 'center',
+    marginVertical: 24,
+    borderWidth: 3,
+    borderColor: '#ddd',
+    backgroundColor: '#eee',
+  },
+  profileImagePlaceholder: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    alignSelf: 'center',
+    marginVertical: 24,
+    borderWidth: 3,
+    borderColor: '#ddd',
+    backgroundColor: '#eee',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileImageText: {
+    color: '#aaa',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  iconEditButton: {
+    marginTop: 20,
+    backgroundColor: '#4CAF50',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    shadowColor: '#4CAF50',
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  iconEditButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   container: {
     flex: 1,
     backgroundColor: '#f2f2f2',

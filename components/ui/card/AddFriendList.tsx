@@ -3,11 +3,12 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, Dimensions } from '
 
 type Props = {
   studentIds: string[];
+  username:string[];
   alreadyAddedIds: string[];
   onFriendToggle: (studentId: string, isAdded: boolean) => void;  // onFriendToggle の追加
 };
 
-const StudentList: React.FC<Props> = ({ studentIds, alreadyAddedIds, onFriendToggle }) => {
+const StudentList: React.FC<Props> = ({ studentIds,username, alreadyAddedIds, onFriendToggle }) => {
 
 
   const handlePress = (id: string, isAdded: boolean) => {

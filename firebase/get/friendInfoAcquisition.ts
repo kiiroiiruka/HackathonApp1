@@ -41,6 +41,7 @@ export const fetchFriendsFromStudentIdArray = async (email: string) => {
           location: data.location ?? '',
           message: data.message ?? '',
           time: data.status ?? '',
+          profileImageUri:data.profileImageUri??'',
         };
       });
 

@@ -6,7 +6,6 @@ import { meDataUpdateByStudentId} from '@/firebase/update/meDataUpdate';//自分
 import { studentIdAtom } from '@/atom/studentIdAtom';
 import { useAtom } from 'jotai';
 import SubHeader from '@/components/ui/header/SubScreenHeader'
-import { isBackendFunctionActiveAtom } from '@/atom/setting/backendFunctionBoot';
 import { errorFlagAtom } from '@/atom/flag/errorFlag';
 
 const SettingScreen: React.FC = () => {
@@ -16,12 +15,11 @@ const SettingScreen: React.FC = () => {
   const [freeUntil, setFreeUntil] = useState(userInfo.time || '');
   const [message, setMessage] = useState(userInfo.message || '');
   const [meDId,setMeId]=useAtom(studentIdAtom)
-  const [backend,]=useAtom(isBackendFunctionActiveAtom)
   const [,errorFlag]=useAtom(errorFlagAtom)
   const { updateLocation, updateTime, updateMessage } = useMeInfoStore();
   
   const change = async () => {
-    if (backend) {
+
       const flag = await meDataUpdateByStudentId(meDId, location, message, freeUntil);
   
       if (flag === false) {
@@ -37,7 +35,6 @@ const SettingScreen: React.FC = () => {
         } else {
           Alert.alert('編集内容を保存しました');
         }
-      }
     }
   };
   

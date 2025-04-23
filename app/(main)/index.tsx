@@ -20,7 +20,6 @@ import { useCallback } from 'react'
 import { useAtom } from 'jotai';
 import { mailAddressAtom } from '@/atom/mailAddressAtom';
 import { ActivityIndicator } from 'react-native';
-import { isBackendFunctionActiveAtom } from '@/atom/setting/backendFunctionBoot';
 import { errorFlagAtom } from '@/atom/flag/errorFlag';
 const MainScreen: React.FC = () => {
   const users = useFriendUserStore((state) => state.users);
@@ -34,7 +33,7 @@ const MainScreen: React.FC = () => {
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
-        if (mail && isBackendFunctionActiveAtom) {
+        if (mail) {
           const flag = await fetchFriendsFromStudentIdArray(mail);
           if (flag === false) errorFlag(false);
         }
@@ -60,13 +59,13 @@ const MainScreen: React.FC = () => {
           <TouchableOpacity
             onPress={async () => {
               setLoading(true);  // ローディング開始
-              if(isBackendFunctionActiveAtom){
+              
                 //ーーー↓自分が友達に設定しているuserの情報をフロントにセット↓ーーー
                 const flag=await fetchFriendsFromStudentIdArray(mail); // データ取得
                 if(flag===false)errorFlag(false);//通信エラー
                 console.log(users)
                 //ーーー↑自分が友達に設定しているuserの情報をフロントにセット↑ーーー
-              }
+              
               setTimeout(() => setLoading(false), 1000); // 1秒後に解除
             }}
             disabled={loading}

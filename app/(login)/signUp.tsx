@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createUser } from '../../firebase/add/createUser';
 import { studentIdAtom } from '@/atom/studentIdAtom';
 import { useAtom } from 'jotai';
-import { fetchUserInfoAndSet } from '@/firebase/get/meDataset';
+import { fetchUserInfoAndSetbyEmail } from '@/firebase/fetch/meDataset';
 import { mailAddressAtom } from '@/atom/mailAddressAtom';
 import { errorFlagAtom } from '@/atom/flag/errorFlag';
 import SubHeader from '@/components/ui/header/SubScreenHeader';
@@ -72,7 +72,7 @@ const SignUpScreen: React.FC = () => {
 
     
     //ーーー↓メールアドレスを基に自分の情報をフロントにセット↓ーーー
-    const flag = await fetchUserInfoAndSet(email);
+    const flag = await fetchUserInfoAndSetbyEmail(email);
     if (flag === false) errorFlag(false);
     //ーーー↑メールアドレスを基に自分の情報をフロントにセット↑ーーー
     

@@ -61,11 +61,11 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
         console.log('条件に一致するチャットルームが見つかりませんでした。新しいチャットルームを作成します。');
         // チャットルームが見つからなかった場合、新しいチャットルームを作成
         const result = await createChatroom(myId, studentId);
-        if (result.success) {
+        if (result && result.success) {
           console.log('新しいチャットルームが作成されました:', result.chatroomId);
           router.push(`/(chat)/${result.chatroomId}`); // 作成したチャットルームに遷移
         } else {
-          console.error('チャットルーム作成エラー:', result.error);
+          console.error('チャットルーム作成エラー:', result?.error || '不明なエラー');
         }
       }
     } catch (error) {

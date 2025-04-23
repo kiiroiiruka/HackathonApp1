@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 export type UserInfo = {
+  key: string; // 追加
   uid: string;
   username: string;
   location: string;
@@ -11,6 +12,7 @@ export type UserInfo = {
 type UserInfoState = {
   userInfo: UserInfo;
   setUserInfo: (info: UserInfo) => void;
+  updateKey: (key: string) => void; // 追加
   updateUsername: (username: string) => void;
   updateLocation: (location: string) => void;
   updateTime: (time: string) => void;
@@ -19,6 +21,7 @@ type UserInfoState = {
 
 export const useMeInfoStore = create<UserInfoState>((set) => ({
   userInfo: {
+    key: '', // 初期値を追加
     uid: '',
     username: '',
     location: '',
@@ -26,6 +29,8 @@ export const useMeInfoStore = create<UserInfoState>((set) => ({
     time: '',
   },
   setUserInfo: (info) => set({ userInfo: info }),
+  updateKey: (key) =>
+    set((state) => ({ userInfo: { ...state.userInfo, key } })), // 追加
   updateUsername: (username) =>
     set((state) => ({ userInfo: { ...state.userInfo, username } })),
   updateLocation: (location) =>

@@ -7,69 +7,62 @@ import {
   FlatList,
   StyleSheet,
   KeyboardAvoidingView,
-  TouchableWithoutFeedback,
-  Keyboard,
   Platform,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { createChat, getChats } from '@/firebase/firebaseFunction';
+import { useMeInfoStore } from '@/store/meData';
+import { subscribeToChats } from '@/firebase/fetch/fetchChats';
+import { createChat } from '@/firebase/add/createChat';
 import SubHeader from '@/components/ui/header/SubScreenHeader';
 
 type Message = {
   id: string;
-  sender: string;
+  createdBy: string;
   text: string;
-  timestamp: number;
+  createdAt: number;
 };
 
 const ChatRoom = () => {
   const { id } = useLocalSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [myId] = useState('myUniqueId');
-  const router = useRouter(); // ← 戻るボタンで使用
+  const userInfo = useMeInfoStore((state) => state.userInfo);
+  const router = useRouter();
 
   useEffect(() => {
-    const fetchChatMessages = async () => {
-      if (!id) return;
+    if (!id || typeof id !== 'string') {
+      console.error('チャットルームIDが無効です。');
+      return;
+    }
 
-      try {
-        const chatMessages = await getChats.getChats(id as string);
-        if (chatMessages) {
-          const formattedMessages = Object.keys(chatMessages).map((key) => ({
-            id: key,
-            ...chatMessages[key],
-          }));
-          setMessages(formattedMessages);
-        } else {
-          console.log('チャットルームが見つかりませんでした。');
-        }
-      } catch (error) {
-        console.error('チャットメッセージの取得中にエラーが発生しました:', error);
+    const unsubscribe = subscribeToChats(id, (chats) => {
+      if (Array.isArray(chats)) {
+        const sortedChats = chats.sort((a, b) => a.createdAt - b.createdAt);
+        setMessages(sortedChats);
+      } else {
+        console.error('chatsが配列ではありません:', chats);
       }
-    };
+    });
 
-    fetchChatMessages();
+    return () => unsubscribe();
   }, [id]);
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim()) {
+      console.error('メッセージが空です。');
+      return;
+    }
 
     try {
       const newMessage = {
-        sender: myId,
+        createdBy: userInfo.key,
         text: input,
-        timestamp: Date.now(),
+        createdAt: Date.now(),
       };
 
-      const result = await createChat.createChat(newMessage.text, myId, id as string);
-      if (result.success) {
-        if (result.messageId) {
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            { id: result.messageId, ...newMessage },
-          ]);
-        }
+      const result = await createChat(newMessage.text, userInfo.key, id as string);
+      if (result.success && result.messageId) {
+        setMessages((prev) => [...prev, { id: result.messageId, ...newMessage }]);
         setInput('');
       } else {
         console.error('メッセージ送信エラー:', result.error);
@@ -79,58 +72,55 @@ const ChatRoom = () => {
     }
   };
 
-return (
-  <KeyboardAvoidingView
-    style={styles.container}
-    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-  >
-    <View style={styles.wrapper}>
-      {/* SubHeader */}
-      <SubHeader title="チャット" onBack={() => router.back()} />
+  return (
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <View style={styles.wrapper}>
+        <SubHeader title="チャット" onBack={() => router.back()} />
 
-      {/* メッセージ一覧 */}
-      <FlatList
-        data={messages}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View
-            style={
-              item.sender === myId
-                ? [styles.messageContainer, styles.myMessage]
-                : [styles.messageContainer, styles.otherMessage]
-            }
-          >
-            <Text style={styles.messageSender}>
-              {item.sender === myId ? 'あなた' : item.sender}
-            </Text>
-            <Text style={styles.messageText}>{item.text}</Text>
-            <Text style={styles.messageTimestamp}>
-                  {new Date(item.timestamp).toLocaleTimeString()}
-            </Text>
-          </View>
-        )}
-        contentContainerStyle={styles.messageList}
-        keyboardShouldPersistTaps="handled" // ★ここ大事！
-      />
-
-      {/* 入力エリア */}
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={input}
-          onChangeText={setInput}
-          placeholder="メッセージを入力"
-          placeholderTextColor="#b0b0b0"
-          returnKeyType="send"
-          onSubmitEditing={sendMessage} // ★エンターでも送信OK
+        <FlatList
+          data={messages}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View
+              style={
+                item.createdBy === userInfo.key
+                  ? [styles.messageContainer, styles.myMessage]
+                  : [styles.messageContainer, styles.otherMessage]
+              }
+            >
+              <Text style={styles.messageSender}>
+                {item.createdBy === userInfo.key ? 'あなた' : item.createdBy}
+              </Text>
+              <Text style={styles.messageText}>{item.text}</Text>
+              <Text style={styles.messageTimestamp}>
+                {new Date(item.createdAt).toLocaleTimeString()}
+              </Text>
+            </View>
+          )}
+          contentContainerStyle={styles.messageList}
+          keyboardShouldPersistTaps="handled"
         />
-        <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-          <Text style={styles.sendButtonText}>送信</Text>
-        </TouchableOpacity>
+
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            value={input}
+            onChangeText={setInput}
+            placeholder="メッセージを入力"
+            placeholderTextColor="#b0b0b0"
+            returnKeyType="send"
+            onSubmitEditing={sendMessage}
+          />
+          <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+            <Text style={styles.sendButtonText}>送信</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
-  </KeyboardAvoidingView>
-);
+    </KeyboardAvoidingView>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -179,18 +169,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 10,
-    borderRadius: 10,
     backgroundColor: '#18D7A3',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 5,
-    position: 'absolute', // 入力フィールドを画面下部に固定
-    bottom: -10, // 画面下部に配置
+    position: 'absolute',
+    bottom: 0,
     left: 0,
     right: 0,
-    paddingBottom:40,
   },
   input: {
     flex: 1,
@@ -199,10 +182,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     fontSize: 16,
     marginRight: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
     elevation: 3,
   },
   sendButton: {

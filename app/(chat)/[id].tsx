@@ -8,12 +8,14 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  Image, // 追加
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMeInfoStore } from '@/store/meData';
 import { subscribeToChats } from '@/firebase/fetch/fetchChats';
 import { createChat } from '@/firebase/add/createChat';
 import SubHeader from '@/components/ui/header/SubScreenHeader';
+import { getUserInfoByDocId } from '@/firebase/get/getChatIcon';
 
 type Message = {
   id: string;
@@ -28,6 +30,38 @@ const ChatRoom = () => {
   const [input, setInput] = useState('');
   const userInfo = useMeInfoStore((state) => state.userInfo);
   const router = useRouter();
+  const [usernames, setUsernames] = useState<{ [key: string]: string }>({});
+  const [profileImages, setProfileImages] = useState<{ [key: string]: string }>({});
+
+  // ユーザー名とアイコン画像を取得
+  useEffect(() => {
+    const fetchUsernames = async () => {
+      const uniqueIds = [...new Set(messages.map(msg => msg.createdBy))];
+      const nameMap: { [key: string]: string } = { ...usernames };
+      const imageMap: { [key: string]: string } = { ...profileImages };
+  
+      await Promise.all(
+        uniqueIds.map(async (id) => {
+          if (!nameMap[id]) {
+            const user = await getUserInfoByDocId(id);
+            if (user && user.username) {
+              nameMap[id] = user.username; // ユーザー名がある場合のみ追加
+            }
+            if (user && user.profileImageUri) {
+              imageMap[id] = user.profileImageUri; // アイコン画像があれば追加
+            }
+          }
+        })
+      );
+  
+      setUsernames(nameMap);
+      setProfileImages(imageMap); // アイコン画像の状態を更新
+    };
+  
+    if (messages.length > 0) {
+      fetchUsernames();
+    }
+  }, [messages]);
 
   useEffect(() => {
     if (!id || typeof id !== 'string') {
@@ -91,9 +125,49 @@ const ChatRoom = () => {
                   : [styles.messageContainer, styles.otherMessage]
               }
             >
-              <Text style={styles.messageSender}>
-                {item.createdBy === userInfo.key ? 'あなた' : item.createdBy}
-              </Text>
+              <View style={styles.messageHeader}>
+                
+              {item.createdBy === userInfo.key?(
+                <View style={{marginLeft:"auto",flexDirection:"row",alignItems:"center",marginRight: -10,}}>
+
+
+                  <Text style={styles.messageSender}>
+                    あなた
+                  </Text>
+                  <View style={{marginLeft:5}}>
+                    {profileImages[item.createdBy] ? (
+                      <Image
+                        source={{ uri: profileImages[item.createdBy] }}
+                        style={styles.profileImage}
+                      />
+                    ) : (
+                      <View style={styles.profileImagePlaceholder}>
+                        <Text style={styles.profileImagePlaceholderText}>なし</Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+                ):(
+                  <>
+                    {profileImages[item.createdBy] ? (
+                      <Image
+                        source={{ uri: profileImages[item.createdBy] }}
+                        style={styles.profileImage}
+                      />
+                    ) : (
+                      <View style={styles.profileImagePlaceholder}>
+                        <Text style={styles.profileImagePlaceholderText}>なし</Text>
+                      </View>
+                    )}
+
+                    <Text style={styles.messageSender}>
+                      {usernames[item.createdBy] ?? '名前取得中...'}
+                    </Text>
+                  </>
+                )
+                }
+
+              </View>
               <Text style={styles.messageText}>{item.text}</Text>
               <Text style={styles.messageTimestamp}>
                 {new Date(item.createdAt).toLocaleTimeString()}
@@ -124,6 +198,12 @@ const ChatRoom = () => {
 };
 
 const styles = StyleSheet.create({
+  profileImagePlaceholderText: {
+    fontSize: 12,
+    color: '#888',
+    textAlign: 'center', // テキストを中央揃え
+    margin:"auto"
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -183,6 +263,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginRight: 10,
     elevation: 3,
+    marginBottom: 20,
   },
   sendButton: {
     backgroundColor: 'rgba(129, 132, 63, 0.76)',
@@ -196,6 +277,25 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  messageHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  profileImage: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    marginRight: 10,
+  },
+  profileImagePlaceholder: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    marginRight: 10,
   },
 });
 

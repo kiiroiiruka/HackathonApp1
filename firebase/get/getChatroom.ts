@@ -14,7 +14,7 @@ const getAllChatrooms = async () => {
     const chatroomsRef = ref(db, 'chat'); // "chatrooms"ノードを参照
 
     const snapshot = await get(chatroomsRef); // 全データを取得
-
+    console.log('取得したスナップショット:', snapshot); // デバッグ用にログ出力
     if (snapshot.exists()) {
       return snapshot.val(); // すべてのチャットルームデータを返す
     } else {

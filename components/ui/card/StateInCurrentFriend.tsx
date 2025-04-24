@@ -51,9 +51,11 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
   const messageStyle = message.trim() === '' ? styles.emptyLocation : styles.filledLocation;
 
   const handleChatNavigation = async () => {
+    console.log('ルームチャットに移動ボタンが押されました。');
     try {
       // MyIdとstudentIdを使ってチャットルームを検索
       const chatroom = await getChatroomByPersons(myId, studentId);
+      console.log(chatroom)
       if (chatroom) {
         // チャットルームが見つかった場合、動的ルートに遷移
         router.push(`/(chat)/${chatroom.id}`);

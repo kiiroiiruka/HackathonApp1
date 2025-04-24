@@ -128,7 +128,7 @@ const ChatRoom = () => {
               <View style={styles.messageHeader}>
                 
               {item.createdBy === userInfo.key?(
-                <View style={{marginLeft:"auto",flexDirection:"row",alignItems:"center",marginRight: -10,}}>
+                <View style={{marginLeft:"auto",flexDirection:"row",alignItems:"center",marginRight: -10}}>
 
 
                   <Text style={styles.messageSender}>
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 25,
     justifyContent: 'center',
-    alignItems: 'center',
+    marginBottom: 20,
   },
   sendButtonText: {
     color: '#fff',
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   messageHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 5,
+
   },
   profileImage: {
     width: 30,

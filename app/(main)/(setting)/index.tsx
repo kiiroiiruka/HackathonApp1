@@ -123,12 +123,36 @@ const SettingScreen: React.FC = () => {
 
           {/* 👇 追加: 公開設定の切替ボタン */}
           {!loadingSetting && (
-            <TouchableOpacity onPress={toggleFriendOnly} style={styles.saveButton}>
-              <Text style={styles.saveButtonText}>
-                公開範囲: {friendOnly ? '友達のみ' : '全体'}（タップで変更）
+          <View style={styles.toggleContainer}>
+            <TouchableOpacity
+              onPress={async () => {
+                if (!friendOnly) {
+                  const success = await updateFriendOnlySetting(mail, false);
+                  if (success) setFriendOnly(true);
+                }
+              }}
+              style={[styles.toggleButton, friendOnly && styles.toggleButtonActive]}
+            >
+              <Text style={[styles.toggleButtonText, friendOnly && styles.toggleButtonTextActive]}>
+                友達のみ
               </Text>
             </TouchableOpacity>
-          )}
+
+            <TouchableOpacity
+              onPress={async () => {
+                if (friendOnly) {
+                  const success = await updateFriendOnlySetting(mail, true);
+                  if (success) setFriendOnly(false);
+                }
+              }}
+              style={[styles.toggleButton, !friendOnly && styles.toggleButtonActive]}
+            >
+              <Text style={[styles.toggleButtonText, !friendOnly && styles.toggleButtonTextActive]}>
+                全体公開
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
           <TouchableOpacity onPress={change} style={styles.saveButton} activeOpacity={0.8}>
             <Text style={styles.saveButtonText}>変更内容を保存する</Text>
@@ -141,6 +165,36 @@ const SettingScreen: React.FC = () => {
 
 
 const styles = StyleSheet.create({
+  toggleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+    gap: 10, // React Native v0.71+ ならOK
+  },
+  
+  toggleButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: '#E0E0E0',
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  
+  toggleButtonActive: {
+    backgroundColor: 'red',
+    borderColor: 'red',
+  },
+  
+  toggleButtonText: {
+    color: 'gray',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  
+  toggleButtonTextActive: {
+    color: 'white',
+  },
   roundButton: {
     width: 180,
     height: 180,

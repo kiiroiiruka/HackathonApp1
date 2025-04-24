@@ -25,7 +25,7 @@ const MainScreen: React.FC = () => {
   const users = useFriendUserStore((state) => state.users);
   // 🔽 ここで選択状態を管理（デフォルトは「友達」）
   const [selectedTab, setSelectedTab] = useState<string>('友達');
-  const [mail]=useAtom(mailAddressAtom)
+  const [mail,]=useAtom(mailAddressAtom)
   const [loading, setLoading] = useState(false);
   const [,errorFlag]=useAtom(errorFlagAtom)
   const router=useRouter()

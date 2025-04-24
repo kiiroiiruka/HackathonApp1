@@ -1,6 +1,6 @@
 import React, { useState,useCallback  } from 'react';
 import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, Platform,ScrollView, KeyboardAvoidingView } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter,useFocusEffect } from 'expo-router';
 import { useMeInfoStore } from '@/store/meData';
 import { meDataUpdateByStudentId} from '@/firebase/update/meDataUpdate';//自分のデータの変更をバクエンド側に反映させる。
 import { studentIdAtom } from '@/atom/studentIdAtom';
@@ -25,29 +25,22 @@ const SettingScreen: React.FC = () => {
   const [loadingSetting, setLoadingSetting] = useState<boolean>(true); // ローディング中
 
   // 初期設定の読み込み
-  React.useEffect(() => {
-    const fetchFriendOnly = async () => {
-      if (mail) {
-        const setting = await getFriendOnlySetting(mail);
-        if (setting !== null) {
-          setFriendOnly(setting);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchFriendOnly = async () => {
+        if (mail) {
+          const setting = await getFriendOnlySetting(mail);
+          if (setting !== null) {
+            setFriendOnly(setting);
+          }
+          setLoadingSetting(false);
         }
-        setLoadingSetting(false);
-      }
-    };
-    fetchFriendOnly();
-  }, [mail]);
-
-  const toggleFriendOnly = async () => {
-    const newSetting = !friendOnly;
-    const success = await updateFriendOnlySetting(mail, newSetting);
-    if (success) {
-      setFriendOnly(newSetting);
-      Alert.alert(`公開設定を「${newSetting ? '友達のみ' : '全体'}」に変更しました`);
-    } else {
-      Alert.alert('公開設定の変更に失敗しました');
-    }
-  };
+      };
+  
+      fetchFriendOnly();
+    }, [mail]) // mail に依存
+  );
+  
 
   const change = async () => {
     const flag = await meDataUpdateByStudentId(meDId, location, message, freeUntil);
@@ -126,33 +119,35 @@ const SettingScreen: React.FC = () => {
           {/* 👇 追加: 公開設定の切替ボタン */}
           {!loadingSetting && (
           <View style={styles.toggleContainer}>
-            <TouchableOpacity
-              onPress={async () => {
-                if (!friendOnly) {
-                  const success = await updateFriendOnlySetting(mail, false);
-                  if (success) setFriendOnly(true);
-                }
-              }}
-              style={[styles.toggleButton, friendOnly && styles.toggleButtonActive]}
-            >
-              <Text style={[styles.toggleButtonText, friendOnly && styles.toggleButtonTextActive]}>
-                友達のみ
-              </Text>
-            </TouchableOpacity>
-           
-            <TouchableOpacity
-              onPress={async () => {
-                if (friendOnly) {
-                  const success = await updateFriendOnlySetting(mail, true);
-                  if (success) setFriendOnly(false);
-                }
-              }}
-              style={[styles.toggleButton, !friendOnly && styles.toggleButtonActive]}
-            >
-              <Text style={[styles.toggleButtonText, !friendOnly && styles.toggleButtonTextActive]}>
-                全体公開
-              </Text>
-            </TouchableOpacity>
+           {/* 「友達のみ」ボタン */}
+          <TouchableOpacity
+            onPress={async () => {
+              if (!friendOnly) {
+                const success = await updateFriendOnlySetting(mail, true); // ← friendOnlyをtrueに
+                if (success) setFriendOnly(true);
+              }
+            }}
+            style={[styles.toggleButton, friendOnly && styles.toggleButtonActive]} // friendOnlyがtrueのとき選択中の見た目
+          >
+            <Text style={[styles.toggleButtonText, friendOnly && styles.toggleButtonTextActive]}>
+              全体公開
+            </Text>
+          </TouchableOpacity>
+
+          {/* 「全体公開」ボタン */}
+          <TouchableOpacity
+            onPress={async () => {
+              if (friendOnly) {
+                const success = await updateFriendOnlySetting(mail, false); // ← friendOnlyをfalseに
+                if (success) setFriendOnly(false);
+              }
+            }}
+            style={[styles.toggleButton, !friendOnly && styles.toggleButtonActive]} // friendOnlyがfalseのとき選択中の見た目
+          >
+            <Text style={[styles.toggleButtonText, !friendOnly && styles.toggleButtonTextActive]}>
+              友達のみ
+            </Text>
+          </TouchableOpacity>
           </View>
         )}
 

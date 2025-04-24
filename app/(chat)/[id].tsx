@@ -16,7 +16,7 @@ import { subscribeToChats } from '@/firebase/fetch/fetchChats';
 import { createChat } from '@/firebase/add/createChat';
 import SubHeader from '@/components/ui/header/SubScreenHeader';
 import { getUserInfoByDocId } from '@/firebase/get/getChatIcon';
-
+import { setReadCount } from '@/firebase/chatReadTime/updateAccessTime';
 type Message = {
   id: string;
   createdBy: string;
@@ -53,7 +53,6 @@ const ChatRoom = () => {
           }
         })
       );
-  
       setUsernames(nameMap);
       setProfileImages(imageMap); // アイコン画像の状態を更新
     };
@@ -68,16 +67,19 @@ const ChatRoom = () => {
       console.error('チャットルームIDが無効です。');
       return;
     }
-
-    const unsubscribe = subscribeToChats(id, (chats) => {
+  
+    const unsubscribe = subscribeToChats(id, async (chats) => {
       if (Array.isArray(chats)) {
         const sortedChats = chats.sort((a, b) => a.createdAt - b.createdAt);
         setMessages(sortedChats);
+  
+        // 🔽 ここでカウント保存
+        await setReadCount(userInfo.key, id, sortedChats.length);
       } else {
         console.error('chatsが配列ではありません:', chats);
       }
     });
-
+  
     return () => unsubscribe();
   }, [id]);
 
@@ -86,18 +88,22 @@ const ChatRoom = () => {
       console.error('メッセージが空です。');
       return;
     }
-
+  
     try {
       const newMessage = {
         createdBy: userInfo.key,
         text: input,
         createdAt: Date.now(),
       };
-
+  
       const result = await createChat(newMessage.text, userInfo.key, id as string);
       if (result.success && result.messageId) {
-        setMessages((prev) => [...prev, { id: result.messageId, ...newMessage }]);
+        const newMessages = [...messages, { id: result.messageId, ...newMessage }];
+        setMessages(newMessages);
         setInput('');
+  
+        // 🔽 カウント更新
+        await setReadCount(userInfo.key, id as string, newMessages.length);
       } else {
         console.error('メッセージ送信エラー:', result.error);
       }

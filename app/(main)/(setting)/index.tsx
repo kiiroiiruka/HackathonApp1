@@ -7,74 +7,83 @@ import { studentIdAtom } from '@/atom/studentIdAtom';
 import { useAtom } from 'jotai';
 import SubHeader from '@/components/ui/header/SubScreenHeader'
 import { errorFlagAtom } from '@/atom/flag/errorFlag';
-
+import { updateFriendOnlySetting } from '@/firebase/update/friendReleasePreference';
+import { mailAddressAtom } from '@/atom/mailAddressAtom';
+import { getFriendOnlySetting } from '@/firebase/get/getFriendOnlySetting';
 const SettingScreen: React.FC = () => {
   const router = useRouter();
   const { userInfo } = useMeInfoStore();
   const [location, setLocation] = useState(userInfo.location || '');
   const [freeUntil, setFreeUntil] = useState(userInfo.time || '');
   const [message, setMessage] = useState(userInfo.message || '');
-  const [meDId,setMeId]=useAtom(studentIdAtom)
-  const [,errorFlag]=useAtom(errorFlagAtom)
+  const [meDId, setMeId] = useAtom(studentIdAtom);
+  const [, errorFlag] = useAtom(errorFlagAtom);
+  const [mail] = useAtom(mailAddressAtom);
   const { updateLocation, updateTime, updateMessage } = useMeInfoStore();
-  
-  const change = async () => {
 
-      const flag = await meDataUpdateByStudentId(meDId, location, message, freeUntil);
-  
-      if (flag === false) {
-        errorFlag(false);
-      } else {
-        // 🟢 保存成功時に zustand 側も更新
-        updateLocation(location);
-        updateMessage(message);
-        updateTime(freeUntil);
-  
-        if (Platform.OS === 'web') {
-          window.alert('編集内容を保存しました');
-        } else {
-          Alert.alert('編集内容を保存しました');
+  const [friendOnly, setFriendOnly] = useState<boolean>(true); // ← 初期値true
+  const [loadingSetting, setLoadingSetting] = useState<boolean>(true); // ローディング中
+
+  // 初期設定の読み込み
+  React.useEffect(() => {
+    const fetchFriendOnly = async () => {
+      if (mail) {
+        const setting = await getFriendOnlySetting(mail);
+        if (setting !== null) {
+          setFriendOnly(setting);
         }
-    }
-  };
-  
+        setLoadingSetting(false);
+      }
+    };
+    fetchFriendOnly();
+  }, [mail]);
 
-  // 活動状態トグル処理
-  const toggleActiveStatus = () => {
-    if (freeUntil === '活動中') {
-      setFreeUntil('');
+  const toggleFriendOnly = async () => {
+    const newSetting = !friendOnly;
+    const success = await updateFriendOnlySetting(mail, newSetting);
+    if (success) {
+      setFriendOnly(newSetting);
+      Alert.alert(`公開設定を「${newSetting ? '友達のみ' : '全体'}」に変更しました`);
     } else {
-      setFreeUntil('活動中');
+      Alert.alert('公開設定の変更に失敗しました');
     }
   };
 
-  // 入力ハンドラー
+  const change = async () => {
+    const flag = await meDataUpdateByStudentId(meDId, location, message, freeUntil);
+
+    if (flag === false) {
+      errorFlag(false);
+    } else {
+      updateLocation(location);
+      updateMessage(message);
+      updateTime(freeUntil);
+      Alert.alert('編集内容を保存しました');
+    }
+  };
+
+  const toggleActiveStatus = () => {
+    setFreeUntil(freeUntil === '活動中' ? '' : '活動中');
+  };
+
   const handleFreeUntilChange = (newTime: string) => {
     setFreeUntil(newTime);
   };
 
   return (
-    <View style={{flex:1, backgroundColor:"white"}}>
+    <View style={{ flex: 1, backgroundColor: 'white' }}>
       <SubHeader title="今の状態を登録しよう" onBack={() => router.back()} />
-    
+
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView
-          contentContainerStyle={styles.container}
-          keyboardShouldPersistTaps="handled"
-        >
-          {/* ↓中身はそのままでOK */}
-          <Text
-            style={[
-              styles.statusText,
-              freeUntil === '活動中' ? styles.busyStatus : styles.freeStatus,
-            ]}
-          >
+        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+          <Text style={[styles.statusText, freeUntil === '活動中' ? styles.busyStatus : styles.freeStatus]}>
             {freeUntil === '活動中' ? '活動中です' : '暇です'}
           </Text>
-          <Text style={{margin:"auto",color:"red"}}>※全て10文字以内で入力してください</Text>
+          <Text style={{ margin: 'auto', color: 'red' }}>※全て10文字以内で入力してください</Text>
+
           <TextInput
             style={styles.input}
             placeholder="今の場所（例: 渋谷）"
@@ -82,7 +91,6 @@ const SettingScreen: React.FC = () => {
             onChangeText={(text) => setLocation(text)}
             maxLength={10}
           />
-    
           <TextInput
             style={styles.input}
             placeholder="一言メッセージ（例: カフェいきたい）"
@@ -90,7 +98,6 @@ const SettingScreen: React.FC = () => {
             onChangeText={(text) => setMessage(text)}
             maxLength={10}
           />
-    
           {freeUntil !== '活動中' && (
             <TextInput
               style={styles.input}
@@ -100,7 +107,7 @@ const SettingScreen: React.FC = () => {
               maxLength={10}
             />
           )}
-    
+
           <TouchableOpacity
             style={[
               styles.roundButton,
@@ -113,12 +120,17 @@ const SettingScreen: React.FC = () => {
               {freeUntil === '活動中' ? '活動中解除' : '活動中にする'}
             </Text>
           </TouchableOpacity>
-    
-          <TouchableOpacity
-            onPress={change}
-            style={styles.saveButton}
-            activeOpacity={0.8}
-          >
+
+          {/* 👇 追加: 公開設定の切替ボタン */}
+          {!loadingSetting && (
+            <TouchableOpacity onPress={toggleFriendOnly} style={styles.saveButton}>
+              <Text style={styles.saveButtonText}>
+                公開範囲: {friendOnly ? '友達のみ' : '全体'}（タップで変更）
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          <TouchableOpacity onPress={change} style={styles.saveButton} activeOpacity={0.8}>
             <Text style={styles.saveButtonText}>変更内容を保存する</Text>
           </TouchableOpacity>
         </ScrollView>
@@ -126,6 +138,7 @@ const SettingScreen: React.FC = () => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   roundButton: {

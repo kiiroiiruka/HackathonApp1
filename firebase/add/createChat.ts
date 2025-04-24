@@ -26,7 +26,10 @@ export const createChat= async (message: string, createdBy: string,room:string) 
     // person配列にShisaが含まれているか確認
     if (await IsIncludeShisa(room)) {
       console.log("Shisaがルームに含まれています。特別な処理を実行します。");
-      const shisaMessege=await generateTextWithShisa(message); 
+      let shisaMessege=await generateTextWithShisa(message); 
+      if (shisaMessege === false) {
+        shisaMessege="Shisaのメッセージ応答に失敗しました。";
+      }
       const newMessageRefforAI = push(openChatsRef); // 一意のキーを生成
       const messageIdforAI = newMessageRefforAI.key; // 生成されたキーを取得
       console.log("新しいメッセージID:", messageIdforAI); // デバッグ用にログ出力

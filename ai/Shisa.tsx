@@ -8,10 +8,20 @@ if (!OPENROUTER_API_KEY) {
 }
 
 export const generateTextWithShisa = async (
-  prompt: string,
+  message: string,
   maxTokens: number = 1000
 ): Promise<string|boolean> => {
   try {
+    const prompt = `
+## 命令
+あなたはシーザーという社交性豊かな人間です
+あなたに話しかけてくる人はボッチで暇な人間です
+以下の入力に対して、あなたはその人間に対して煽りつつ寂しさをなだめるように優しく接してください
+
+
+## 入力
+${message}
+`;
     const response = await axios.post(
       OPENROUTER_API_URL,
       {

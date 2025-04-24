@@ -6,7 +6,6 @@ import { meDataUpdateByStudentId} from '@/firebase/update/meDataUpdate';//自分
 import { studentIdAtom } from '@/atom/studentIdAtom';
 import { useAtom } from 'jotai';
 import SubHeader from '@/components/ui/header/SubScreenHeader'
-import { isBackendFunctionActiveAtom } from '@/atom/setting/backendFunctionBoot';
 import { errorFlagAtom } from '@/atom/flag/errorFlag';
 
 const SettingScreen: React.FC = () => {
@@ -16,12 +15,11 @@ const SettingScreen: React.FC = () => {
   const [freeUntil, setFreeUntil] = useState(userInfo.time || '');
   const [message, setMessage] = useState(userInfo.message || '');
   const [meDId,setMeId]=useAtom(studentIdAtom)
-  const [backend,]=useAtom(isBackendFunctionActiveAtom)
   const [,errorFlag]=useAtom(errorFlagAtom)
   const { updateLocation, updateTime, updateMessage } = useMeInfoStore();
   
   const change = async () => {
-    if (backend) {
+
       const flag = await meDataUpdateByStudentId(meDId, location, message, freeUntil);
   
       if (flag === false) {
@@ -37,7 +35,6 @@ const SettingScreen: React.FC = () => {
         } else {
           Alert.alert('編集内容を保存しました');
         }
-      }
     }
   };
   
@@ -77,12 +74,13 @@ const SettingScreen: React.FC = () => {
           >
             {freeUntil === '活動中' ? '活動中です' : '暇です'}
           </Text>
-    
+          <Text style={{margin:"auto",color:"red"}}>※全て10文字以内で入力してください</Text>
           <TextInput
             style={styles.input}
             placeholder="今の場所（例: 渋谷）"
             value={location}
             onChangeText={(text) => setLocation(text)}
+            maxLength={10}
           />
     
           <TextInput
@@ -90,6 +88,7 @@ const SettingScreen: React.FC = () => {
             placeholder="一言メッセージ（例: カフェいきたい）"
             value={message}
             onChangeText={(text) => setMessage(text)}
+            maxLength={10}
           />
     
           {freeUntil !== '活動中' && (
@@ -98,6 +97,7 @@ const SettingScreen: React.FC = () => {
               placeholder="何時まで暇？（例: 18:00）"
               value={freeUntil}
               onChangeText={handleFreeUntilChange}
+              maxLength={10}
             />
           )}
     
@@ -120,13 +120,6 @@ const SettingScreen: React.FC = () => {
             activeOpacity={0.8}
           >
             <Text style={styles.saveButtonText}>変更内容を保存する</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={()=>{router.push("./photoCamera")}}
-            style={{margin:"auto",backgroundColor:"rgb(199, 158, 53)",padding:10,borderRadius:10,marginTop:5}}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.saveButtonText}>写真を付ける</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>

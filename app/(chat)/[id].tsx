@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, FlatList, StyleSheet } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
-import { getChats } from '@/firebase/get/getChats'; // チャットルームの取得関数をインポート
-import { createChat } from '@/firebase/add/createChat'; // メッセージ送信関数をインポート
-import { useMeInfoStore } from '@/store/meData'; // Zustandのストアをインポート
-import { subscribeToChats } from '@/firebase/fetch/fetchChats'; // リアルタイムリスナーをインポート
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useMeInfoStore } from '@/store/meData';
+import { subscribeToChats } from '@/firebase/fetch/fetchChats';
+import { createChat } from '@/firebase/add/createChat';
+import SubHeader from '@/components/ui/header/SubScreenHeader';
 
 type Message = {
   id: string;
@@ -14,31 +23,22 @@ type Message = {
 };
 
 const ChatRoom = () => {
-  const { id } = useLocalSearchParams(); // 動的ルートからチャットルームIDを取得
+  const { id } = useLocalSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-
-  // Zustandからユーザー情報を取得
   const userInfo = useMeInfoStore((state) => state.userInfo);
+  const router = useRouter();
 
   useEffect(() => {
-    if (!id) {
-      console.error('チャットルームIDが見つかりません。');
-      return;
-    }
-
-    // リアルタイムリスナーを設定
-    if (typeof id !== 'string') {
+    if (!id || typeof id !== 'string') {
       console.error('チャットルームIDが無効です。');
       return;
     }
 
     const unsubscribe = subscribeToChats(id, (chats) => {
       if (Array.isArray(chats)) {
-        // chatsをcreatedAtで昇順にソート
         const sortedChats = chats.sort((a, b) => a.createdAt - b.createdAt);
-        console.log('ソートされたchats:', sortedChats);
-        setMessages(sortedChats); // ソート後のチャットメッセージを更新
+        setMessages(sortedChats);
       } else {
         console.error('chatsが配列ではありません:', chats);
       }
@@ -48,7 +48,6 @@ const ChatRoom = () => {
   }, [id]);
 
   const sendMessage = async () => {
-    console.log(messages)
     if (!input.trim()) {
       console.error('メッセージが空です。');
       return;
@@ -56,60 +55,87 @@ const ChatRoom = () => {
 
     try {
       const newMessage = {
-        createdBy: userInfo.key, // Zustandから取得したユーザーIDを使用
+        createdBy: userInfo.key,
         text: input,
         createdAt: Date.now(),
       };
 
-      // メッセージを送信
-      setInput('');
       const result = await createChat(newMessage.text, userInfo.key, id as string);
+      if (result.success && result.messageId) {
+        setMessages((prev) => [...prev, { id: result.messageId, ...newMessage }]);
+        setInput('');
+      } else {
+        console.error('メッセージ送信エラー:', result.error);
+      }
     } catch (error) {
       console.error('メッセージ送信中にエラーが発生しました:', error);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={messages}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View
-            style={
-              item.createdBy === userInfo.key
-                ? [styles.messageContainer, styles.myMessage]
-                : [styles.messageContainer, styles.otherMessage]
-            }
-          >
-            <Text style={styles.messageSender}>
-              {item.createdBy === userInfo.key ? 'あなた' : item.createdBy}
-            </Text>
-            <Text style={styles.messageText}>{item.text}</Text>
-            <Text style={styles.messageTimestamp}>
-              {new Date(item.createdAt).toLocaleTimeString()}
-            </Text>
-          </View>
-        )}
-      />
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={input}
-          onChangeText={setInput}
-          placeholder="メッセージを入力"
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <View style={styles.wrapper}>
+        <SubHeader title="チャット" onBack={() => router.back()} />
+
+        <FlatList
+          data={messages}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View
+              style={
+                item.createdBy === userInfo.key
+                  ? [styles.messageContainer, styles.myMessage]
+                  : [styles.messageContainer, styles.otherMessage]
+              }
+            >
+              <Text style={styles.messageSender}>
+                {item.createdBy === userInfo.key ? 'あなた' : item.createdBy}
+              </Text>
+              <Text style={styles.messageText}>{item.text}</Text>
+              <Text style={styles.messageTimestamp}>
+                {new Date(item.createdAt).toLocaleTimeString()}
+              </Text>
+            </View>
+          )}
+          contentContainerStyle={styles.messageList}
+          keyboardShouldPersistTaps="handled"
         />
-        <Button title="送信" onPress={sendMessage} />
+
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            value={input}
+            onChangeText={setInput}
+            placeholder="メッセージを入力"
+            placeholderTextColor="#b0b0b0"
+            returnKeyType="send"
+            onSubmitEditing={sendMessage}
+          />
+          <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+            <Text style={styles.sendButtonText}>送信</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: '#fff',
+  },
+  wrapper: {
+    flex: 1,
+    backgroundColor: 'white',
+    paddingBottom: 80,
+  },
+  messageList: {
+    flexGrow: 1,
+    padding: 16,
   },
   messageContainer: {
     padding: 10,
@@ -119,11 +145,11 @@ const styles = StyleSheet.create({
   },
   myMessage: {
     alignSelf: 'flex-end',
-    backgroundColor: '#DCF8C6', // 自分のメッセージの背景色
+    backgroundColor: '#DCF8C6',
   },
   otherMessage: {
     alignSelf: 'flex-start',
-    backgroundColor: '#ECECEC', // 相手のメッセージの背景色
+    backgroundColor: '#ECECEC',
   },
   messageSender: {
     fontSize: 12,
@@ -142,15 +168,34 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 16,
+    padding: 10,
+    backgroundColor: '#18D7A3',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   input: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 10,
-    marginRight: 8,
+    padding: 12,
+    borderRadius: 25,
+    backgroundColor: '#fff',
+    fontSize: 16,
+    marginRight: 10,
+    elevation: 3,
+  },
+  sendButton: {
+    backgroundColor: 'rgba(129, 132, 63, 0.76)',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sendButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

@@ -4,7 +4,7 @@ import { useFriendUserStore } from '@/store/friendData';
 
 export const fetchFriendsFromStudentIdArray = async (email: string) => {
   try {
-    // 自分のユーザードキュメントを取得（メールアドレスから）
+    // メールアドレスでユーザーを検索
     const userQuery = query(collection(db, 'users'), where('email', '==', email));
     const userSnapshot = await getDocs(userQuery);
 
@@ -18,13 +18,13 @@ export const fetchFriendsFromStudentIdArray = async (email: string) => {
 
     const friendStudentIds: string[] = userData.friends ?? [];
 
-    if (!Array.isArray(friendStudentIds) || friendStudentIds.length === 0) {
+    if (friendStudentIds.length === 0) {
       console.warn('friends配列が空です');
-      useFriendUserStore.getState().loadUsersFromData([]); // ← Zustandのusersを空にする
+      useFriendUserStore.getState().loadUsersFromData([]); // 空配列をZustandにセット
       return;
     }
 
-    // friends配列に入っている学籍番号に基づいて、他ユーザーの情報を取得
+    // 友達の学籍番号に基づいてユーザー情報を取得
     const allUsersQuery = query(collection(db, 'users'));
     const allUsersSnapshot = await getDocs(allUsersQuery);
 
@@ -36,34 +36,21 @@ export const fetchFriendsFromStudentIdArray = async (email: string) => {
       .map((doc) => {
         const data = doc.data();
         return {
-          uid:data.studentId,
+          uid: data.studentId,
           username: data.username ?? '',
           location: data.location ?? '',
           message: data.message ?? '',
           time: data.status ?? '',
+          profileImageUri: data.profileImageUri ?? '',
         };
       });
-      // 恣意的な情報を追加
-      const ShisaInfo = {
-        uid: 'Shisa',
-        username: 'AIだよー',
-        location: 'サーバ',
-        message: 'hello',
-        time: '200',
-      };
-      
-      // friendUsersに追加情報を付加
-      friendUsers.push(ShisaInfo);
 
-    // Zustand にセット
-    const setFriendUserStore = useFriendUserStore.getState().loadUsersFromData;
-    setFriendUserStore(friendUsers);
-    console.log(friendUsers)
-
-    console.log('学籍番号に対応する友達をZustandにセットしました');
-    return true
+    // Zustandにセット
+    useFriendUserStore.getState().loadUsersFromData(friendUsers);
+    console.log('友達情報をZustandにセットしました');
+    return true;
   } catch (error) {
     console.error('友達の情報取得に失敗しました:', error);
-    return false
+    return false;
   }
 };

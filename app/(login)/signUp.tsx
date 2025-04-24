@@ -136,20 +136,25 @@ const SignUpScreen: React.FC = () => {
       <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 10 }}>
         <View style={styles.container}>
           <Text style={styles.title}>{"以下の内容を入力してください"}</Text>
-          <Text style={{ marginHorizontal: 'auto', color: 'red' }}>※ユーザー名は後ほど変更可能です</Text>
+          <Text style={{ color: 'red', textAlign: 'center' }}>
+            {"※ユーザー名は後ほど変更可能です\n10文字以下で入力してください"}
+          </Text>          
           <TextInput
             style={styles.input}
             placeholder="ユーザー名"
             value={username}
             onChangeText={setUsername}
+            maxLength={10}
           />
-          <Text style={{ marginHorizontal: 'auto', color: 'red' }}>
-            {`※学籍番号の末尾に入力時刻が追加されます（入力ミスによる重複防止のため）。\n例：学籍番号「123」を入力 → 登録される学籍番号は「123--2025-04-20_15:23:45.123」となります。\n※入力した「123」の部分は後ほど変更可能です。`}</Text>
+         <Text style={{ color: 'red', textAlign: 'center' }}>
+            {`※学籍番号の末尾に入力時刻が追加されます\n（入力ミスによる重複防止のため）。\n例：学籍番号「123」を入力 → 登録される学籍番号は「123--2025-04-20_15:23:45.123」となります。\n※入力した「123」の部分は後ほど変更可能です。\n10文字以内で入力してください`}
+          </Text>          
           <TextInput
             style={styles.input}
             placeholder="学籍番号"
             value={studentId}
             onChangeText={setStudentId}
+            maxLength={10}
           />
           <TextInput
             style={styles.input}

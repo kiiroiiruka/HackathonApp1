@@ -20,13 +20,12 @@ import { useCallback } from 'react'
 import { useAtom } from 'jotai';
 import { mailAddressAtom } from '@/atom/mailAddressAtom';
 import { ActivityIndicator } from 'react-native';
-import { isBackendFunctionActiveAtom } from '@/atom/setting/backendFunctionBoot';
 import { errorFlagAtom } from '@/atom/flag/errorFlag';
 const MainScreen: React.FC = () => {
   const users = useFriendUserStore((state) => state.users);
   // 🔽 ここで選択状態を管理（デフォルトは「友達」）
   const [selectedTab, setSelectedTab] = useState<string>('友達');
-  const [mail,]=useAtom(mailAddressAtom)
+  const [mail]=useAtom(mailAddressAtom)
   const [loading, setLoading] = useState(false);
   const [,errorFlag]=useAtom(errorFlagAtom)
   const router=useRouter()
@@ -34,11 +33,9 @@ const MainScreen: React.FC = () => {
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
-        if (isBackendFunctionActiveAtom) {
-          //ーーー↓自分が友達に設定しているuserの情報をフロントにセット↓ーーー
-          const flag = await fetchFriendsFromStudentIdArray(mail); // 自分以外の人のデータをセットする
-          if (flag === false)errorFlag(false);//通信エラー
-          //ーーー↑自分が友達に設定しているuserの情報をフロントにセット↑ーーー
+        if (mail) {
+          const flag = await fetchFriendsFromStudentIdArray(mail);
+          if (flag === false) errorFlag(false);
         }
       };
       fetchData(); // 非同期関数を即時呼び出し
@@ -62,13 +59,13 @@ const MainScreen: React.FC = () => {
           <TouchableOpacity
             onPress={async () => {
               setLoading(true);  // ローディング開始
-              if(isBackendFunctionActiveAtom){
+              
                 //ーーー↓自分が友達に設定しているuserの情報をフロントにセット↓ーーー
                 const flag=await fetchFriendsFromStudentIdArray(mail); // データ取得
                 if(flag===false)errorFlag(false);//通信エラー
                 console.log(users)
                 //ーーー↑自分が友達に設定しているuserの情報をフロントにセット↑ーーー
-              }
+              
               setTimeout(() => setLoading(false), 1000); // 1秒後に解除
             }}
             disabled={loading}

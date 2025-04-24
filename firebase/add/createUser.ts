@@ -17,6 +17,7 @@ export const createUser = async (email: string, password: string, username: stri
       friends: [],  // フレンドのユーザーID一覧（最初は空の配列）
       status: '活動中', // 「どの時間帯まで暇か」を示す文字列（初期は「活動中」）
       message: '',
+      profileImageUri: "", // 新しく画像URIを追加
       createdAt: serverTimestamp(), // サーバータイムスタンプ
     });
 

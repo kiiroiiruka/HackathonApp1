@@ -42,7 +42,7 @@ const StudentList: React.FC<Props> = ({ studentIds,username, alreadyAddedIds, on
   return (
     <View style={styles.container}>
       <FlatList
-        data={studentIds}
+        data={studentIds.filter(id => id !== 'Shisa')} // ← ここでAIを除外！
         keyExtractor={(item) => item}
         renderItem={renderItem}
         contentContainerStyle={styles.list}

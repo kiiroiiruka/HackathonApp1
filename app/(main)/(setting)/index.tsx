@@ -120,7 +120,9 @@ const SettingScreen: React.FC = () => {
               {freeUntil === '活動中' ? '活動中解除' : '活動中にする'}
             </Text>
           </TouchableOpacity>
-
+          <Text style={{ margin: 'auto', color: 'red', textAlign: 'center', }}>
+            {"※活動中のステータスに設定すると、友達以外のユーザーには「学籍番号」と「ユーザーネーム」以外の情報が表示されなくなります。また、「チャットルームへ移動」ボタンも非表示になります。"}
+          </Text>
           {/* 👇 追加: 公開設定の切替ボタン */}
           {!loadingSetting && (
           <View style={styles.toggleContainer}>
@@ -137,7 +139,7 @@ const SettingScreen: React.FC = () => {
                 友達のみ
               </Text>
             </TouchableOpacity>
-
+           
             <TouchableOpacity
               onPress={async () => {
                 if (friendOnly) {

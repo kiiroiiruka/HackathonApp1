@@ -116,17 +116,9 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
   
           <View style={styles.highlightBox}>
             <Text style={styles.highlightLabel}>⏰ 何時まで暇？</Text>
-            <Text
-            style={[
-              styles.highlightText,
-              canView
-                ? (time.trim() === '' ? styles.emptyLocation : timeStyle)
-                : styles.emptyLocation,
-            ]}
-          >
-            {canView ? (time.trim() === '' ? '未記入' : time) : '非表示'}
-          </Text>
-
+            <Text style={[styles.highlightText, canView ? timeStyle : styles.emptyLocation]}>
+              {canView ? (time.trim() === '' ? '未記入' : time) : '非表示'}
+            </Text>
           </View>
         </View>
       </View>

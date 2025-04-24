@@ -25,7 +25,7 @@ const MainScreen: React.FC = () => {
   const users = useFriendUserStore((state) => state.users);
   // 🔽 ここで選択状態を管理（デフォルトは「友達」）
   const [selectedTab, setSelectedTab] = useState<string>('友達');
-  const [mail]=useAtom(mailAddressAtom)
+  const [mail,]=useAtom(mailAddressAtom)
   const [loading, setLoading] = useState(false);
   const [,errorFlag]=useAtom(errorFlagAtom)
   const router=useRouter()
@@ -47,7 +47,7 @@ const MainScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header title="暇やつ探そうぜ？">
+      <Header title="暇なやつ探そうぜ？">
       <View style={{margin:"auto",flexDirection:"row"}}>
         {/* 🔽 選択肢を SelectTab に渡す */}
 

@@ -7,7 +7,7 @@ import { createChatroom } from '@/firebase/add/createChatroom'; // チャット�
 import { studentIdAtom } from '@/atom/studentIdAtom'; // MyIdを管理するatomをインポート
 import { useEffect, useState } from 'react';
 import { getProfileImageUriByStudentId } from '@/firebase/get/getProfileImageUriByStudentId';
-
+import {canAccessUserData} from '@/firebase/get/friendFiltering'; // ユーザーデータにアクセスできるか確認する関数をインポート
 type UserCardProps = {
   username: string;
   studentId: string;
@@ -23,15 +23,25 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
   message,
   time,
 }) => {
-  const router = useRouter(); // ルーターを使用してページ遷移
-  const [myId,] = useAtom(studentIdAtom); // jotaiからMyIdを取得
+  const router = useRouter();
+  const [myId] = useAtom(studentIdAtom);
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [canView, setCanView] = useState<boolean | null>(null); // 初期はnull
 
-  // 末尾から最初に現れる '--' を探して、それを基準に分ける処理
   const lastDoubleHyphenIndex = studentId.lastIndexOf('--');
-  const mainId = lastDoubleHyphenIndex !== -1 ? studentId.slice(0, lastDoubleHyphenIndex) : studentId; // '--' より前の部分
-  const subId = lastDoubleHyphenIndex !== -1 ? studentId.slice(lastDoubleHyphenIndex + 2) : ''; // '--' より後ろの部分
+  const mainId = lastDoubleHyphenIndex !== -1 ? studentId.slice(0, lastDoubleHyphenIndex) : studentId;
+  const subId = lastDoubleHyphenIndex !== -1 ? studentId.slice(lastDoubleHyphenIndex + 2) : '';
 
+  // アクセス可能かどうかを判定
+  useEffect(() => {
+    const checkAccess = async () => {
+      const access = await canAccessUserData(myId, studentId);
+      setCanView(access);
+    };
+    checkAccess();
+  }, [myId, studentId]);
+
+  // プロフィール画像取得
   useEffect(() => {
     const fetchImage = async () => {
       const uri = await getProfileImageUriByStudentId(studentId);
@@ -40,32 +50,29 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
     fetchImage();
   }, [studentId]);
 
-  const timeStyle = time === '活動中' ? styles.busyTime : styles.freeTime;
 
-  // location に対するチェック
+  // アクセス確認中はスケルトンやローディング中などを表示したいなら以下で制御
+  if (canView === null) {
+    return null; // または <ActivityIndicator /> など
+  }
+
+  const timeStyle = time === '活動中' ? styles.busyTime : styles.freeTime;
   const locationText = location.trim() === '' ? '未記入' : location;
   const locationStyle = location.trim() === '' ? styles.emptyLocation : styles.filledLocation;
-
-  // message に対するチェック
   const messageText = message.trim() === '' ? '未記入' : message;
   const messageStyle = message.trim() === '' ? styles.emptyLocation : styles.filledLocation;
 
   const handleChatNavigation = async () => {
     console.log('ルームチャットに移動ボタンが押されました。');
     try {
-      // MyIdとstudentIdを使ってチャットルームを検索
       const chatroom = await getChatroomByPersons(myId, studentId);
       console.log(chatroom)
       if (chatroom) {
-        // チャットルームが見つかった場合、動的ルートに遷移
         router.push(`/(chat)/${chatroom.id}`);
       } else {
-        console.log('条件に一致するチャットルームが見つかりませんでした。新しいチャットルームを作成します。');
-        // チャットルームが見つからなかった場合、新しいチャットルームを作成
         const result = await createChatroom(myId, studentId);
-        if (result && result.success) {
-          console.log('新しいチャットルームが作成されました:', result.chatroomId);
-          router.push(`/(chat)/${result.chatroomId}`); // 作成したチャットルームに遷移
+        if (result?.success) {
+          router.push(`/(chat)/${result.chatroomId}`);
         } else {
           console.error('チャットルーム作成エラー:', result?.error || '不明なエラー');
         }
@@ -81,30 +88,42 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
         {/* 左側の情報 */}
         <View style={styles.leftSection}>
           <Text>👤ユーザー名</Text>
-          <Text style={styles.label}> {username}</Text>
+          <Text style={styles.label}>
+          {username}
+          {!canView && <Text style={styles.subStudentId}>※一部情報は非公開です</Text>}
+          </Text>
+  
           <Text>🎓学籍番号</Text>
           <Text style={styles.label}>
-           {mainId}
+            {mainId}
             {subId && <Text style={styles.subStudentId}>{"\n"}{subId}</Text>}
           </Text>
+  
           <Text>💬一言メッセージ</Text>
-          <Text style={[styles.label, messageStyle]}>{messageText}</Text>
+          <Text style={[styles.label, canView ? messageStyle : styles.emptyLocation]}>
+            {canView ? messageText : '非表示'}
+          </Text>
         </View>
-
+  
         {/* 右側の情報 */}
         <View style={styles.rightSection}>
           <View style={styles.highlightBox}>
             <Text style={styles.highlightLabel}>📍 現在地</Text>
-            <Text style={[styles.highlightText, locationStyle]}>{locationText}</Text>
+            <Text style={[styles.highlightText, canView ? locationStyle : styles.emptyLocation]}>
+              {canView ? locationText : '非表示'}
+            </Text>
           </View>
+  
           <View style={styles.highlightBox}>
             <Text style={styles.highlightLabel}>⏰ 何時まで暇？</Text>
-            <Text style={[styles.highlightText, timeStyle]}>{time}</Text>
+            <Text style={[styles.highlightText, canView ? timeStyle : styles.emptyLocation]}>
+              {canView ? time : '非表示'}
+            </Text>
           </View>
         </View>
       </View>
-
-      {/* 中央にルームチャットボタンを追加 */}
+  
+      {/* プロフィール画像 & チャットボタン */}
       <View style={styles.buttonContainer}>
         {imageUri ? (
           <Image source={{ uri: imageUri }} style={styles.profileImage} />
@@ -113,14 +132,17 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
             <Text style={styles.placeholderText}>No Image</Text>
           </View>
         )}
-        
-        <TouchableOpacity style={styles.chatButton} onPress={handleChatNavigation}>
-          <Text style={styles.chatIcon}>💬</Text>
-          <Text style={styles.chatButtonText}>ルームチャットに移動</Text>
-        </TouchableOpacity>
+  
+        {canView && (
+          <TouchableOpacity style={styles.chatButton} onPress={handleChatNavigation}>
+            <Text style={styles.chatIcon}>💬</Text>
+            <Text style={styles.chatButtonText}>ルームチャットに移動</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
+  
 };
 
 const styles = StyleSheet.create({

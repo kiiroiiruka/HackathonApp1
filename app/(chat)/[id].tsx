@@ -8,7 +8,8 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Image, // 追加
+  Image,
+  ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMeInfoStore } from '@/store/meData';
@@ -17,6 +18,7 @@ import { createChat } from '@/firebase/add/createChat';
 import SubHeader from '@/components/ui/header/SubScreenHeader';
 import { getUserInfoByDocId } from '@/firebase/get/getChatIcon';
 import { setReadCount } from '@/firebase/chatReadTime/updateAccessTime';
+import { isShisaInRoom} from '@/firebase/get/IsShisa';
 type Message = {
   id: string;
   createdBy: string;
@@ -32,9 +34,11 @@ const ChatRoom = () => {
   const router = useRouter();
   const [usernames, setUsernames] = useState<{ [key: string]: string }>({});
   const [profileImages, setProfileImages] = useState<{ [key: string]: string }>({});
+  const [showTypingIndicator, setShowTypingIndicator] = useState(false);
+  const isshasa = typeof id === 'string' ? isShisaInRoom(id) : false;
 
-  // ユーザー名とアイコン画像を取得
   useEffect(() => {
+    console.log('mmmmmmmmm:',messages);
     const fetchUsernames = async () => {
       const uniqueIds = [...new Set(messages.map(msg => msg.createdBy))];
       const nameMap: { [key: string]: string } = { ...usernames };
@@ -45,16 +49,16 @@ const ChatRoom = () => {
           if (!nameMap[id]) {
             const user = await getUserInfoByDocId(id);
             if (user && user.username) {
-              nameMap[id] = user.username; // ユーザー名がある場合のみ追加
+              nameMap[id] = user.username;
             }
             if (user && user.profileImageUri) {
-              imageMap[id] = user.profileImageUri; // アイコン画像があれば追加
+              imageMap[id] = user.profileImageUri;
             }
           }
         })
       );
       setUsernames(nameMap);
-      setProfileImages(imageMap); // アイコン画像の状態を更新
+      setProfileImages(imageMap);
     };
   
     if (messages.length > 0) {
@@ -72,8 +76,7 @@ const ChatRoom = () => {
       if (Array.isArray(chats)) {
         const sortedChats = chats.sort((a, b) => a.createdAt - b.createdAt);
         setMessages(sortedChats);
-  
-        // 🔽 ここでカウント保存
+        console.log('リアルタイムofリアルタイム取得:', sortedChats);
         await setReadCount(userInfo.key, id, sortedChats.length);
       } else {
         console.error('chatsが配列ではありません:', chats);
@@ -82,6 +85,17 @@ const ChatRoom = () => {
   
     return () => unsubscribe();
   }, [id]);
+
+  useEffect(() => {
+    if (isshasa && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.createdBy !== userInfo.key) {
+        setShowTypingIndicator(false); // 相手の会話が追加されたらぐるぐるカードを削除
+      } else {
+        setShowTypingIndicator(true); // 自分が最後に会話した場合はぐるぐるカードを表示
+      }
+    }
+  }, [messages, isshasa]);
 
   const sendMessage = async () => {
     if (!input.trim()) {
@@ -99,10 +113,8 @@ const ChatRoom = () => {
       const result = await createChat(newMessage.text, userInfo.key, id as string);
       if (result.success && result.messageId) {
         const newMessages = [...messages, { id: result.messageId, ...newMessage }];
-        setMessages(newMessages);
         setInput('');
   
-        // 🔽 カウント更新
         await setReadCount(userInfo.key, id as string, newMessages.length);
       } else {
         console.error('メッセージ送信エラー:', result.error);
@@ -122,6 +134,7 @@ const ChatRoom = () => {
 
         <FlatList
           data={messages}
+          extraData={messages} 
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View
@@ -132,28 +145,32 @@ const ChatRoom = () => {
               }
             >
               <View style={styles.messageHeader}>
-                
-              {item.createdBy === userInfo.key?(
-                <View style={{marginLeft:"auto",flexDirection:"row",alignItems:"center",marginRight: -10}}>
-
-
-                  <Text style={styles.messageSender}>
-                    あなた
-                  </Text>
-                  <View style={{marginLeft:5}}>
-                    {profileImages[item.createdBy] ? (
-                      <Image
-                        source={{ uri: profileImages[item.createdBy] }}
-                        style={styles.profileImage}
-                      />
-                    ) : (
-                      <View style={styles.profileImagePlaceholder}>
-                        <Text style={styles.profileImagePlaceholderText}>なし</Text>
-                      </View>
-                    )}
+                {item.createdBy === userInfo.key ? (
+                  <View
+                    style={{
+                      marginLeft: "auto",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginRight: -10,
+                    }}
+                  >
+                    <Text style={styles.messageSender}>あなた</Text>
+                    <View style={{ marginLeft: 5 }}>
+                      {profileImages[item.createdBy] ? (
+                        <Image
+                          source={{ uri: profileImages[item.createdBy] }}
+                          style={styles.profileImage}
+                        />
+                      ) : (
+                        <View style={styles.profileImagePlaceholder}>
+                          <Text style={styles.profileImagePlaceholderText}>
+                            なし
+                          </Text>
+                        </View>
+                      )}
+                    </View>
                   </View>
-                </View>
-                ):(
+                ) : (
                   <>
                     {profileImages[item.createdBy] ? (
                       <Image
@@ -162,17 +179,16 @@ const ChatRoom = () => {
                       />
                     ) : (
                       <View style={styles.profileImagePlaceholder}>
-                        <Text style={styles.profileImagePlaceholderText}>なし</Text>
+                        <Text style={styles.profileImagePlaceholderText}>
+                          なし
+                        </Text>
                       </View>
                     )}
-
                     <Text style={styles.messageSender}>
-                      {usernames[item.createdBy] ?? '名前取得中...'}
+                      {usernames[item.createdBy] ?? "名前取得中..."}
                     </Text>
                   </>
-                )
-                }
-
+                )}
               </View>
               <Text style={styles.messageText}>{item.text}</Text>
               <Text style={styles.messageTimestamp}>
@@ -180,6 +196,31 @@ const ChatRoom = () => {
               </Text>
             </View>
           )}
+          ListFooterComponent={
+            showTypingIndicator ? (
+              <View style={[styles.messageContainer, styles.otherMessage]}>
+                <View style={styles.messageHeader}>
+                  {profileImages[messages[messages.length - 2]?.createdBy] ? (
+                    <Image
+                      source={{ uri: profileImages[messages[messages.length - 2]?.createdBy] }}
+                      style={styles.profileImage}
+                    />
+                  ) : (
+                    <View style={styles.profileImagePlaceholder}>
+                      <Text style={styles.profileImagePlaceholderText}>
+                        なし
+                      </Text>
+                    </View>
+                  )}
+                  <Text style={styles.messageSender}>
+                    {usernames[messages[messages.length - 2]?.createdBy] ?? "相手"}
+                  </Text>
+                </View>
+                <Text style={styles.typingText}>入力中...</Text>
+                <ActivityIndicator color="#888" size="small" />
+              </View>
+            ) : null
+          }
           contentContainerStyle={styles.messageList}
           keyboardShouldPersistTaps="handled"
         />
@@ -207,8 +248,8 @@ const styles = StyleSheet.create({
   profileImagePlaceholderText: {
     fontSize: 12,
     color: '#888',
-    textAlign: 'center', // テキストを中央揃え
-    margin:"auto"
+    textAlign: 'center',
+    margin: "auto"
   },
   container: {
     flex: 1,
@@ -287,7 +328,6 @@ const styles = StyleSheet.create({
   messageHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-
   },
   profileImage: {
     width: 30,
@@ -302,6 +342,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     marginRight: 10,
+  },
+  typingText: {
+    fontSize: 14,
+    color: "#888",
+    fontStyle: "italic",
+    marginTop: 4,
   },
 });
 

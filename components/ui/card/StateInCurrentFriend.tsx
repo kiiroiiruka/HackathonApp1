@@ -213,7 +213,9 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
           </View>
           <View style={styles.highlightBox}>
             <Text style={styles.highlightLabel}>📏 距離</Text>
-            <Text style={styles.highlightText}>{distanse}</Text>
+            <Text style={styles.highlightText}>
+              {canView ? distanse : "非表示"}
+            </Text>
           </View>
         </View>
       </View>

@@ -52,7 +52,7 @@ const MainScreen: React.FC = () => {
             setErrorMsg('位置情報のアクセスが許可されていません');
             return;
           }
-          const currentLocation = await Location.getCurrentPositionAsync({});
+          const currentLocation = await Location.getCurrentPositionAsync({accuracy: Location.Accuracy.BestForNavigation});
           console.log("gpsのねで",currentLocation.coords);
           const cor=currentLocation.coords
           setmyLocation({accuracy:cor.accuracy ??0,latitude:cor.latitude,longitude:cor.longitude});
@@ -70,15 +70,9 @@ const MainScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-<<<<<<< HEAD
-      <Header title="暇やつ探そうぜ？">
-        <View style={{ margin: 'auto', flexDirection: 'row' }}>
-          {/* 🔽 選択肢を SelectTab に渡す */}
-=======
       <Header title="暇なやつ探そうぜ？">
       <View style={{margin:"auto",flexDirection:"row"}}>
         {/* 🔽 選択肢を SelectTab に渡す */}
->>>>>>> main
 
           <SelectTab
             options={['友達', '暇な奴だけ']}

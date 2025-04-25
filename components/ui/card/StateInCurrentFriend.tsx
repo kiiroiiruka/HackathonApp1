@@ -48,14 +48,9 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
   message,
   time,
 }) => {
-<<<<<<< HEAD
   const [myLocation,]  = useAtom(myLocationAtom); // jotaiから位置情報を取得
   const router = useRouter(); // ルーターを使用してページ遷移
   const [myId,] = useAtom(studentIdAtom); // jotaiからMyIdを取得
-=======
-  const router = useRouter();
-  const [myId] = useAtom(studentIdAtom);
->>>>>>> main
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [canView, setCanView] = useState<boolean | null>(null); // 初期はnull
 
@@ -81,27 +76,27 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
     fetchImage();
   }, [studentId]);
 
-<<<<<<< HEAD
   const [distanse, setDistanse] = useState<string>('不明');
 
   useEffect(() => {
     const fetchDistance = async () => {
       try {
         const location = await getlocationbyStdudentId(studentId);
-        const dict=haversine(location.latitude,location.longitude, myLocation.latitude, myLocation.longitude);
+        if (myLocation.latitude == 0 && myLocation.longitude == 0) {
+          setDistanse('位置情報取得待ち');
+          return;
+        }
+        const dict = haversine(location.latitude, location.longitude, myLocation.latitude, myLocation.longitude);
         const distanceText = dict >= 1 ? `${dict.toFixed(2)} km` : `${(dict * 1000).toFixed(0)} m`;
         setDistanse(distanceText);
+        console.log("位置情報取得", dict);
       } catch (error) {
         console.error('位置情報取得エラー:', error);
         setDistanse('エラー');
       }
     };
     fetchDistance();
-  }, [studentId]);
-
-  const timeStyle = time === '活動中' ? styles.busyTime : styles.freeTime;
-=======
->>>>>>> main
+  }, [studentId, myLocation]); // myLocationを依存配列に追加
 
   // アクセス確認中はスケルトンやローディング中などを表示したいなら以下で制御
   if (canView === null) {

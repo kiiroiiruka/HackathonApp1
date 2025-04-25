@@ -52,15 +52,9 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
   message,
   time,
 }) => {
-<<<<<<< HEAD
   const [myLocation,]  = useAtom(myLocationAtom); // jotaiから位置情報を取得
   const router = useRouter(); // ルーターを使用してページ遷移
   const [myId,] = useAtom(studentIdAtom); // jotaiからMyIdを取得
-=======
-  const [myLocation] = useAtom(myLocationAtom); // jotaiから位置情報を取得
-  const router = useRouter(); // ルーターを使用してページ遷移
-  const [myId] = useAtom(studentIdAtom); // jotaiからMyIdを取得
->>>>>>> bdb8cad029c329789abc074404dd9c27f8695500
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [canView, setCanView] = useState<boolean | null>(null); // 初期はnull
 
@@ -92,7 +86,6 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
     fetchImage();
   }, [studentId]);
 
-<<<<<<< HEAD
   const [distanse, setDistanse] = useState<string>('不明');
 
   useEffect(() => {
@@ -114,36 +107,6 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
     };
     fetchDistance();
   }, [studentId, myLocation]); // myLocationを依存配列に追加
-=======
-  const [distanse, setDistanse] = useState<string>("不明");
-
-  useEffect(() => {
-    const fetchDistance = async () => {
-      // 1秒待機してから処理を実行
-      setTimeout(async () => {
-        try {
-          const location = await getlocationbyStdudentId(studentId);
-          const dict = haversine(
-            location.latitude,
-            location.longitude,
-            myLocation.latitude,
-            myLocation.longitude,
-          );
-          const distanceText =
-            dict >= 1
-              ? `${dict.toFixed(2)} km`
-              : `${(dict * 1000).toFixed(0)} m`;
-          setDistanse(distanceText);
-        } catch (error) {
-          console.error("位置情報取得エラー:", error);
-          setDistanse("エラー");
-        }
-      }, 500); // 1000ミリ秒（1秒）遅延
-    };
-
-    fetchDistance();
-  }, [studentId, myLocation]);
->>>>>>> bdb8cad029c329789abc074404dd9c27f8695500
 
   // アクセス確認中はスケルトンやローディング中などを表示したいなら以下で制御
   if (canView === null) {

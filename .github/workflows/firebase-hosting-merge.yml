@@ -34,7 +34,7 @@ jobs:
       # Expoプロジェクトをビルド
       - run: |
           npm ci
-          npx expo export --output-dir dist
+          npx expo export
 
       # ビルド成果物をアーティファクトとしてアップロード
       - name: Upload build artifacts

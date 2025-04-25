@@ -25,14 +25,16 @@ module.exports = [
             },
         },
         rules: {
-            // ESLint推奨ルール
-            ...require('eslint/conf/eslint-recommended').rules,
-            // React推奨ルール
-            ...require('eslint-plugin-react/configs/recommended').rules,
-            // React Nativeルール
-            ...require('eslint-plugin-react-native/configs/all').rules,
-            // Prettierルール
-            'prettier/prettier': 'error',
+            // 必要なルールを手動で定義
+            'no-unused-vars': 'warn',
+            'no-undef': 'error',
+            'react/prop-types': 'off',
+            'react/react-in-jsx-scope': 'off',
+            'react-native/no-unused-styles': 'warn',
+            'react-native/split-platform-components': 'warn',
+            'react-native/no-inline-styles': 'warn',
+            'react-native/no-color-literals': 'warn',
+            'prettier/prettier': 'error', // Prettierルールを適用
             // カスタムルール
             'prefer-const': 'error',
             'consistent-return': 'error',

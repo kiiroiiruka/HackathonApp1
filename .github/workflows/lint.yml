@@ -23,7 +23,7 @@ jobs:
         run: npx prettier --write .
 
       - name: Run ESLint
-        run: npx eslint . --ext .js,.jsx,.ts,.tsx --fix
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx
 
   push:
     runs-on: ubuntu-latest

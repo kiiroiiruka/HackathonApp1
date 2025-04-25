@@ -101,7 +101,9 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
             myLocation.longitude,
           );
           const distanceText =
-            dict >= 1 ? `${dict.toFixed(2)} km` : `${(dict * 1000).toFixed(0)} m`;
+            dict >= 1
+              ? `${dict.toFixed(2)} km`
+              : `${(dict * 1000).toFixed(0)} m`;
           setDistanse(distanceText);
         } catch (error) {
           console.error("位置情報取得エラー:", error);

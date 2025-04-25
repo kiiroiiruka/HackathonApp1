@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,31 +6,31 @@ import {
   FlatList,
   SafeAreaView,
   TouchableOpacity,
-} from 'react-native';
+} from "react-native";
 
-import StateInCurrentFriend from '@/components/ui/card/StateInCurrentFriend';
-import { useFriendUserStore } from '@/store/friendData';
-import Header from '@/components/ui/header/Header';
-import SelectTab from '@/components/ui/selectionUi/SelectTab';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons'; // ← アイコン追加！
-import { fetchFriendsFromStudentIdArray } from '@/firebase/get/friendInfoAcquisition';
-import { useFocusEffect } from 'expo-router'; //expo-routerを活用している場合はこっちをimportすればOK
-import { useCallback } from 'react';
-import { useAtom } from 'jotai';
-import { useMeInfoStore } from '@/store/meData';
-import { mailAddressAtom } from '@/atom/mailAddressAtom';
-import { ActivityIndicator } from 'react-native';
-import { errorFlagAtom } from '@/atom/flag/errorFlag';
-import * as Location from 'expo-location'; // expo-locationをインポート
-import { updateLocation } from '@/firebase/fetch/fetchLocation'; // 位置情報をFirebaseに送信する関数をインポート
-import {myLocationAtom }from "@/atom/locationAtom"; // 位置情報を管理するatomをインポート
+import StateInCurrentFriend from "@/components/ui/card/StateInCurrentFriend";
+import { useFriendUserStore } from "@/store/friendData";
+import Header from "@/components/ui/header/Header";
+import SelectTab from "@/components/ui/selectionUi/SelectTab";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons"; // ← アイコン追加！
+import { fetchFriendsFromStudentIdArray } from "@/firebase/get/friendInfoAcquisition";
+import { useFocusEffect } from "expo-router"; //expo-routerを活用している場合はこっちをimportすればOK
+import { useCallback } from "react";
+import { useAtom } from "jotai";
+import { useMeInfoStore } from "@/store/meData";
+import { mailAddressAtom } from "@/atom/mailAddressAtom";
+import { ActivityIndicator } from "react-native";
+import { errorFlagAtom } from "@/atom/flag/errorFlag";
+import * as Location from "expo-location"; // expo-locationをインポート
+import { updateLocation } from "@/firebase/fetch/fetchLocation"; // 位置情報をFirebaseに送信する関数をインポート
+import { myLocationAtom } from "@/atom/locationAtom"; // 位置情報を管理するatomをインポート
 const MainScreen: React.FC = () => {
   const users = useFriendUserStore((state) => state.users);
   const userInfo = useMeInfoStore((state) => state.userInfo);
   // 🔽 ここで選択状態を管理（デフォルトは「友達」）
-  const [selectedTab, setSelectedTab] = useState<string>('友達');
-  const [myLocation,setmyLocation]=useAtom(myLocationAtom);
+  const [selectedTab, setSelectedTab] = useState<string>("友達");
+  const [myLocation, setmyLocation] = useAtom(myLocationAtom);
   const [mail] = useAtom(mailAddressAtom);
   const [loading, setLoading] = useState(false);
   const [, errorFlag] = useAtom(errorFlagAtom);
@@ -47,16 +47,20 @@ const MainScreen: React.FC = () => {
 
         // 位置情報の取得
         const getLocation = async () => {
-          let { status } = await Location.requestForegroundPermissionsAsync();
-          if (status !== 'granted') {
-            setErrorMsg('位置情報のアクセスが許可されていません');
+          const { status } = await Location.requestForegroundPermissionsAsync();
+          if (status !== "granted") {
+            setErrorMsg("位置情報のアクセスが許可されていません");
             return;
           }
           const currentLocation = await Location.getCurrentPositionAsync({});
-          console.log("gpsのねで",currentLocation.coords);
-          const cor=currentLocation.coords
-          setmyLocation({accuracy:cor.accuracy ??0,latitude:cor.latitude,longitude:cor.longitude});
-          updateLocation(userInfo.key,currentLocation);
+          console.log("gpsのねで", currentLocation.coords);
+          const cor = currentLocation.coords;
+          setmyLocation({
+            accuracy: cor.accuracy ?? 0,
+            latitude: cor.latitude,
+            longitude: cor.longitude,
+          });
+          updateLocation(userInfo.key, currentLocation);
         };
 
         await getLocation(); // 位置情報取得関数を呼び出し
@@ -65,23 +69,17 @@ const MainScreen: React.FC = () => {
       return () => {
         // クリーンアップ処理があればここに書く
       };
-    }, [])
+    }, []),
   );
 
   return (
     <SafeAreaView style={styles.container}>
-<<<<<<< HEAD
       <Header title="暇やつ探そうぜ？">
-        <View style={{ margin: 'auto', flexDirection: 'row' }}>
+        <View style={{ margin: "auto", flexDirection: "row" }}>
           {/* 🔽 選択肢を SelectTab に渡す */}
-=======
-      <Header title="暇なやつ探そうぜ？">
-      <View style={{margin:"auto",flexDirection:"row"}}>
-        {/* 🔽 選択肢を SelectTab に渡す */}
->>>>>>> main
 
           <SelectTab
-            options={['友達', '暇な奴だけ']}
+            options={["友達", "暇な奴だけ"]}
             selected={selectedTab}
             setSelected={setSelectedTab}
           />
@@ -115,8 +113,8 @@ const MainScreen: React.FC = () => {
       {/* 🔽 選択状態に応じて表示を切り替えることもできる（任意） */}
       <FlatList
         data={
-          selectedTab === '暇な奴だけ'
-            ? users.filter((u) => !u.time.includes('活動中'))
+          selectedTab === "暇な奴だけ"
+            ? users.filter((u) => !u.time.includes("活動中"))
             : users
         }
         keyExtractor={(item) => item.uid}
@@ -141,7 +139,7 @@ const MainScreen: React.FC = () => {
 
       <View style={{ padding: 10 }}>
         {errorMsg ? (
-          <Text style={{ color: 'red' }}>{errorMsg}</Text>
+          <Text style={{ color: "red" }}>{errorMsg}</Text>
         ) : location ? (
           <Text>
             現在地: 緯度 {myLocation.latitude}, 経度 {myLocation.longitude}
@@ -155,7 +153,7 @@ const MainScreen: React.FC = () => {
       <View style={styles.footer}>
         <TouchableOpacity
           style={styles.settingsButtonSmall}
-          onPress={() => router.push('./(setting)')}
+          onPress={() => router.push("./(setting)")}
         >
           <Ionicons
             name="settings-outline"
@@ -167,7 +165,7 @@ const MainScreen: React.FC = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.settingsButtonSmall}
-          onPress={() => router.push('./(openchat)')}
+          onPress={() => router.push("./(openchat)")}
         >
           <Ionicons
             name="chatbubble-outline"
@@ -179,7 +177,7 @@ const MainScreen: React.FC = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.settingsButtonSmall}
-          onPress={() => router.push('./(addFriend)')}
+          onPress={() => router.push("./(addFriend)")}
         >
           <Ionicons
             name="person-add-outline"
@@ -197,16 +195,16 @@ const MainScreen: React.FC = () => {
 const styles = StyleSheet.create({
   emptyContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 40,
   },
   emptyText: {
     fontSize: 16,
-    color: '#888',
+    color: "#888",
   },
   reloadButton: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 10,
@@ -218,27 +216,27 @@ const styles = StyleSheet.create({
   },
   reloadText: {
     fontSize: 14,
-    color: '#333',
+    color: "#333",
   },
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
     padding: 12,
     borderTopWidth: 1,
-    borderColor: '#ccc',
-    backgroundColor: '#fff',
+    borderColor: "#ccc",
+    backgroundColor: "#fff",
   },
   settingsButtonSmall: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'center',
-    backgroundColor: '#007AFF',
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "center",
+    backgroundColor: "#007AFF",
     paddingVertical: 6,
 
     paddingHorizontal: 12,
     borderRadius: 16,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -246,25 +244,25 @@ const styles = StyleSheet.create({
   },
 
   settingsButtonTextSmall: {
-    color: '#fff',
-    fontWeight: '500',
+    color: "#fff",
+    fontWeight: "500",
     fontSize: 14,
   },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   chatButton: {
     marginVertical: 10,
     padding: 10,
-    backgroundColor: '#007bff',
+    backgroundColor: "#007bff",
     borderRadius: 5,
-    alignItems: 'center',
+    alignItems: "center",
   },
   chatButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   listContent: {
     paddingBottom: 20,

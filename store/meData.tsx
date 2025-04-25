@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 export type UserInfo = {
   key: string; // 追加
@@ -21,12 +21,12 @@ type UserInfoState = {
 
 export const useMeInfoStore = create<UserInfoState>((set) => ({
   userInfo: {
-    key: '', // 初期値を追加
-    uid: '',
-    username: '',
-    location: '',
-    message: '',
-    time: '',
+    key: "", // 初期値を追加
+    uid: "",
+    username: "",
+    location: "",
+    message: "",
+    time: "",
   },
   setUserInfo: (info) => set({ userInfo: info }),
   updateKey: (key) =>

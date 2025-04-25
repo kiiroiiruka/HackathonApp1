@@ -1,4 +1,10 @@
-import { collection, query, where, getDocs, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
 /**
@@ -8,7 +14,7 @@ import { db } from "../firebaseConfig";
  */
 export const updateUsernameByEmail = async (
   email: string,
-  newUsername: string
+  newUsername: string,
 ) => {
   try {
     const usersRef = collection(db, "users");
@@ -18,7 +24,9 @@ export const updateUsernameByEmail = async (
     const querySnapshot = await getDocs(q);
 
     if (querySnapshot.empty) {
-      console.warn("指定されたメールアドレスのユーザーが見つかりませんでした。");
+      console.warn(
+        "指定されたメールアドレスのユーザーが見つかりませんでした。",
+      );
       return false;
     }
 

@@ -1,18 +1,17 @@
-import { realtimeDb } from '@/firebase/firebaseConfig';
+import { realtimeDb } from "@/firebase/firebaseConfig";
 import { getDatabase, ref, push, set } from "firebase/database";
 import { getKeybyStudentId } from "@/firebase/fetch/meDataset"; // 必要な関数をインポート
 
 const db = getDatabase(); // Realtime Databaseの初期化
 
-
-export const createChatroom= async (personA: string,personB: string) => {
+export const createChatroom = async (personA: string, personB: string) => {
   try {
     // Realtime Databaseの "chat/openchats" ノード
     const userAId = await getKeybyStudentId(personA);
     const userBId = await getKeybyStudentId(personB);
 
     if (!userAId || !userBId) {
-      console.error('ユーザー情報が見つかりませんでした。');
+      console.error("ユーザー情報が見つかりませんでした。");
       return null;
     }
     const openChatsRef = ref(db, "chat");
@@ -24,8 +23,8 @@ export const createChatroom= async (personA: string,personB: string) => {
     // メッセージデータを保存
     await set(newMessageRef, {
       id: chatroomId,
-      person:[userAId ,userBId],
-      chat:[]
+      person: [userAId, userBId],
+      chat: [],
     });
 
     console.log("オープンチャットメッセージが作成されました:", chatroomId);

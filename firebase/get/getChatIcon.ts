@@ -1,5 +1,5 @@
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebaseConfig";
 
 // 戻り値の型を定義（オプションだけどおすすめ）
 type UserProfile = {
@@ -7,13 +7,15 @@ type UserProfile = {
   username?: string;
 };
 
-export const getUserInfoByDocId = async (documentId: string): Promise<UserProfile | undefined | false> => {
+export const getUserInfoByDocId = async (
+  documentId: string,
+): Promise<UserProfile | undefined | false> => {
   try {
-    const userDocRef = doc(db, 'users', documentId);
+    const userDocRef = doc(db, "users", documentId);
     const userDocSnap = await getDoc(userDocRef);
 
     if (!userDocSnap.exists()) {
-      console.warn('指定されたユーザーは存在しません');
+      console.warn("指定されたユーザーは存在しません");
       return;
     }
 
@@ -22,9 +24,8 @@ export const getUserInfoByDocId = async (documentId: string): Promise<UserProfil
       profileImageUri: data?.profileImageUri,
       username: data?.username,
     };
-
   } catch (error) {
-    console.error('ユーザー情報の取得に失敗しました:', error);
+    console.error("ユーザー情報の取得に失敗しました:", error);
     return false;
   }
 };

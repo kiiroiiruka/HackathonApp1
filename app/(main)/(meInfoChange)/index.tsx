@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,34 +9,34 @@ import {
   Platform,
   Image,
   TouchableOpacity,
-  ScrollView
-} from 'react-native';
-import { useMeInfoStore } from '@/store/meData';
-import { useRouter } from 'expo-router';
-import SubHeader from '@/components/ui/header/SubScreenHeader';
-import { updateFriendsWithNewStudentId } from '@/firebase/update/studentNumberUpdate';
-import { useAtom } from 'jotai';
-import { studentIdAtom } from '@/atom/studentIdAtom';
-import { mailAddressAtom } from '@/atom/mailAddressAtom';
-import { updateUsernameByEmail } from '@/firebase/update/meNameChange';
-import { getProfileImageUriByEmail } from '@/firebase/get/getImage';
-import { useFocusEffect } from'expo-router'//expo-routerを活用している場合はこっちをimportすればOK
-import { useCallback } from 'react'
+  ScrollView,
+} from "react-native";
+import { useMeInfoStore } from "@/store/meData";
+import { useRouter } from "expo-router";
+import SubHeader from "@/components/ui/header/SubScreenHeader";
+import { updateFriendsWithNewStudentId } from "@/firebase/update/studentNumberUpdate";
+import { useAtom } from "jotai";
+import { studentIdAtom } from "@/atom/studentIdAtom";
+import { mailAddressAtom } from "@/atom/mailAddressAtom";
+import { updateUsernameByEmail } from "@/firebase/update/meNameChange";
+import { getProfileImageUriByEmail } from "@/firebase/get/getImage";
+import { useFocusEffect } from "expo-router"; //expo-routerを活用している場合はこっちをimportすればOK
+import { useCallback } from "react";
 const ProfileScreen = () => {
   const router = useRouter();
   const { userInfo, setUserInfo } = useMeInfoStore();
   const [, setStudentId] = useAtom(studentIdAtom);
   const [mail] = useAtom(mailAddressAtom);
 
-  const uid = userInfo.uid || '';
-  const lastDoubleHyphenIndex = uid.lastIndexOf('--');
+  const uid = userInfo.uid || "";
+  const lastDoubleHyphenIndex = uid.lastIndexOf("--");
 
   const [editableUidPart, setEditableUidPart] = useState(() =>
-    lastDoubleHyphenIndex !== -1 ? uid.slice(0, lastDoubleHyphenIndex) : uid
+    lastDoubleHyphenIndex !== -1 ? uid.slice(0, lastDoubleHyphenIndex) : uid,
   );
 
   const fixedUidPart =
-    lastDoubleHyphenIndex !== -1 ? uid.slice(lastDoubleHyphenIndex) : '';
+    lastDoubleHyphenIndex !== -1 ? uid.slice(lastDoubleHyphenIndex) : "";
 
   const [username, setUsername] = useState(userInfo.username);
   const [profileImageUri, setProfileImageUri] = useState<string | null>(null);
@@ -49,12 +49,12 @@ const ProfileScreen = () => {
         setProfileImageUri(imageUri);
       };
       fetchProfileImage();
-    }, [])
-  )
+    }, []),
+  );
 
   const handleSave = async () => {
     if (!editableUidPart || !username) {
-      Alert.alert('エラー', 'すべての項目を入力してください');
+      Alert.alert("エラー", "すべての項目を入力してください");
       return;
     }
 
@@ -67,16 +67,16 @@ const ProfileScreen = () => {
     await updateUsernameByEmail(mail, username);
 
     if (updateResult) {
-      Alert.alert('保存完了', '個人情報を更新しました');
+      Alert.alert("保存完了", "個人情報を更新しました");
     } else {
-      Alert.alert('エラー', 'Firebaseの更新に失敗しました');
+      Alert.alert("エラー", "Firebaseの更新に失敗しました");
     }
   };
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.select({ ios: 'padding', android: undefined })}
+      behavior={Platform.select({ ios: "padding", android: undefined })}
     >
       <SubHeader title="個人情報設定" onBack={() => router.back()} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -91,7 +91,7 @@ const ProfileScreen = () => {
               placeholder="UIDの編集可能部分"
               placeholderTextColor="#999"
             />
-            {fixedUidPart !== '' && (
+            {fixedUidPart !== "" && (
               <Text style={styles.fixedText}>{fixedUidPart}</Text>
             )}
           </View>
@@ -104,32 +104,39 @@ const ProfileScreen = () => {
             placeholder="ユーザー名を入力"
             placeholderTextColor="#999"
           />
-          
+
           {/* プロフィール画像が取得できたら表示 */}
-          <Text style={{
-            textAlign: 'center',
-            alignSelf: 'center',
-            marginTop: 20,
-            fontSize: 14,
-            color: '#555'
-          }}>
-            ※アイコンの画像の変更内容の反映には{'\n'}時間がかかることがあります
+          <Text
+            style={{
+              textAlign: "center",
+              alignSelf: "center",
+              marginTop: 20,
+              fontSize: 14,
+              color: "#555",
+            }}
+          >
+            ※アイコンの画像の変更内容の反映には{"\n"}時間がかかることがあります
           </Text>
           {profileImageUri ? (
-            <Image source={{ uri: profileImageUri }} style={styles.profileImage} />
+            <Image
+              source={{ uri: profileImageUri }}
+              style={styles.profileImage}
+            />
           ) : (
             <View style={styles.profileImagePlaceholder}>
               <Text style={styles.profileImageText}>アイコン画像なし</Text>
             </View>
           )}
-          
+
           <TouchableOpacity
             style={styles.iconEditButton}
-            onPress={() => router.push('./photoCamera')}
+            onPress={() => router.push("./photoCamera")}
           >
-            <Text style={styles.iconEditButtonText}>アイコン画像を変更する</Text>
+            <Text style={styles.iconEditButtonText}>
+              アイコン画像を変更する
+            </Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
             <Text style={styles.saveButtonText}>編集内容を保存する</Text>
           </TouchableOpacity>
@@ -150,100 +157,100 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    alignSelf: 'center',
+    alignSelf: "center",
     marginVertical: 24,
     borderWidth: 3,
-    borderColor: '#ddd',
-    backgroundColor: '#eee',
+    borderColor: "#ddd",
+    backgroundColor: "#eee",
   },
   profileImagePlaceholder: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    alignSelf: 'center',
+    alignSelf: "center",
     marginVertical: 24,
     borderWidth: 3,
-    borderColor: '#ddd',
-    backgroundColor: '#eee',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderColor: "#ddd",
+    backgroundColor: "#eee",
+    justifyContent: "center",
+    alignItems: "center",
   },
   profileImageText: {
-    color: '#aaa',
+    color: "#aaa",
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
   },
   iconEditButton: {
     marginTop: 20,
-    backgroundColor: '#4CAF50',
+    backgroundColor: "#4CAF50",
     paddingVertical: 12,
     borderRadius: 10,
-    alignItems: 'center',
-    shadowColor: '#4CAF50',
+    alignItems: "center",
+    shadowColor: "#4CAF50",
     shadowOpacity: 0.2,
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 6,
     elevation: 2,
   },
   iconEditButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   container: {
     flex: 1,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: "#f2f2f2",
   },
   content: {
     padding: 24,
   },
   label: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginTop: 24,
-    color: '#333',
+    color: "#333",
   },
   subLabel: {
     fontSize: 12,
-    color: '#888',
+    color: "#888",
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 10,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     fontSize: 16,
     elevation: 1,
   },
   uidRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   fixedText: {
     fontSize: 16,
-    color: '#888',
-    fontStyle: 'italic',
+    color: "#888",
+    fontStyle: "italic",
     marginLeft: 8,
   },
   saveButton: {
     marginTop: 40,
-    backgroundColor: '#2196f3',
+    backgroundColor: "#2196f3",
     paddingVertical: 14,
     borderRadius: 10,
-    alignItems: 'center',
-    shadowColor: '#2196f3',
+    alignItems: "center",
+    shadowColor: "#2196f3",
     shadowOpacity: 0.3,
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 6,
     elevation: 3,
   },
   saveButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

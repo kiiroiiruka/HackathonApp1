@@ -1,5 +1,5 @@
-import { Stack } from 'expo-router';
-import { Text, View, StyleSheet } from 'react-native';
+import { Stack } from "expo-router";
+import { Text, View, StyleSheet } from "react-native";
 
 const Layout = () => {
   return (
@@ -7,7 +7,7 @@ const Layout = () => {
       {/* Stackでラップしているのでページ遷移はここから行います */}
       <Stack>
         {/* 他のページへのリンクが必要なら、Stack.Screenで定義できます */}
-        <Stack.Screen name="index" options={{ headerShown:false }} />
+        <Stack.Screen name="index" options={{ headerShown: false }} />
       </Stack>
     </View>
   );

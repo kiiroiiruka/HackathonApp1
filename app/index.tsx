@@ -6,14 +6,14 @@ import { getStudentIdByEmail } from "@/firebase/get/studentNumberAcquisition";
 import { studentIdAtom } from "@/atom/studentIdAtom";
 import { useAtom } from "jotai";
 import { fetchFriendsFromStudentIdArray } from "@/firebase/get/friendInfoAcquisition";
-import { mailAddressAtom } from "@/atom/mailAddressAtom"; 
+import { mailAddressAtom } from "@/atom/mailAddressAtom";
 import { errorFlagAtom } from "@/atom/flag/errorFlag";
 import { fetchUserInfoAndSetbyEmail } from "@/firebase/fetch/meDataset";
 const AuthGate = () => {
   const router = useRouter();
-  const [,setStudentId]=useAtom(studentIdAtom)
-  const [,setMail]=useAtom(mailAddressAtom)
-  const [,errorFlag]=useAtom(errorFlagAtom)
+  const [, setStudentId] = useAtom(studentIdAtom);
+  const [, setMail] = useAtom(mailAddressAtom);
+  const [, errorFlag] = useAtom(errorFlagAtom);
 
   const [loadingMessage, setLoadingMessage] = useState<string>("ようこそ!");
   useEffect(() => {
@@ -34,30 +34,37 @@ const AuthGate = () => {
           // React Native（iOS/Android）
           storedEmail = await AsyncStorage.getItem("email");
           storedPassword = await AsyncStorage.getItem("password");
-          console.log("ローカルストレージ内に入っているメールアドレスは", storedEmail);
-          console.log("ローカルstorage内に入っているパスワードは", storedPassword);
+          console.log(
+            "ローカルストレージ内に入っているメールアドレスは",
+            storedEmail,
+          );
+          console.log(
+            "ローカルstorage内に入っているパスワードは",
+            storedPassword,
+          );
         }
-        
+
         if (storedEmail && storedPassword) {
           //ここでメールアドレスを引数的に受け取って、返り値でそのメールアドレスに対応する学籍番号を返す関数を起動
-          
+
           //ーーー↓メールアドレスの情報を基に自分の学籍番号をフロントにセット↓ーーー
           const studentId = await getStudentIdByEmail(storedEmail);
-          if(studentId===false)errorFlag(false)//通信エラー
-          else setStudentId(studentId)//データのセット
+          if (studentId === false)
+            errorFlag(false); //通信エラー
+          else setStudentId(studentId); //データのセット
           //ーーー↑メールアドレスの情報を基に自分の学籍番号をフロントにセット↑ーーー
-          
+
           //ーーー↓自分が友達に設定しているuserの情報をフロントにセット↓ーーー
-          const flag=await fetchFriendsFromStudentIdArray(storedEmail);//ここでFriendでつながっている友達の情報をフロントにセットさせる
-          if(flag===false)errorFlag(false)//通信エラー
+          const flag = await fetchFriendsFromStudentIdArray(storedEmail); //ここでFriendでつながっている友達の情報をフロントにセットさせる
+          if (flag === false) errorFlag(false); //通信エラー
           //ーーー↑自分が友達に設定しているuserの情報をフロントにセット↑ーーー
-          
+
           //ーーー↓自分の位置情報の設定情報をフロントにセット↓ーーー
-          const flag2=await fetchUserInfoAndSetbyEmail(storedEmail)
-          if(flag2===false)errorFlag(false)//通信エラー
+          const flag2 = await fetchUserInfoAndSetbyEmail(storedEmail);
+          if (flag2 === false) errorFlag(false); //通信エラー
           //ーーー↑自分の位置情報の設定情報をフロントにセット↑ーーー
 
-          setMail(storedEmail)//メールアドレスフロントにセット
+          setMail(storedEmail); //メールアドレスフロントにセット
           console.log("取得した学籍番号:", studentId);
           // ホームへ遷移（履歴を置き換える）
           router.replace("./(main)"); // 修正: これが適切なパスの形式か確認
@@ -101,7 +108,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     textAlign: "center",
   },
-  
 });
 
 export default AuthGate;

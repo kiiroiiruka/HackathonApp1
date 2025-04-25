@@ -1,6 +1,6 @@
-import { realtimeDb } from '@/firebase/firebaseConfig'; // FirebaseのRealtime Databaseをインポート
-import { ref, get } from 'firebase/database';
-import { getKeybyStudentId } from '@/firebase/fetch/meDataset'; // 必要な関数をインポート
+import { realtimeDb } from "@/firebase/firebaseConfig"; // FirebaseのRealtime Databaseをインポート
+import { ref, get } from "firebase/database";
+import { getKeybyStudentId } from "@/firebase/fetch/meDataset"; // 必要な関数をインポート
 
 type Chatroom = {
   id: string; // チャットルームのID
@@ -10,25 +10,25 @@ type Chatroom = {
 
 const getAllChatrooms = async () => {
   try {
-    const chatroomsRef = ref(realtimeDb, 'chat'); // "chatrooms"ノードを参照
+    const chatroomsRef = ref(realtimeDb, "chat"); // "chatrooms"ノードを参照
 
     const snapshot = await get(chatroomsRef); // 全データを取得
-    console.log('取得したスナップショット:', snapshot); // デバッグ用にログ出力
+    console.log("取得したスナップショット:", snapshot); // デバッグ用にログ出力
     if (snapshot.exists()) {
       return snapshot.val(); // すべてのチャットルームデータを返す
     } else {
-      console.log('チャットルームが存在しません。');
+      console.log("チャットルームが存在しません。");
       return null;
     }
   } catch (error) {
-    console.error('チャットルームの取得中にエラーが発生しました:', error);
+    console.error("チャットルームの取得中にエラーが発生しました:", error);
     throw error;
   }
 };
 
 export const getChatroomByPersons = async (
   studentIdA: string,
-  studentIdB: string
+  studentIdB: string,
 ): Promise<Chatroom | null> => {
   try {
     // Firestoreからユーザー情報を取得
@@ -36,14 +36,14 @@ export const getChatroomByPersons = async (
     const userBId = await getKeybyStudentId(studentIdB);
 
     if (!userAId || !userBId) {
-      console.error('ユーザー情報が見つかりませんでした。');
+      console.error("ユーザー情報が見つかりませんでした。");
       return null;
     }
 
-    console.log('取得したユーザー情報:', { userAId, userBId });
+    console.log("取得したユーザー情報:", { userAId, userBId });
 
     const chatrooms = await getAllChatrooms(); // すべてのチャットルームを取得
-    console.log('取得したチャットルーム:', chatrooms); // デバッグ用にログ出力
+    console.log("取得したチャットルーム:", chatrooms); // デバッグ用にログ出力
 
     if (chatrooms) {
       // 条件に一致するチャットルームを検索
@@ -57,18 +57,18 @@ export const getChatroomByPersons = async (
       });
 
       if (matchingRoom) {
-        console.log('条件に一致するチャットルーム:', matchingRoom);
+        console.log("条件に一致するチャットルーム:", matchingRoom);
         return matchingRoom as Chatroom; // 型アサーションを使用
       } else {
-        console.log('条件に一致するチャットルームが見つかりませんでした。');
+        console.log("条件に一致するチャットルームが見つかりませんでした。");
         return null;
       }
     } else {
-      console.log('チャットルームが存在しません。');
+      console.log("チャットルームが存在しません。");
       return null;
     }
   } catch (error) {
-    console.error('条件検索中にエラーが発生しました:', error);
+    console.error("条件検索中にエラーが発生しました:", error);
     throw error;
   }
 };

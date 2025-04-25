@@ -3,7 +3,7 @@ import { db } from "../firebaseConfig";
 
 // 学籍番号の末尾を更新する関数
 export const updateFriendsWithNewStudentId = async (
-  newStudentId: string // 新しい学籍番号
+  newStudentId: string, // 新しい学籍番号
 ) => {
   try {
     const usersRef = collection(db, "users");
@@ -16,9 +16,10 @@ export const updateFriendsWithNewStudentId = async (
 
     // ✅ 最後の "--" より後ろの文字列を取得
     const lastDoubleHyphenIndex = newStudentId.lastIndexOf("--");
-    const newUidSuffix = lastDoubleHyphenIndex !== -1
-      ? newStudentId.slice(lastDoubleHyphenIndex + 2)
-      : "";
+    const newUidSuffix =
+      lastDoubleHyphenIndex !== -1
+        ? newStudentId.slice(lastDoubleHyphenIndex + 2)
+        : "";
 
     snapshot.forEach(async (userDoc) => {
       const userData = userDoc.data();
@@ -28,20 +29,19 @@ export const updateFriendsWithNewStudentId = async (
       // ✅ friends の末尾部分と比較・更新
       const updatedFriends = userFriends.map((friendId: string) => {
         const friendHyphenIndex = friendId.lastIndexOf("--");
-        const friendSuffix = friendHyphenIndex !== -1 ? friendId.slice(friendHyphenIndex + 2) : "";
+        const friendSuffix =
+          friendHyphenIndex !== -1 ? friendId.slice(friendHyphenIndex + 2) : "";
 
         return friendSuffix === newUidSuffix ? newStudentId : friendId;
       });
 
       // ✅ studentId の末尾部分もチェック
       const userHyphenIndex = userStudentId.lastIndexOf("--");
-      const userStudentIdSuffix = userHyphenIndex !== -1
-        ? userStudentId.slice(userHyphenIndex + 2)
-        : "";
+      const userStudentIdSuffix =
+        userHyphenIndex !== -1 ? userStudentId.slice(userHyphenIndex + 2) : "";
 
-      const updatedStudentId = userStudentIdSuffix === newUidSuffix
-        ? newStudentId
-        : userStudentId;
+      const updatedStudentId =
+        userStudentIdSuffix === newUidSuffix ? newStudentId : userStudentId;
 
       // ✅ 更新が必要かチェック
       const updateData: any = {};

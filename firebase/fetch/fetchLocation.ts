@@ -1,8 +1,11 @@
 import { ref, set } from "firebase/database";
-import {realtimeDb} from "@/firebase/firebaseConfig";
-import * as Location from 'expo-location'; // expo-locationをインポート
-export const updateLocation=async function(userKey: string,location:Location.LocationObject) {
-    const coords=location.coords;
-    const locationRef = ref(realtimeDb, `locations/${userKey}`);
-    await set(locationRef,coords);
-}
+import { realtimeDb } from "@/firebase/firebaseConfig";
+import * as Location from "expo-location"; // expo-locationをインポート
+export const updateLocation = async function (
+  userKey: string,
+  location: Location.LocationObject,
+) {
+  const coords = location.coords;
+  const locationRef = ref(realtimeDb, `locations/${userKey}`);
+  await set(locationRef, coords);
+};

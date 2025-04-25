@@ -1,6 +1,6 @@
 module.exports = [
     {
-      ignores: ['dist'], // 無視するファイル・ディレクトリ
+        ignores: ['dist'], // 無視するファイル・ディレクトリ
     },
     {
         files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
@@ -19,24 +19,26 @@ module.exports = [
             react: require('eslint-plugin-react'),
             'react-native': require('eslint-plugin-react-native'),
         },
-        extends: [
-          'eslint:recommended',
-          'plugin:react/recommended',
-          'plugin:react-native/all',
-          'prettier',
-        ],
         settings: {
             react: {
                 version: 'detect', // Reactバージョンを自動検出
             },
         },
         rules: {
+            // ESLint推奨ルール
+            ...require('eslint/conf/eslint-recommended').rules,
+            // React推奨ルール
+            ...require('eslint-plugin-react/configs/recommended').rules,
+            // React Nativeルール
+            ...require('eslint-plugin-react-native/configs/all').rules,
+            // Prettierルール
+            'prettier/prettier': 'error',
+            // カスタムルール
             'prefer-const': 'error',
             'consistent-return': 'error',
             'prefer-template': 'error',
             'no-multiple-empty-lines': ['error', { max: 2 }],
             'no-mixed-spaces-and-tabs': 'error',
-            'prettier/prettier': 'error', // Prettierルールを適用
         },
     },
 ];

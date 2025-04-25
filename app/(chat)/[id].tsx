@@ -17,7 +17,7 @@ import { subscribeToChats } from "@/firebase/fetch/fetchChats";
 import { createChat } from "@/firebase/add/createChat";
 import SubHeader from "@/components/ui/header/SubScreenHeader";
 import { getUserInfoByDocId } from "@/firebase/get/getChatIcon";
-import { setReadCount } from "@/firebase/chatReadTime/updateAccessTime";
+
 import { isShisaInRoom } from "@/firebase/get/IsShisa";
 type Message = {
   id: string;
@@ -78,8 +78,6 @@ const ChatRoom = () => {
       if (Array.isArray(chats)) {
         const sortedChats = chats.sort((a, b) => a.createdAt - b.createdAt);
         setMessages(sortedChats);
-        console.log("リアルタイムofリアルタイム取得:", sortedChats);
-        await setReadCount(userInfo.key, id, sortedChats.length);
       } else {
         console.error("chatsが配列ではありません:", chats);
       }
@@ -123,8 +121,6 @@ const ChatRoom = () => {
           { id: result.messageId, ...newMessage },
         ];
         setInput("");
-
-        await setReadCount(userInfo.key, id as string, newMessages.length);
       } else {
         console.error("メッセージ送信エラー:", result.error);
       }

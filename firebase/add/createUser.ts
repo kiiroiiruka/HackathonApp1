@@ -27,6 +27,7 @@ export const createUser = async (
       status: "活動中", // 「どの時間帯まで暇か」を示す文字列（初期は「活動中」）
       message: "",
       profileImageUri: "", // 新しく画像URIを追加
+      imagePublicId: "", //画像データを削除するために必要なパブリックID
       friendOnlyOrEveryone: false, // 表示を許可する相手(自分が友達として追加している相手だけからだけか、全員か)
       createdAt: serverTimestamp(), // サーバータイムスタンプ
     });

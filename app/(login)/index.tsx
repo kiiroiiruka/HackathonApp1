@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router"; // expo-routerを使って遷移
 import AsyncStorage from "@react-native-async-storage/async-storage"; // ローカルストレージを使う
-import { signInWithEmailAndPassword, updateEmail } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase/firebaseConfig"; // ← あなたのパスに合わせてね
 import { getStudentIdByEmail } from "@/firebase/get/studentNumberAcquisition";
 import { studentIdAtom } from "@/atom/studentIdAtom";

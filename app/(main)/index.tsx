@@ -135,6 +135,7 @@ const MainScreen: React.FC = () => {
         contentContainerStyle={styles.listContent}
       />
 
+      {/*}
       <View style={{ padding: 5 }}>
         {errorMsg ? (
           <Text style={{ color: "red" }}>{errorMsg}</Text>
@@ -146,7 +147,7 @@ const MainScreen: React.FC = () => {
           <Text>位置情報を取得中...</Text>
         )}
       </View>
-
+      */}
       {/* 🔽 フッターボタン配置 */}
       <View style={styles.footer}>
         <TouchableOpacity

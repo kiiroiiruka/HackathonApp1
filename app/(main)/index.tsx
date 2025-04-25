@@ -15,21 +15,28 @@ import SelectTab from '@/components/ui/selectionUi/SelectTab';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons'; // ← アイコン追加！
 import { fetchFriendsFromStudentIdArray } from '@/firebase/get/friendInfoAcquisition';
-import { useFocusEffect } from'expo-router'//expo-routerを活用している場合はこっちをimportすればOK
-import { useCallback } from 'react'
+import { useFocusEffect } from 'expo-router'; //expo-routerを活用している場合はこっちをimportすればOK
+import { useCallback } from 'react';
 import { useAtom } from 'jotai';
+import { useMeInfoStore } from '@/store/meData';
 import { mailAddressAtom } from '@/atom/mailAddressAtom';
 import { ActivityIndicator } from 'react-native';
 import { errorFlagAtom } from '@/atom/flag/errorFlag';
+import * as Location from 'expo-location'; // expo-locationをインポート
+import { updateLocation } from '@/firebase/fetch/fetchLocation'; // 位置情報をFirebaseに送信する関数をインポート
+import {myLocationAtom }from "@/atom/locationAtom"; // 位置情報を管理するatomをインポート
 const MainScreen: React.FC = () => {
   const users = useFriendUserStore((state) => state.users);
+  const userInfo = useMeInfoStore((state) => state.userInfo);
   // 🔽 ここで選択状態を管理（デフォルトは「友達」）
   const [selectedTab, setSelectedTab] = useState<string>('友達');
-  const [mail,]=useAtom(mailAddressAtom)
+  const [myLocation,setmyLocation]=useAtom(myLocationAtom);
+  const [mail] = useAtom(mailAddressAtom);
   const [loading, setLoading] = useState(false);
-  const [,errorFlag]=useAtom(errorFlagAtom)
-  const router=useRouter()
-  
+  const [, errorFlag] = useAtom(errorFlagAtom);
+  const router = useRouter();
+  const [errorMsg, setErrorMsg] = useState<string | null>(null); // エラーメッセージの状態管理
+
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
@@ -37,6 +44,22 @@ const MainScreen: React.FC = () => {
           const flag = await fetchFriendsFromStudentIdArray(mail);
           if (flag === false) errorFlag(false);
         }
+
+        // 位置情報の取得
+        const getLocation = async () => {
+          let { status } = await Location.requestForegroundPermissionsAsync();
+          if (status !== 'granted') {
+            setErrorMsg('位置情報のアクセスが許可されていません');
+            return;
+          }
+          const currentLocation = await Location.getCurrentPositionAsync({accuracy: Location.Accuracy.BestForNavigation});
+          console.log("gpsのねで",currentLocation.coords);
+          const cor=currentLocation.coords
+          setmyLocation({accuracy:cor.accuracy ??0,latitude:cor.latitude,longitude:cor.longitude});
+          updateLocation(userInfo.key,currentLocation);
+        };
+
+        await getLocation(); // 位置情報取得関数を呼び出し
       };
       fetchData(); // 非同期関数を即時呼び出し
       return () => {
@@ -58,14 +81,14 @@ const MainScreen: React.FC = () => {
           />
           <TouchableOpacity
             onPress={async () => {
-              setLoading(true);  // ローディング開始
-              
-                //ーーー↓自分が友達に設定しているuserの情報をフロントにセット↓ーーー
-                const flag=await fetchFriendsFromStudentIdArray(mail); // データ取得
-                if(flag===false)errorFlag(false);//通信エラー
-                console.log(users)
-                //ーーー↑自分が友達に設定しているuserの情報をフロントにセット↑ーーー
-              
+              setLoading(true); // ローディング開始
+
+              //ーーー↓自分が友達に設定しているuserの情報をフロントにセット↓ーーー
+              const flag = await fetchFriendsFromStudentIdArray(mail); // データ取得
+              if (flag === false) errorFlag(false); //通信エラー
+              console.log(users);
+              //ーーー↑自分が友達に設定しているuserの情報をフロントにセット↑ーーー
+
               setTimeout(() => setLoading(false), 1000); // 1秒後に解除
             }}
             disabled={loading}
@@ -80,7 +103,6 @@ const MainScreen: React.FC = () => {
               <Text style={styles.reloadText}>リロードする</Text>
             )}
           </TouchableOpacity>
-          
         </View>
       </Header>
 
@@ -103,11 +125,25 @@ const MainScreen: React.FC = () => {
         )}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>条件に当てはまるユーザーが存在しません</Text>
+            <Text style={styles.emptyText}>
+              条件に当てはまるユーザーが存在しません
+            </Text>
           </View>
         }
         contentContainerStyle={styles.listContent}
       />
+
+      <View style={{ padding: 10 }}>
+        {errorMsg ? (
+          <Text style={{ color: 'red' }}>{errorMsg}</Text>
+        ) : location ? (
+          <Text>
+            現在地: 緯度 {myLocation.latitude}, 経度 {myLocation.longitude}
+          </Text>
+        ) : (
+          <Text>位置情報を取得中...</Text>
+        )}
+      </View>
 
       {/* 🔽 フッターボタン配置 */}
       <View style={styles.footer}>
@@ -115,21 +151,36 @@ const MainScreen: React.FC = () => {
           style={styles.settingsButtonSmall}
           onPress={() => router.push('./(setting)')}
         >
-          <Ionicons name="settings-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
+          <Ionicons
+            name="settings-outline"
+            size={16}
+            color="#fff"
+            style={{ marginRight: 6 }}
+          />
           <Text style={styles.settingsButtonTextSmall}>暇情報設定</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.settingsButtonSmall}
           onPress={() => router.push('./(openchat)')}
         >
-         <Ionicons name="chatbubble-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
+          <Ionicons
+            name="chatbubble-outline"
+            size={16}
+            color="#fff"
+            style={{ marginRight: 6 }}
+          />
           <Text style={styles.settingsButtonTextSmall}>全体チャット</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.settingsButtonSmall}
           onPress={() => router.push('./(addFriend)')}
         >
-          <Ionicons name="person-add-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
+          <Ionicons
+            name="person-add-outline"
+            size={16}
+            color="#fff"
+            style={{ marginRight: 6 }}
+          />
           <Text style={styles.settingsButtonTextSmall}>友達追加</Text>
         </TouchableOpacity>
       </View>
@@ -187,7 +238,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 3,
   },
-  
+
   settingsButtonTextSmall: {
     color: '#fff',
     fontWeight: '500',

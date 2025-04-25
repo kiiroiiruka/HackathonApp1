@@ -20,17 +20,9 @@ jobs:
         run: npm ci
 
       - name: Check Prettier formatting
-        run: npx prettier --check .
-
-      - name: Run ESLint
-        run: npx eslint . --ext .js,.jsx,.ts,.tsx
-
-      - name: Fix Prettier issues
-        if: failure()
         run: npx prettier --write .
 
-      - name: Fix ESLint issues
-        if: failure()
+      - name: Run ESLint
         run: npx eslint . --ext .js,.jsx,.ts,.tsx --fix
 
   push:

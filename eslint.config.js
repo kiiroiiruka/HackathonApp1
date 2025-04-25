@@ -1,3 +1,5 @@
+const tsParser = require('@typescript-eslint/parser');
+
 module.exports = [
     {
         ignores: ['dist'], // 無視するファイル・ディレクトリ
@@ -7,7 +9,7 @@ module.exports = [
         languageOptions: {
             ecmaVersion: 2021,
             sourceType: 'module',
-            parser: '@typescript-eslint/parser',
+            parser: tsParser, // 修正: パーサーを正しい形式で指定
             globals: {
                 browser: true,
                 node: true,

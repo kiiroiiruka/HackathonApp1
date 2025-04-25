@@ -90,24 +90,28 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
 
   useEffect(() => {
     const fetchDistance = async () => {
-      try {
-        const location = await getlocationbyStdudentId(studentId);
-        const dict = haversine(
-          location.latitude,
-          location.longitude,
-          myLocation.latitude,
-          myLocation.longitude,
-        );
-        const distanceText =
-          dict >= 1 ? `${dict.toFixed(2)} km` : `${(dict * 1000).toFixed(0)} m`;
-        setDistanse(distanceText);
-      } catch (error) {
-        console.error("位置情報取得エラー:", error);
-        setDistanse("エラー");
-      }
+      // 1秒待機してから処理を実行
+      setTimeout(async () => {
+        try {
+          const location = await getlocationbyStdudentId(studentId);
+          const dict = haversine(
+            location.latitude,
+            location.longitude,
+            myLocation.latitude,
+            myLocation.longitude,
+          );
+          const distanceText =
+            dict >= 1 ? `${dict.toFixed(2)} km` : `${(dict * 1000).toFixed(0)} m`;
+          setDistanse(distanceText);
+        } catch (error) {
+          console.error("位置情報取得エラー:", error);
+          setDistanse("エラー");
+        }
+      }, 500); // 1000ミリ秒（1秒）遅延
     };
+
     fetchDistance();
-  }, [studentId]);
+  }, [studentId, myLocation]);
 
   // アクセス確認中はスケルトンやローディング中などを表示したいなら以下で制御
   if (canView === null) {
@@ -251,7 +255,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
   },
-
   chatIcon: {
     fontSize: 16,
     color: "#fff",
@@ -330,7 +333,7 @@ const styles = StyleSheet.create({
   },
   highlightBox: {
     backgroundColor: "#e1f4ff",
-    paddingVertical: 6,
+    paddingVertical: 3,
     paddingHorizontal: 12,
     borderRadius: 8,
     marginBottom: 8,

@@ -92,7 +92,6 @@ const MainScreen: React.FC = () => {
               if (flag === false) errorFlag(false); //通信エラー
               console.log(users);
               //ーーー↑自分が友達に設定しているuserの情報をフロントにセット↑ーーー
-
               setTimeout(() => setLoading(false), 1000); // 1秒後に解除
             }}
             disabled={loading}
@@ -109,7 +108,6 @@ const MainScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
       </Header>
-
       {/* 🔽 選択状態に応じて表示を切り替えることもできる（任意） */}
       <FlatList
         data={
@@ -137,7 +135,7 @@ const MainScreen: React.FC = () => {
         contentContainerStyle={styles.listContent}
       />
 
-      <View style={{ padding: 10 }}>
+      <View style={{ padding: 5 }}>
         {errorMsg ? (
           <Text style={{ color: "red" }}>{errorMsg}</Text>
         ) : location ? (

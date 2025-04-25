@@ -1,11 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   Animated,
-} from 'react-native';
+} from "react-native";
 
 type Props = {
   options: string[];
@@ -14,7 +14,9 @@ type Props = {
 };
 
 const SelectTab: React.FC<Props> = ({ options, selected, setSelected }) => {
-  const animatedValues = useRef(options.map(() => new Animated.Value(0))).current;
+  const animatedValues = useRef(
+    options.map(() => new Animated.Value(0)),
+  ).current;
 
   useEffect(() => {
     const selectedIndex = options.indexOf(selected);
@@ -36,12 +38,12 @@ const SelectTab: React.FC<Props> = ({ options, selected, setSelected }) => {
 
         const bgColor = animatedValues[index].interpolate({
           inputRange: [0, 1],
-          outputRange: ['#E8F5E9', '#2ECC71'],
+          outputRange: ["#E8F5E9", "#2ECC71"],
         });
 
         const textColor = animatedValues[index].interpolate({
           inputRange: [0, 1],
-          outputRange: ['#2ECC71', '#fff'],
+          outputRange: ["#2ECC71", "#fff"],
         });
 
         const scale = animatedValues[index].interpolate({
@@ -69,7 +71,7 @@ const SelectTab: React.FC<Props> = ({ options, selected, setSelected }) => {
                 {
                   backgroundColor: bgColor,
                   transform: [{ scale }],
-                  alignSelf: 'center',
+                  alignSelf: "center",
                   borderWidth: borderWidth, // borderWidth のアニメーションを追加
                 },
               ]}
@@ -79,7 +81,7 @@ const SelectTab: React.FC<Props> = ({ options, selected, setSelected }) => {
                   styles.tabText,
                   {
                     color: textColor,
-                    fontWeight: selected === option ? 'bold' : 'normal',
+                    fontWeight: selected === option ? "bold" : "normal",
                   },
                 ]}
               >
@@ -95,18 +97,18 @@ const SelectTab: React.FC<Props> = ({ options, selected, setSelected }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    overflow: 'hidden',
+    flexDirection: "row",
+    justifyContent: "center",
+    overflow: "hidden",
     marginHorizontal: 16,
     marginBottom: 8,
   },
   tab: {
     paddingVertical: 6,
     paddingHorizontal: 12,
-    borderColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderColor: "#000",
+    justifyContent: "center",
+    alignItems: "center",
     borderRadius: 8,
     marginHorizontal: 4,
   },
@@ -120,7 +122,7 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 12,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });
 

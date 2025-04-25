@@ -1,11 +1,19 @@
-import { collection, query, where, getDocs, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
 // 自分の友達リストを更新する関数
 export const updateFriendsOfUser = async (
-  myStudentId: string,        // 自分の学籍番号
-  targetStudentId: string,    // 追加・削除したい友達の学籍番号
-  shouldAdd: boolean          // trueなら追加、falseなら削除
+  myStudentId: string, // 自分の学籍番号
+  targetStudentId: string, // 追加・削除したい友達の学籍番号
+  shouldAdd: boolean, // trueなら追加、falseなら削除
 ) => {
   try {
     // ユーザーコレクションの参照
@@ -26,13 +34,15 @@ export const updateFriendsOfUser = async (
 
     // 自分のfriends配列を更新
     await updateDoc(userDoc.ref, {
-      friends: shouldAdd ? arrayUnion(targetStudentId) : arrayRemove(targetStudentId),
+      friends: shouldAdd
+        ? arrayUnion(targetStudentId)
+        : arrayRemove(targetStudentId),
     });
 
     console.log(`友達リストが${shouldAdd ? "追加" : "削除"}されました。`);
-    return true
+    return true;
   } catch (error) {
     console.error("friends 更新エラー:", error);
-    return false
+    return false;
   }
 };

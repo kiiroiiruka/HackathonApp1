@@ -6,7 +6,9 @@ import { db } from "../firebaseConfig";
  * @param studentId - 対象ユーザーの学籍番号
  * @returns そのユーザーの friends 配列（なければ空配列）
  */
-export const getFriendsByStudentId = async (studentId: string): Promise<string[]|false> => {
+export const getFriendsByStudentId = async (
+  studentId: string,
+): Promise<string[] | false> => {
   try {
     const usersRef = collection(db, "users");
     const q = query(usersRef, where("studentId", "==", studentId));
@@ -26,9 +28,8 @@ export const getFriendsByStudentId = async (studentId: string): Promise<string[]
     } else {
       return [];
     }
-    
   } catch (error) {
     console.error("friends リストの取得中にエラーが発生しました:", error);
-    return false
+    return false;
   }
 };

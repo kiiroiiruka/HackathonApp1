@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,15 +10,15 @@ import {
   Platform,
   Image,
   ActivityIndicator,
-} from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useMeInfoStore } from '@/store/meData';
-import { subscribeToChats } from '@/firebase/fetch/fetchChats';
-import { createChat } from '@/firebase/add/createChat';
-import SubHeader from '@/components/ui/header/SubScreenHeader';
-import { getUserInfoByDocId } from '@/firebase/get/getChatIcon';
-import { setReadCount } from '@/firebase/chatReadTime/updateAccessTime';
-import { isShisaInRoom} from '@/firebase/get/IsShisa';
+} from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useMeInfoStore } from "@/store/meData";
+import { subscribeToChats } from "@/firebase/fetch/fetchChats";
+import { createChat } from "@/firebase/add/createChat";
+import SubHeader from "@/components/ui/header/SubScreenHeader";
+import { getUserInfoByDocId } from "@/firebase/get/getChatIcon";
+
+import { isShisaInRoom } from "@/firebase/get/IsShisa";
 type Message = {
   id: string;
   createdBy: string;
@@ -29,21 +29,23 @@ type Message = {
 const ChatRoom = () => {
   const { id } = useLocalSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const userInfo = useMeInfoStore((state) => state.userInfo);
   const router = useRouter();
   const [usernames, setUsernames] = useState<{ [key: string]: string }>({});
-  const [profileImages, setProfileImages] = useState<{ [key: string]: string }>({});
+  const [profileImages, setProfileImages] = useState<{ [key: string]: string }>(
+    {},
+  );
   const [showTypingIndicator, setShowTypingIndicator] = useState(false);
-  const isshasa = typeof id === 'string' ? isShisaInRoom(id) : false;
+  const isshasa = typeof id === "string" ? isShisaInRoom(id) : false;
 
   useEffect(() => {
-    console.log('mmmmmmmmm:',messages);
+    console.log("mmmmmmmmm:", messages);
     const fetchUsernames = async () => {
-      const uniqueIds = [...new Set(messages.map(msg => msg.createdBy))];
+      const uniqueIds = [...new Set(messages.map((msg) => msg.createdBy))];
       const nameMap: { [key: string]: string } = { ...usernames };
       const imageMap: { [key: string]: string } = { ...profileImages };
-  
+
       await Promise.all(
         uniqueIds.map(async (id) => {
           if (!nameMap[id]) {
@@ -55,34 +57,32 @@ const ChatRoom = () => {
               imageMap[id] = user.profileImageUri;
             }
           }
-        })
+        }),
       );
       setUsernames(nameMap);
       setProfileImages(imageMap);
     };
-  
+
     if (messages.length > 0) {
       fetchUsernames();
     }
   }, [messages]);
 
   useEffect(() => {
-    if (!id || typeof id !== 'string') {
-      console.error('チャットルームIDが無効です。');
+    if (!id || typeof id !== "string") {
+      console.error("チャットルームIDが無効です。");
       return;
     }
-  
+
     const unsubscribe = subscribeToChats(id, async (chats) => {
       if (Array.isArray(chats)) {
         const sortedChats = chats.sort((a, b) => a.createdAt - b.createdAt);
         setMessages(sortedChats);
-        console.log('リアルタイムofリアルタイム取得:', sortedChats);
-        await setReadCount(userInfo.key, id, sortedChats.length);
       } else {
-        console.error('chatsが配列ではありません:', chats);
+        console.error("chatsが配列ではありません:", chats);
       }
     });
-  
+
     return () => unsubscribe();
   }, [id]);
 
@@ -99,42 +99,47 @@ const ChatRoom = () => {
 
   const sendMessage = async () => {
     if (!input.trim()) {
-      console.error('メッセージが空です。');
+      console.error("メッセージが空です。");
       return;
     }
-  
+
     try {
       const newMessage = {
         createdBy: userInfo.key,
         text: input,
         createdAt: Date.now(),
       };
-  
-      const result = await createChat(newMessage.text, userInfo.key, id as string);
+
+      const result = await createChat(
+        newMessage.text,
+        userInfo.key,
+        id as string,
+      );
       if (result.success && result.messageId) {
-        const newMessages = [...messages, { id: result.messageId, ...newMessage }];
-        setInput('');
-  
-        await setReadCount(userInfo.key, id as string, newMessages.length);
+        const newMessages = [
+          ...messages,
+          { id: result.messageId, ...newMessage },
+        ];
+        setInput("");
       } else {
-        console.error('メッセージ送信エラー:', result.error);
+        console.error("メッセージ送信エラー:", result.error);
       }
     } catch (error) {
-      console.error('メッセージ送信中にエラーが発生しました:', error);
+      console.error("メッセージ送信中にエラーが発生しました:", error);
     }
   };
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <View style={styles.wrapper}>
         <SubHeader title="チャット" onBack={() => router.back()} />
 
         <FlatList
           data={messages}
-          extraData={messages} 
+          extraData={messages}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View
@@ -202,7 +207,11 @@ const ChatRoom = () => {
                 <View style={styles.messageHeader}>
                   {profileImages[messages[messages.length - 2]?.createdBy] ? (
                     <Image
-                      source={{ uri: profileImages[messages[messages.length - 2]?.createdBy] }}
+                      source={{
+                        uri: profileImages[
+                          messages[messages.length - 2]?.createdBy
+                        ],
+                      }}
                       style={styles.profileImage}
                     />
                   ) : (
@@ -213,7 +222,8 @@ const ChatRoom = () => {
                     </View>
                   )}
                   <Text style={styles.messageSender}>
-                    {usernames[messages[messages.length - 2]?.createdBy] ?? "相手"}
+                    {usernames[messages[messages.length - 2]?.createdBy] ??
+                      "相手"}
                   </Text>
                 </View>
                 <Text style={styles.typingText}>入力中...</Text>
@@ -247,17 +257,17 @@ const ChatRoom = () => {
 const styles = StyleSheet.create({
   profileImagePlaceholderText: {
     fontSize: 12,
-    color: '#888',
-    textAlign: 'center',
-    margin: "auto"
+    color: "#888",
+    textAlign: "center",
+    margin: "auto",
   },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   wrapper: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     paddingBottom: 80,
   },
   messageList: {
@@ -268,19 +278,19 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     marginBottom: 8,
-    maxWidth: '80%',
+    maxWidth: "80%",
   },
   myMessage: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#DCF8C6',
+    alignSelf: "flex-end",
+    backgroundColor: "#DCF8C6",
   },
   otherMessage: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#ECECEC',
+    alignSelf: "flex-start",
+    backgroundColor: "#ECECEC",
   },
   messageSender: {
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 4,
   },
   messageText: {
@@ -288,16 +298,16 @@ const styles = StyleSheet.create({
   },
   messageTimestamp: {
     fontSize: 10,
-    color: '#888',
+    color: "#888",
     marginTop: 4,
-    textAlign: 'right',
+    textAlign: "right",
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 10,
-    backgroundColor: '#18D7A3',
-    position: 'absolute',
+    backgroundColor: "#18D7A3",
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
@@ -306,28 +316,28 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 12,
     borderRadius: 25,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     fontSize: 16,
     marginRight: 10,
     elevation: 3,
     marginBottom: 20,
   },
   sendButton: {
-    backgroundColor: 'rgba(129, 132, 63, 0.76)',
+    backgroundColor: "rgba(129, 132, 63, 0.76)",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 25,
-    justifyContent: 'center',
+    justifyContent: "center",
     marginBottom: 20,
   },
   sendButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   messageHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   profileImage: {
     width: 30,
@@ -340,7 +350,7 @@ const styles = StyleSheet.create({
     height: 30,
     borderRadius: 15,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     marginRight: 10,
   },
   typingText: {

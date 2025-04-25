@@ -1,21 +1,27 @@
 //この中には自分のIDが相手のfriendsリスト内に入っている、かつ、相手が
-import { db } from '@/firebase/firebaseConfig';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from "@/firebase/firebaseConfig";
+import { collection, query, where, getDocs } from "firebase/firestore";
 
 /**
  * 自分の studentId が、相手の公開設定や友達リストに基づいて許可されているかを判定する関数
- * 
+ *
  * @param myStudentId 自分の学籍番号
  * @param targetStudentId 相手の学籍番号
  * @returns boolean（true: アクセス可能, false: アクセス不可）
  */
-export const canAccessUserData = async (myStudentId: string, targetStudentId: string): Promise<boolean> => {
+export const canAccessUserData = async (
+  myStudentId: string,
+  targetStudentId: string,
+): Promise<boolean> => {
   try {
-    const userQuery = query(collection(db, 'users'), where('studentId', '==', targetStudentId));
+    const userQuery = query(
+      collection(db, "users"),
+      where("studentId", "==", targetStudentId),
+    );
     const snapshot = await getDocs(userQuery);
 
     if (snapshot.empty) {
-      console.warn('対象ユーザーが見つかりませんでした');
+      console.warn("対象ユーザーが見つかりませんでした");
       return false;
     }
 
@@ -36,9 +42,8 @@ export const canAccessUserData = async (myStudentId: string, targetStudentId: st
 
     // どちらにも当てはまらない場合はアクセス不可
     return false;
-
   } catch (error) {
-    console.error('アクセス判定中にエラーが発生しました:', error);
+    console.error("アクセス判定中にエラーが発生しました:", error);
     return false;
   }
 };

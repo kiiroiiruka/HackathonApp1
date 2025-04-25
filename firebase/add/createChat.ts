@@ -1,13 +1,15 @@
-import { realtimeDb } from '@/firebase/firebaseConfig';
-import { getDatabase, ref, push, set,get } from "firebase/database";
-import {generateTextWithShisa } from '@/ai/Shisa'; // Shisaの生成関数をインポート
+import { realtimeDb } from "@/firebase/firebaseConfig";
+import { getDatabase, ref, push, set, get } from "firebase/database";
+import { generateTextWithShisa } from "@/ai/Shisa"; // Shisaの生成関数をインポート
 
-
-export const createChat= async (message: string, createdBy: string,room:string) => {
+export const createChat = async (
+  message: string,
+  createdBy: string,
+  room: string,
+) => {
   try {
     const openChatsRef = ref(realtimeDb, `chat/${room}/chats`); // ルームIDを使用して参照を取得
     console.log("openChatsRef:", openChatsRef); // デバッグ用にログ出力
-
 
     // 新しいメッセージを作成
     const newMessageRef = push(openChatsRef); // 一意のキーを生成
@@ -22,13 +24,13 @@ export const createChat= async (message: string, createdBy: string,room:string) 
     });
 
     console.log("メッセージが作成されました:", messageId);
-    
+
     // person配列にShisaが含まれているか確認
     if (await IsIncludeShisa(room)) {
       console.log("Shisaがルームに含まれています。特別な処理を実行します。");
-      let shisaMessege=await generateTextWithShisa(message); 
+      let shisaMessege = await generateTextWithShisa(message);
       if (shisaMessege === false) {
-        shisaMessege="Shisaのメッセージ応答に失敗しました。";
+        shisaMessege = "Shisaのメッセージ応答に失敗しました。";
       }
       const newMessageRefforAI = push(openChatsRef); // 一意のキーを生成
       const messageIdforAI = newMessageRefforAI.key; // 生成されたキーを取得
@@ -37,7 +39,7 @@ export const createChat= async (message: string, createdBy: string,room:string) 
       await set(newMessageRefforAI, {
         id: messageIdforAI,
         text: shisaMessege,
-        createdBy:"Shisa",
+        createdBy: "Shisa",
         createdAt: Date.now(),
       });
     }

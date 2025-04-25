@@ -7,6 +7,8 @@ import { createChatroom } from '@/firebase/add/createChatroom'; // チャット�
 import { studentIdAtom } from '@/atom/studentIdAtom'; // MyIdを管理するatomをインポート
 import { useEffect, useState } from 'react';
 import { getProfileImageUriByStudentId } from '@/firebase/get/getProfileImageUriByStudentId';
+import { getlocationbyStdudentId } from '@/firebase/get/getLocation'; // 学籍番号から位置情報を取得する関数をインポート
+import { myLocationAtom } from '@/atom/locationAtom';
 import {canAccessUserData} from '@/firebase/get/friendFiltering'; // ユーザーデータにアクセスできるか確認する関数をインポート
 type UserCardProps = {
   username: string;
@@ -15,6 +17,29 @@ type UserCardProps = {
   message: string;
   time: string;
 };
+// ハーサイン公式を実装した関数
+function toRadians(degrees: number): number {
+  return degrees * Math.PI / 180;
+}
+
+function haversine(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // 地球の半径（キロメートル）
+
+  // 緯度と経度をラジアンに変換
+  const φ1 = toRadians(lat1);
+  const φ2 = toRadians(lat2);
+  const Δφ = toRadians(lat2 - lat1);
+  const Δλ = toRadians(lon2 - lon1);
+
+  // ハーサイン公式を使用して距離を計算
+  const a = Math.sin(Δφ / 2) ** 2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  // 距離を返す（キロメートル）
+  return R * c;
+}
+
+
 
 const StateInCurrentFriend: React.FC<UserCardProps> = ({
   username,
@@ -23,8 +48,14 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
   message,
   time,
 }) => {
+<<<<<<< HEAD
+  const [myLocation,]  = useAtom(myLocationAtom); // jotaiから位置情報を取得
+  const router = useRouter(); // ルーターを使用してページ遷移
+  const [myId,] = useAtom(studentIdAtom); // jotaiからMyIdを取得
+=======
   const router = useRouter();
   const [myId] = useAtom(studentIdAtom);
+>>>>>>> main
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [canView, setCanView] = useState<boolean | null>(null); // 初期はnull
 
@@ -50,6 +81,27 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
     fetchImage();
   }, [studentId]);
 
+<<<<<<< HEAD
+  const [distanse, setDistanse] = useState<string>('不明');
+
+  useEffect(() => {
+    const fetchDistance = async () => {
+      try {
+        const location = await getlocationbyStdudentId(studentId);
+        const dict=haversine(location.latitude,location.longitude, myLocation.latitude, myLocation.longitude);
+        const distanceText = dict >= 1 ? `${dict.toFixed(2)} km` : `${(dict * 1000).toFixed(0)} m`;
+        setDistanse(distanceText);
+      } catch (error) {
+        console.error('位置情報取得エラー:', error);
+        setDistanse('エラー');
+      }
+    };
+    fetchDistance();
+  }, [studentId]);
+
+  const timeStyle = time === '活動中' ? styles.busyTime : styles.freeTime;
+=======
+>>>>>>> main
 
   // アクセス確認中はスケルトンやローディング中などを表示したいなら以下で制御
   if (canView === null) {
@@ -119,6 +171,10 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
             <Text style={[styles.highlightText, canView ? timeStyle : styles.emptyLocation]}>
               {canView ? (time.trim() === '' ? '未記入' : time) : '非表示'}
             </Text>
+          </View>
+          <View style={styles.highlightBox}>
+            <Text style={styles.highlightLabel}>📏 距離</Text>
+            <Text style={styles.highlightText}>{distanse}</Text>
           </View>
         </View>
       </View>

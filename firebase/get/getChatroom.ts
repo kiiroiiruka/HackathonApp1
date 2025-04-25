@@ -1,5 +1,5 @@
 import { realtimeDb } from '@/firebase/firebaseConfig'; // FirebaseのRealtime Databaseをインポート
-import { getDatabase, ref, get } from 'firebase/database';
+import { ref, get } from 'firebase/database';
 import { getKeybyStudentId } from '@/firebase/fetch/meDataset'; // 必要な関数をインポート
 
 type Chatroom = {
@@ -10,8 +10,7 @@ type Chatroom = {
 
 const getAllChatrooms = async () => {
   try {
-    const db = getDatabase(); // Realtime Databaseのインスタンスを取得
-    const chatroomsRef = ref(db, 'chat'); // "chatrooms"ノードを参照
+    const chatroomsRef = ref(realtimeDb, 'chat'); // "chatrooms"ノードを参照
 
     const snapshot = await get(chatroomsRef); // 全データを取得
     console.log('取得したスナップショット:', snapshot); // デバッグ用にログ出力

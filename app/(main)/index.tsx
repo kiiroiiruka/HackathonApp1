@@ -70,9 +70,15 @@ const MainScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+<<<<<<< HEAD
       <Header title="暇やつ探そうぜ？">
         <View style={{ margin: 'auto', flexDirection: 'row' }}>
           {/* 🔽 選択肢を SelectTab に渡す */}
+=======
+      <Header title="暇なやつ探そうぜ？">
+      <View style={{margin:"auto",flexDirection:"row"}}>
+        {/* 🔽 選択肢を SelectTab に渡す */}
+>>>>>>> main
 
           <SelectTab
             options={['友達', '暇な奴だけ']}

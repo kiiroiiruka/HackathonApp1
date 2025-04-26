@@ -12,7 +12,7 @@ import { useRouter } from "expo-router";
 import SubHeader from "@/components/ui/header/SubScreenHeader";
 import { mailAddressAtom } from "@/atom/mailAddressAtom";
 import { useAtom } from "jotai";
-import { updateProfileImageUriByEmail } from "@/firebase/update/imageSet";
+import { updateProfileImageAndPublicIdByEmail } from "@/firebase/update/imageSet";
 import * as ImagePicker from "expo-image-picker";
 
 export default function ImagePickerScreen() {
@@ -116,10 +116,12 @@ export default function ImagePickerScreen() {
 
       const result = await res.json();
       console.log("取得したURI", result);
+      const publicId = `media/pictures/${name}`;
 
       // 成功した場合
       if (result.secure_url) {
-        await updateProfileImageUriByEmail(mail, String(result.secure_url)); // Firestoreに画像URLを保存
+        console.log("アップロード成功")
+        await updateProfileImageAndPublicIdByEmail(mail, String(result.secure_url), publicId); // Firestoreに画像URLを保存
         if (Platform.OS !== "web") {
           // Web以外でのみアラートを表示
           Alert.alert(

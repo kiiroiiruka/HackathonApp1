@@ -21,8 +21,8 @@ const apiSecret = "ldgPpbMUFtwM02IaLaARhNY2Hks"; // ⚠️ここにSECRET書く�
 const endpoint = `https://api.cloudinary.com/v1_1/${cloudName}/image/destroy`;
 
 export async function deleteImage(url: string) {
-    const publicId = imageAplit(url); // 取得したURIからpublic_idを抽出 
-    console.log("start",publicId);
+    const publicId = url; // 取得したURIからpublic_idを抽出 
+    console.log("これが削除に活用するpublicIdです",publicId);
     const timestamp = Math.floor(Date.now() / 1000);
 
     // 1. シグネチャ（署名）を作る

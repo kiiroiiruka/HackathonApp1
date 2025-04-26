@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -38,6 +38,7 @@ const ChatRoom = () => {
   );
   const [showTypingIndicator, setShowTypingIndicator] = useState(false);
   const [isshasa, setIsshasa] = useState(false);
+  const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
     const checkIsShisa = async () => {
@@ -108,6 +109,15 @@ const ChatRoom = () => {
     }
   }, [messages, isshasa]);
 
+  useEffect(() => {
+    console.log("ssa",flatListRef)
+    if (messages.length > 0) {
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 300); // 100msくらい待つと描画が終わってることが多い
+    }
+  }, [messages]);
+
   const sendMessage = async () => {
     if (!input.trim()) {
       console.error("メッセージが空です。");
@@ -149,6 +159,7 @@ const ChatRoom = () => {
         <SubHeader title="チャット" onBack={() => router.back()} />
 
         <FlatList
+          ref={flatListRef}
           data={messages}
           extraData={messages}
           keyExtractor={(item) => item.id}

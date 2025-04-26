@@ -54,7 +54,7 @@ export const getKeybyStudentId = async (studentId: string) => {
     const data = userDoc.data();
     return userDoc.id; // ドキュメントIDをkeyとして使用
   } catch (error) {
-    console.error("ユーザー情報の取得に失敗しました:", error);
+    console.error("ユーザー情報の取得に失敗しましたget:", error);
     return false;
   }
 };

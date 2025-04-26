@@ -1,7 +1,15 @@
 import { db } from "@/firebase/firebaseConfig";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { useFriendUserStore } from "@/store/friendData";
-
+const ShisaInfo = {
+  uid: "Shisa",
+  username: "AIだよー",
+  location: "サーバ",
+  message: "hello",
+  time: "200",
+  profileImageUri:
+    "https://res.cloudinary.com/dy1ip2xgb/image/upload/v1745468781/media/pictures/images.jpg.jpg",
+};
 export const fetchFriendsFromStudentIdArray = async (email: string) => {
   try {
     // メールアドレスでユーザーを検索
@@ -22,8 +30,8 @@ export const fetchFriendsFromStudentIdArray = async (email: string) => {
     const friendStudentIds: string[] = userData.friends ?? [];
 
     if (friendStudentIds.length === 0) {
-      console.warn("friends配列が空です");
-      useFriendUserStore.getState().loadUsersFromData([]); // 空配列をZustandにセット
+      console.warn("友達がAiしかいません！！");
+      useFriendUserStore.getState().loadUsersFromData([ShisaInfo]); // 空配列をZustandにセット
       return;
     }
 
@@ -48,15 +56,7 @@ export const fetchFriendsFromStudentIdArray = async (email: string) => {
         };
       });
     // 恣意的な情報を追加
-    const ShisaInfo = {
-      uid: "Shisa",
-      username: "AIだよー",
-      location: "サーバ",
-      message: "hello",
-      time: "200",
-      profileImageUri:
-        "https://res.cloudinary.com/dy1ip2xgb/image/upload/v1745468781/media/pictures/images.jpg.jpg",
-    };
+
 
     // friendUsersに追加情報を付加
     friendUsers.push(ShisaInfo);

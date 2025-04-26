@@ -99,21 +99,23 @@ const ChatRoom = () => {
         const sortedChats = chats.sort((a, b) => a.createdAt - b.createdAt);
         setMessages(sortedChats);
         
-        const newScrole=(otherId:string) => {
-          const secondLastMessageId = messages[messages.length-2]?.id;
+        const newScrole=() => {
+          if(messages.length > 0){
+            const secondLastMessageId = messages[messages.length-2]?.id;
 
-          const isSecondLastVisible = viewableItems.some(
-            (item) => item.item.id === secondLastMessageId
-          );
+            const isSecondLastVisible = viewableItems.some(
+              (item) => item.item.id === secondLastMessageId
+            );
 
-          console.log("スクロール", isSecondLastVisible )
-          if (isSecondLastVisible && messages.length > 0) {
-            setTimeout(() => {
-              flatListRef.current?.scrollToEnd({ animated: true });
-            }, 800);
+            console.log("スクロール", isSecondLastVisible )
+            if (isSecondLastVisible) {
+              setTimeout(() => {
+                flatListRef.current?.scrollToEnd({ animated: true });
+              }, 800);
+            }
           }
         }
-        newScrole(sortedChats[sortedChats.length-1].id)
+        newScrole()
       } else {
         console.error("chatsが配列ではありません:", chats);
       }

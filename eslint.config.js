@@ -5,6 +5,11 @@ module.exports = [
     ignores: ["dist"], // 無視するファイル・ディレクトリ
   },
   {
+    env: {
+      browser: true, // ブラウザ環境を有効化
+      node: true, // Node.js環境を有効化
+      es2021: true,
+    },
     files: ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
     languageOptions: {
       ecmaVersion: 2021,
@@ -13,13 +18,9 @@ module.exports = [
       globals: {
         browser: true,
         node: true,
+        es2021: true, // ES2021のグローバル変数を有効化
         process: "readonly", // processをグローバルとして定義
         console: "readonly", // consoleをグローバルとして定義
-      },
-      env: {
-        browser: true, // ブラウザ環境を有効化
-        node: true, // Node.js環境を有効化
-        es2021: true, // ES2021のグローバル変数を有効化
       },
     },
     plugins: {

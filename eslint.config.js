@@ -13,6 +13,8 @@ module.exports = [
       globals: {
         browser: true,
         node: true,
+        process: "readonly", // processをグローバルとして定義
+        console: "readonly", // consoleをグローバルとして定義
       },
     },
     plugins: {
@@ -28,7 +30,7 @@ module.exports = [
     },
     rules: {
       // 必要なルールを手動で定義
-      "no-unused-vars": "warn",
+      "no-unused-vars": ["warn", { vars: "all", args: "none", ignoreRestSiblings: true }], // 未使用変数の警告を調整
       "no-undef": "error",
       "react/prop-types": "off",
       "react/react-in-jsx-scope": "off",

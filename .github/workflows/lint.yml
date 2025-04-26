@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -25,17 +27,6 @@ jobs:
       - name: Run ESLint
         run: npx eslint . --ext .js,.jsx,.ts,.tsx
 
-  push:
-    runs-on: ubuntu-latest
-    needs: lint
-    permissions:
-      contents: write # リポジトリへの書き込み権限を付与
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Push changes to Git
         run: |
           git config user.name "github-actions[bot]"
@@ -43,3 +34,4 @@ jobs:
           git add .
           git diff --cached --quiet || git commit -m "ci: auto format"
           git push
+

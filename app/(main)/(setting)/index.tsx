@@ -107,6 +107,7 @@ const SettingScreen: React.FC = () => {
             value={location}
             onChangeText={(text) => setLocation(text)}
             maxLength={10}
+            placeholderTextColor="#969696"
           />
           <TextInput
             style={styles.input}
@@ -114,6 +115,7 @@ const SettingScreen: React.FC = () => {
             value={message}
             onChangeText={(text) => setMessage(text)}
             maxLength={10}
+            placeholderTextColor="#969696"  
           />
           {freeUntil !== "活動中" && (
             <TextInput
@@ -122,6 +124,7 @@ const SettingScreen: React.FC = () => {
               value={freeUntil}
               onChangeText={handleFreeUntilChange}
               maxLength={10}
+              placeholderTextColor="#969696"
             />
           )}
 
@@ -326,7 +329,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingHorizontal: 12,
     fontSize: 16,
-    color: "gray",
+    color: "black",
   },
   statusText: {
     fontSize: 18,

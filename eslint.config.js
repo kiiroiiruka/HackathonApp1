@@ -16,6 +16,11 @@ module.exports = [
         process: "readonly", // processをグローバルとして定義
         console: "readonly", // consoleをグローバルとして定義
       },
+      env: {
+        browser: true, // ブラウザ環境を有効化
+        node: true, // Node.js環境を有効化
+        es2021: true, // ES2021のグローバル変数を有効化
+      },
     },
     plugins: {
       "@typescript-eslint": require("@typescript-eslint/eslint-plugin"),
@@ -31,7 +36,6 @@ module.exports = [
     rules: {
       // 必要なルールを手動で定義
       "no-unused-vars": ["warn", { vars: "all", args: "none", ignoreRestSiblings: true }], // 未使用変数の警告を調整
-      "no-undef": "error",
       "react/prop-types": "off",
       "react/react-in-jsx-scope": "off",
       "react-native/no-unused-styles": "warn",

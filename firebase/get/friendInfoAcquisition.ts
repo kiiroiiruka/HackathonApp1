@@ -2,6 +2,7 @@ import { db } from "@/firebase/firebaseConfig";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { useFriendUserStore } from "@/store/friendData";
 const ShisaInfo = {
+  key: "Shisa",
   uid: "Shisa",
   username: "AIだよー",
   location: "サーバ",
@@ -46,7 +47,8 @@ export const fetchFriendsFromStudentIdArray = async (email: string) => {
       })
       .map((doc) => {
         const data = doc.data();
-        return {
+        return {        
+          key: doc.id, // ドキュメントIDをキーとして使用
           uid: data.studentId,
           username: data.username ?? "",
           location: data.location ?? "",

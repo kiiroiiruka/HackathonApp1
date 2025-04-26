@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 // ユーザー情報の型定義
 type UserInfo = {
+  key: string; // ユーザーのキー（FirebaseのUIDなど）
   uid: string; // ユーザーID
   username: string; // ユーザー名
   location: string; // 場所
@@ -29,6 +30,7 @@ export const useFriendUserStore = create<UserStore>((set) => ({
   // 外部データからユーザーを読み込む関数
   loadUsersFromData: (data) => {
     const formatted = data.map((item) => ({
+      key: item.key, // itemのkeyをvalueのキーに設定
       uid: item.uid,
       username: item.username ?? "",
       location: item.location ?? "",

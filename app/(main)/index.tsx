@@ -182,6 +182,18 @@ const MainScreen: React.FC = () => {
           />
           <Text style={styles.settingsButtonTextSmall}>友達追加</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.settingsButtonSmall}
+          onPress={() => router.push("./(map)")}
+        >
+          <Ionicons
+            name="map-outline"
+            size={16}
+            color="#fff"
+            style={{ marginRight: 6 }}
+          />
+          <Text style={styles.settingsButtonTextSmall}>マップ</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

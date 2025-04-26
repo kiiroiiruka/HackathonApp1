@@ -52,7 +52,7 @@ const MainScreen: React.FC = () => {
             setErrorMsg("位置情報のアクセスが許可されていません");
             return;
           }
-          const currentLocation = await Location.getCurrentPositionAsync({accuracy: Location.Accuracy.BestForNavigation});
+          const currentLocation = await Location.getCurrentPositionAsync({accuracy: Location.Accuracy.Highest});
           console.log("gpsのねで",currentLocation.coords);
           const cor=currentLocation.coords
           setmyLocation({accuracy:cor.accuracy ??0,latitude:cor.latitude,longitude:cor.longitude});

@@ -7,7 +7,7 @@ export const isShisaInRoom = async (roomId: string): Promise<boolean> => {
     const snapshot = await get(roomRef);
     if (snapshot.exists()) {
       const personList = snapshot.val() as string[]; // personのリストを取得
-      return personList.includes("shisa"); // 'shisa'が含まれているかチェック
+      return personList.includes("Shisa"); // 'shisa'が含まれているかチェック
     } else {
       console.log("No data found for the specified room ID.");
       return false; // データが存在しない場合は false を返す

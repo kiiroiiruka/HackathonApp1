@@ -37,7 +37,17 @@ const ChatRoom = () => {
     {},
   );
   const [showTypingIndicator, setShowTypingIndicator] = useState(false);
-  const isshasa = typeof id === "string" ? isShisaInRoom(id) : false;
+  const [isshasa, setIsshasa] = useState(false);
+
+  useEffect(() => {
+    const checkIsShisa = async () => {
+      if (typeof id === "string") {
+        const result = await isShisaInRoom(id);
+        setIsshasa(result);
+      }
+    };
+    checkIsShisa();
+  }, [id]);
 
   useEffect(() => {
     console.log("mmmmmmmmm:", messages);
@@ -87,6 +97,7 @@ const ChatRoom = () => {
   }, [id]);
 
   useEffect(() => {
+    console.log("is",isshasa);
     if (isshasa && messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
       if (lastMessage.createdBy !== userInfo.key) {

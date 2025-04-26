@@ -43,8 +43,8 @@ module.exports = [
       "prettier/prettier": "error", // Prettierルールを適用
       // カスタムルール
       "prefer-const": "error",
-      "consistent-return": "error",
       "prefer-template": "error",
+      "arrow-body-style": "off", 
       "no-multiple-empty-lines": ["error", { max: 2 }],
       "no-mixed-spaces-and-tabs": "error",
     },

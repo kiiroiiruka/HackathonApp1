@@ -75,14 +75,12 @@ const ChatRoom = () => {
     }
 
     const unsubscribe = subscribeToChats(id, (chats) => {
-      void (async () => {
-        if (Array.isArray(chats)) {
-          const sortedChats = chats.sort((a, b) => a.createdAt - b.createdAt);
-          setMessages(sortedChats);
-        } else {
-          console.error("chatsが配列ではありません:", chats);
-        }
-      })();
+      if (Array.isArray(chats)) {
+        const sortedChats = chats.sort((a, b) => a.createdAt - b.createdAt);
+        setMessages(sortedChats);
+      } else {
+        console.error("chatsが配列ではありません:", chats);
+      }
     });
 
     return () => unsubscribe();

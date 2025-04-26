@@ -36,29 +36,26 @@ const MainScreen: React.FC = () => {
   const [, errorFlag] = useAtom(errorFlagAtom);
   const router = useRouter();
   const [errorMsg, setErrorMsg] = useState<string | null>(null); // エラーメッセージの状態管理
-
+  const getLocation = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      setErrorMsg("位置情報のアクセスが許可されていません");
+      return;
+    }
+    const currentLocation = await Location.getCurrentPositionAsync({accuracy: Location.Accuracy.Highest});
+    console.log("gpsのねで", currentLocation.coords);
+    const cor = currentLocation.coords;
+    setmyLocation({accuracy: cor.accuracy ?? 0, latitude: cor.latitude, longitude: cor.longitude});
+    updateLocation(userInfo.key, currentLocation);
+  };
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
         if (mail) {
-          const flag = await fetchFriendsFromStudentIdArray(mail);
+          const flag = await fetchFriendsFromStudentIdArray(mail);//GPSとアイコン以外の情報を取得して更新
           if (flag === false) errorFlag(false);
         }
-
         // 位置情報の取得
-        const getLocation = async () => {
-          const { status } = await Location.requestForegroundPermissionsAsync();
-          if (status !== "granted") {
-            setErrorMsg("位置情報のアクセスが許可されていません");
-            return;
-          }
-          const currentLocation = await Location.getCurrentPositionAsync({accuracy: Location.Accuracy.Highest});
-          console.log("gpsのねで",currentLocation.coords);
-          const cor=currentLocation.coords
-          setmyLocation({accuracy:cor.accuracy ??0,latitude:cor.latitude,longitude:cor.longitude});
-          updateLocation(userInfo.key,currentLocation);
-        };
-
         await getLocation(); // 位置情報取得関数を呼び出し
       };
       fetchData(); // 非同期関数を即時呼び出し
@@ -82,7 +79,7 @@ const MainScreen: React.FC = () => {
           <TouchableOpacity
             onPress={async () => {
               setLoading(true); // ローディング開始
-
+              await getLocation()//GPS情報を新しい情報に更新させる。
               //ーーー↓自分が友達に設定しているuserの情報をフロントにセット↓ーーー
               const flag = await fetchFriendsFromStudentIdArray(mail); // データ取得
               if (flag === false) errorFlag(false); //通信エラー

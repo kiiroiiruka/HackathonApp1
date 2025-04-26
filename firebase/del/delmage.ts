@@ -1,18 +1,4 @@
 
-const imageAplit=(url:string)=>{
-    //const url = "https://res.cloudinary.com/dy1ip2xgb/image/upload/v1745647812/media/pictures/8D7F5F5A-F36D-4AE3-9155-F1BD9FF71822.png.png";
-
-    // 1. バージョン以降だけ切り出す
-    const urlParts = url.split('/'); 
-    const versionIndex = urlParts.findIndex(part => part.startsWith('upload'));
-    const publicIdWithExt = urlParts.slice(versionIndex + 2).join('/');
-
-    // 2. 拡張子除去
-    const publicId = publicIdWithExt.replace(/\.[^/.]+$/, '');
-
-    return publicId;
-    // 出力結果 → "media/pictures/8D7F5F5A-F36D-4AE3-9155-F1BD9FF71822.png"
-}
 import crypto from 'crypto-js'; // crypto-jsをnpmで入れてね
 
 const cloudName = "dy1ip2xgb";

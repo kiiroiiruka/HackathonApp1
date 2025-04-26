@@ -19,6 +19,7 @@ import { fetchUserInfoAndSetbyEmail } from "@/firebase/fetch/meDataset";
 import { mailAddressAtom } from "@/atom/mailAddressAtom";
 import { errorFlagAtom } from "@/atom/flag/errorFlag";
 import SubHeader from "@/components/ui/header/SubScreenHeader";
+import { StatusBar } from "expo-status-bar"
 
 const SignUpScreen: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -144,14 +145,17 @@ const SignUpScreen: React.FC = () => {
       style={{ flex: 1, backgroundColor: "white" }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
+      <StatusBar style="dark" />
       {/* Header を ScrollView の外に配置 */}
-      <SubHeader title="サインアップ" onBack={() => router.back()} />
+      <SubHeader title="" onBack={() => router.back()} />
 
       {/* ScrollView で入力フォーム部分をスクロール可能に */}
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 10 }}
+        contentContainerStyle={styles.scrollViewContent}
+        keyboardShouldPersistTaps="handled"
       >
         <View style={styles.container}>
+        <Text style={styles.mainTitle}>サインアップ</Text>
           <Text style={styles.title}>{"以下の内容を入力してください"}</Text>
           <Text style={{ color: "red", textAlign: "center" }}>
             {"※ユーザー名は後ほど変更可能です\n10文字以下で入力してください"}
@@ -162,6 +166,7 @@ const SignUpScreen: React.FC = () => {
             value={username}
             onChangeText={setUsername}
             maxLength={10}
+            placeholderTextColor="#969696"
           />
           <Text style={{ color: "red", textAlign: "center" }}>
             {`※学籍番号の末尾に入力時刻が追加されます\n（入力ミスによる重複防止のため）。\n例：学籍番号「123」を入力 → 登録される学籍番号は「123--2025-04-20_15:23:45.123」となります。\n※入力した「123」の部分は後ほど変更可能です。\n10文字以内で入力してください`}
@@ -172,6 +177,7 @@ const SignUpScreen: React.FC = () => {
             value={studentId}
             onChangeText={setStudentId}
             maxLength={10}
+            placeholderTextColor="#969696"
           />
           <TextInput
             style={styles.input}
@@ -180,6 +186,7 @@ const SignUpScreen: React.FC = () => {
             onChangeText={(text) => setEmail(text)}
             autoCapitalize="none"
             keyboardType="email-address"
+            placeholderTextColor="#969696"
           />
           {emailError ? (
             <Text style={styles.errorText}>{emailError}</Text>
@@ -191,6 +198,7 @@ const SignUpScreen: React.FC = () => {
             value={password}
             onChangeText={setPassword}
             secureTextEntry
+            placeholderTextColor="#969696"
           />
           {passwordError ? (
             <Text style={styles.errorText}>{passwordError}</Text>
@@ -206,6 +214,18 @@ const SignUpScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: "center", // 垂直方向の中央揃え
+    paddingHorizontal: 20,
+    paddingVertical: 30,
+  },
+  mainTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: 20,
+  },
   container: {
     flex: 1,
     backgroundColor: "white",
@@ -224,7 +244,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingHorizontal: 12,
     fontSize: 16,
-    color: "gray",
+    color: "breack",
   },
   button: {
     backgroundColor: "#007AFF",

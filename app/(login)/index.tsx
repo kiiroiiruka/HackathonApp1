@@ -18,6 +18,7 @@ import { useAtom } from "jotai";
 import { fetchFriendsFromStudentIdArray } from "@/firebase/get/friendInfoAcquisition";
 import { fetchUserInfoAndSetbyEmail } from "@/firebase/fetch/meDataset";
 import { errorFlagAtom } from "@/atom/flag/errorFlag";
+import { StatusBar } from "expo-status-bar"
 const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -96,6 +97,7 @@ const LoginScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <StatusBar style="dark" />
       <Text style={styles.title}>ログイン</Text>
       <TextInput
         style={styles.input}
@@ -103,6 +105,7 @@ const LoginScreen: React.FC = () => {
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
+        placeholderTextColor="#969696"
       />
       <TextInput
         style={styles.input}
@@ -110,6 +113,7 @@ const LoginScreen: React.FC = () => {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        placeholderTextColor="#969696"
       />
 
       {/* エラーメッセージを赤色で表示 */}
@@ -152,7 +156,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingHorizontal: 12,
     fontSize: 16,
-    color: "gray",
+    color:"brack"
   },
   button: {
     backgroundColor: "#007AFF",

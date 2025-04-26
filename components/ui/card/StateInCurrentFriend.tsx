@@ -201,7 +201,7 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
                 canView ? timeStyle : styles.emptyLocation,
               ]}
             >
-              {canView ? (time.trim() === "" ? "未記入" : time) : "非表示"}
+              {canView ? (time.trim() === "" ? "今暇です" : time) : "非表示"}
             </Text>
           </View>
           <View style={styles.highlightBox}>

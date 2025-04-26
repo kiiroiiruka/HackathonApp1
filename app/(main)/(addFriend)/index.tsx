@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
+  TextInput,
 } from "react-native";
 import StudentList from "@/components/ui/card/AddFriendList";
 import { useRouter } from "expo-router";
@@ -15,6 +16,7 @@ import SubHeader from "@/components/ui/header/SubScreenHeader";
 import { useAtom } from "jotai";
 import { studentIdAtom } from "@/atom/studentIdAtom";
 import { errorFlagAtom } from "@/atom/flag/errorFlag";
+
 export default function App() {
   const router = useRouter();
   const [allStudents, setAllStudents] = useState<string[]>([]);
@@ -22,6 +24,12 @@ export default function App() {
   const [addedStudents, setAddedStudents] = useState<string[]>([]);
   const [userId, setId] = useAtom(studentIdAtom);
   const [, errorFlag] = useAtom(errorFlagAtom);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const filteredStudents = allStudents.filter((id) =>
+    id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   // 初回読み込みでデータ取得
   useEffect(() => {
     const fetchData = async () => {
@@ -65,8 +73,14 @@ export default function App() {
     <SafeAreaView style={{ flex: 1 }}>
       <SubHeader title="友達の追加・削除" onBack={() => router.back()} />
       <View style={{ flex: 1 }}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="学籍番号を検索"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
         <StudentList
-          studentIds={allStudents} // すべての学籍番号リスト
+          studentIds={filteredStudents} // フィルタリングされた学籍番号リスト
           username={userName}
           alreadyAddedIds={addedStudents} // 追加された友達の学籍番号リスト
           onFriendToggle={handleFriendToggle} // 友達追加・削除の処理
@@ -75,3 +89,14 @@ export default function App() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  searchInput: {
+    padding: 10,
+    margin: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    backgroundColor: "#fff",
+  },
+});

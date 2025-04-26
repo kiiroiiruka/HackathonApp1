@@ -39,6 +39,15 @@ const ChatRoom = () => {
   const [showTypingIndicator, setShowTypingIndicator] = useState(false);
   const [isshasa, setIsshasa] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+  const [viewableItems, setViewableItems] = useState<any[]>([]);
+
+  const viewabilityConfig = {
+    itemVisiblePercentThreshold: 1, // 表示率50%以上で表示中とみなす
+  };
+
+  const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
+    setViewableItems(viewableItems);
+  }).current;
 
   useEffect(() => {
     const checkIsShisa = async () => {
@@ -89,6 +98,22 @@ const ChatRoom = () => {
       if (Array.isArray(chats)) {
         const sortedChats = chats.sort((a, b) => a.createdAt - b.createdAt);
         setMessages(sortedChats);
+        
+        const newScrole=(otherId:string) => {
+          const secondLastMessageId = messages[messages.length-2]?.id;
+
+          const isSecondLastVisible = viewableItems.some(
+            (item) => item.item.id === secondLastMessageId
+          );
+
+          console.log("スクロール", isSecondLastVisible )
+          if (isSecondLastVisible && messages.length > 0) {
+            setTimeout(() => {
+              flatListRef.current?.scrollToEnd({ animated: true });
+            }, 800);
+          }
+        }
+        newScrole(sortedChats[sortedChats.length-1].id)
       } else {
         console.error("chatsが配列ではありません:", chats);
       }
@@ -109,14 +134,6 @@ const ChatRoom = () => {
     }
   }, [messages, isshasa]);
 
-  useEffect(() => {
-    console.log("ssa",flatListRef)
-    if (messages.length > 0) {
-      setTimeout(() => {
-        flatListRef.current?.scrollToEnd({ animated: true });
-      }, 300); // 100msくらい待つと描画が終わってることが多い
-    }
-  }, [messages]);
 
   const sendMessage = async () => {
     if (!input.trim()) {
@@ -223,6 +240,8 @@ const ChatRoom = () => {
               </Text>
             </View>
           )}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
           ListFooterComponent={
             showTypingIndicator ? (
               <View style={[styles.messageContainer, styles.otherMessage]}>

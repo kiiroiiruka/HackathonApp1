@@ -1,5 +1,5 @@
 import { realtimeDb } from "@/firebase/firebaseConfig"; // FirebaseのRealtime Databaseをインポート
-import { ref, get, DatabaseReference } from "firebase/database";
+import { ref, get } from "firebase/database";
 
 export const isShisaInRoom = async (roomId: string): Promise<boolean> => {
   try {

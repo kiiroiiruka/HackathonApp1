@@ -58,3 +58,9 @@ export const getKeybyStudentId = async (studentId: string) => {
     return false;
   }
 };
+
+const fetchData = async () => {
+  void (async () => {
+    // ...existing code...
+  })();
+};

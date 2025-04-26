@@ -1,6 +1,5 @@
-import { ref, set, get } from "firebase/database"; // getをインポート
+import { ref, get } from "firebase/database"; // getをインポート
 import { realtimeDb } from "@/firebase/firebaseConfig";
-import * as Location from "expo-location"; // expo-locationをインポート
 import { getKeybyStudentId } from "@/firebase/fetch/meDataset"; // 学籍番号からkeyを取得する関数をインポート
 
 export const getlocationbyStdudentId = async function (StdudentId: string) {

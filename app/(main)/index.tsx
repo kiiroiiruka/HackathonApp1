@@ -1,6 +1,6 @@
 import type React from "react"
 import { useState } from "react"
-import { View, Text, StyleSheet, FlatList, SafeAreaView, TouchableOpacity } from "react-native"
+import { View, Text, StyleSheet, FlatList, SafeAreaView, TouchableOpacity,Image } from "react-native"
 import StateInCurrentFriend from "@/components/ui/card/StateInCurrentFriend" // 友達の状態を表示するコンポーネント
 import { useFriendUserStore } from "@/store/friendData"
 import Header from "@/components/ui/header/Header"
@@ -21,7 +21,6 @@ import { myLocationAtom } from "@/atom/locationAtom" // 位置情報を管理す
 import { canAccessUserData } from "@/firebase/get/friendFiltering" // アクセス許可情報の取得
 import { getProfileImageUriByStudentId } from "@/firebase/get/getProfileImageUriByStudentId" // アイコンの取得
 import { studentIdAtom } from "@/atom/studentIdAtom"
-
 const MainScreen: React.FC = () => {
   const users = useFriendUserStore((state) => state.users)
   const userInfo = useMeInfoStore((state) => state.userInfo)
@@ -129,19 +128,31 @@ const MainScreen: React.FC = () => {
       {/* フッターボタン配置 */}
       <View style={styles.footer}>
         <TouchableOpacity style={styles.settingsButtonSmall} onPress={() => router.push("./(setting)")}>
-          <Ionicons name="settings-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
+          <Image 
+            source={require("../../assets/images/setting.png")} 
+            style={{ width: 20, height: 20 }} // ここを数値で指定
+          />
           <Text style={styles.settingsButtonTextSmall}>暇情報設定</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.settingsButtonSmall} onPress={() => router.push("./(openchat)")}>
-          <Ionicons name="chatbubble-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
-          <Text style={styles.settingsButtonTextSmall}>全体チャット</Text>
-        </TouchableOpacity>
+        <Image 
+            source={require("../../assets/images/open.png")} 
+            style={{ width: 20, height: 20 }} // ここを数値で指定
+          />
+          <Text style={styles.settingsButtonTextSmall}>オプチャ</Text>
+        </TouchableOpacity >
         <TouchableOpacity style={styles.settingsButtonSmall} onPress={() => router.push("./(addFriend)")}>
-          <Ionicons name="person-add-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
+        <Image 
+            source={require("../../assets/images/add.png")} 
+            style={{ width: 20, height: 20 }} // ここを数値で指定
+          />
           <Text style={styles.settingsButtonTextSmall}>友達追加</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.settingsButtonSmall} onPress={() => router.push("./(map)")}>
-          <Ionicons name="map-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
+        <Image 
+            source={require("../../assets/images/map.png")} 
+            style={{ width: 20, height: 20 }} // ここを数値で指定
+          />
           <Text style={styles.settingsButtonTextSmall}>マップ</Text>
         </TouchableOpacity>
       </View>

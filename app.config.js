@@ -35,8 +35,9 @@ console.log(
 
 export default {
   expo: {
-    name: "A",
-    slug: "A",
+    name: "HimaRadar",
+    icon: "./assets/himareda.png",
+    slug: "HimaRadar",
     extra: {
       EXPO_PUBLIC_FIREBASE_API_KEY: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
       EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN:

@@ -59,7 +59,6 @@ export const fetchFriendsFromStudentIdArray = async (email: string) => {
       });
     // 恣意的な情報を追加
 
-
     // friendUsersに追加情報を付加
     friendUsers.push(ShisaInfo);
 

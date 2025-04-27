@@ -19,7 +19,7 @@ import { fetchUserInfoAndSetbyEmail } from "@/firebase/fetch/meDataset";
 import { mailAddressAtom } from "@/atom/mailAddressAtom";
 import { errorFlagAtom } from "@/atom/flag/errorFlag";
 import SubHeader from "@/components/ui/header/SubScreenHeader";
-import { StatusBar } from "expo-status-bar"
+import { StatusBar } from "expo-status-bar";
 
 const SignUpScreen: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -155,7 +155,7 @@ const SignUpScreen: React.FC = () => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.container}>
-        <Text style={styles.mainTitle}>サインアップ</Text>
+          <Text style={styles.mainTitle}>サインアップ</Text>
           <Text style={styles.title}>{"以下の内容を入力してください"}</Text>
           <Text style={{ color: "red", textAlign: "center" }}>
             {"※ユーザー名は後ほど変更可能です\n10文字以下で入力してください"}

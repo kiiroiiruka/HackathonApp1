@@ -67,6 +67,8 @@ const SettingScreen: React.FC = () => {
       updateTime(freeUntil);
       Alert.alert("編集内容を保存しました");
     }
+    const success = await updateFriendOnlySetting(mail,friendOnly); //公開させる。
+    if (success)setFriendOnly(friendOnly);
   };
 
   const toggleActiveStatus = () => {
@@ -151,12 +153,10 @@ const SettingScreen: React.FC = () => {
           {/* 👇 追加: 公開設定の切替ボタン */}
           {!loadingSetting && (
             <View style={styles.toggleContainer}>
-              {/* 「友達のみ」ボタン */}
               <TouchableOpacity
                 onPress={async () => {
                   if (!friendOnly) {
-                    const success = await updateFriendOnlySetting(mail, true); // ← friendOnlyをtrueに
-                    if (success) setFriendOnly(true);
+                    setFriendOnly(true); // ここでもstateだけ変える
                   }
                 }}
                 style={[
@@ -174,12 +174,10 @@ const SettingScreen: React.FC = () => {
                 </Text>
               </TouchableOpacity>
 
-              {/* 「全体公開」ボタン */}
               <TouchableOpacity
                 onPress={async () => {
                   if (friendOnly) {
-                    const success = await updateFriendOnlySetting(mail, false); // ← friendOnlyをfalseに
-                    if (success) setFriendOnly(false);
+                    setFriendOnly(false); // ここでもstateだけ変える
                   }
                 }}
                 style={[
@@ -348,7 +346,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     textAlign: "center",
-  },
+  }
 });
-
 export default SettingScreen;

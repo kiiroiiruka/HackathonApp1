@@ -18,7 +18,7 @@ import { useAtom } from "jotai";
 import { fetchFriendsFromStudentIdArray } from "@/firebase/get/friendInfoAcquisition";
 import { fetchUserInfoAndSetbyEmail } from "@/firebase/fetch/meDataset";
 import { errorFlagAtom } from "@/atom/flag/errorFlag";
-import { StatusBar } from "expo-status-bar"
+import { StatusBar } from "expo-status-bar";
 const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingHorizontal: 12,
     fontSize: 16,
-    color:"brack"
+    color: "brack",
   },
   button: {
     backgroundColor: "#007AFF",

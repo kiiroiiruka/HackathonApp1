@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "A",
-    "slug": "A",
+    "name": "HimeRadar",
+    "slug": "HimeRadar",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/himareda.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -26,9 +26,9 @@
       }
     },
     "web": {
-      "bundler": "metro",
+      "bundler": "webpack",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/himareda.png"
     },
     "plugins": [
       "expo-router",

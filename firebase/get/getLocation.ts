@@ -31,6 +31,9 @@ export const getlocationsbyKeys = async function (keys: string[]) {
             console.warn("無効なキーが検出されました:", key);
             return null; // 無効なキーはスキップ
           }
+          else if(key=="Shisa"){
+            console.warn("Aiは地上にはいないッ!!、我々の心の中にいる!by", key);
+          }
           const locationRef = ref(realtimeDb, `locations/${key}`);
           const snapshot = await get(locationRef);
 

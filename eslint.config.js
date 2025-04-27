@@ -16,8 +16,8 @@ module.exports = [
         es2021: true, // ES2021のグローバル変数を有効化
         process: "readonly", // processをグローバルとして定義
         console: "readonly", // consoleをグローバルとして定義
-        window: 'readonly', // グローバル変数を定義
-        localStorage: 'readonly',
+        window: "readonly", // グローバル変数を定義
+        localStorage: "readonly",
       },
     },
     plugins: {
@@ -33,7 +33,10 @@ module.exports = [
     },
     rules: {
       // 必要なルールを手動で定義
-      "no-unused-vars": ["warn", { vars: "all", args: "none", ignoreRestSiblings: true }], // 未使用変数の警告を調整
+      "no-unused-vars": [
+        "warn",
+        { vars: "all", args: "none", ignoreRestSiblings: true },
+      ], // 未使用変数の警告を調整
       "react/prop-types": "off",
       "react/react-in-jsx-scope": "off",
       "react-native/no-unused-styles": "warn",
@@ -44,7 +47,7 @@ module.exports = [
       // カスタムルール
       "prefer-const": "error",
       "prefer-template": "error",
-      "arrow-body-style": "off", 
+      "arrow-body-style": "off",
       "no-multiple-empty-lines": ["error", { max: 2 }],
       "no-mixed-spaces-and-tabs": "error",
     },

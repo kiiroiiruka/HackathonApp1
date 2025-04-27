@@ -6,16 +6,16 @@ import { getChatroomByPersons } from "@/firebase/get/getChatroom"; // ルーム�
 import { createChatroom } from "@/firebase/add/createChatroom"; // チャットルーム作成関数をインポート
 import { studentIdAtom } from "@/atom/studentIdAtom"; // MyIdを管理するatomをインポート
 import { useEffect, useState } from "react";
-import { getProfileImageUriByStudentId } from "@/firebase/get/getProfileImageUriByStudentId";
 import { getlocationbyStdudentId } from "@/firebase/get/getLocation"; // 学籍番号から位置情報を取得する関数をインポート
 import { myLocationAtom } from "@/atom/locationAtom";
-import { canAccessUserData } from "@/firebase/get/friendFiltering"; // ユーザーデータにアクセスできるか確認する関数をインポート
 type UserCardProps = {
   username: string;
   studentId: string;
   location: string;
   message: string;
   time: string;
+  imageUri:string, // 受け取るプロパティ
+  canView:string,  // 受け取るプロパティ
 };
 // ハーサイン公式を実装した関数
 function toRadians(degrees: number): number {
@@ -51,12 +51,13 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
   location,
   message,
   time,
+  imageUri, // 受け取るプロパティ
+  canView,  // 受け取るプロパティ
 }) => {
   const [myLocation,]  = useAtom(myLocationAtom); // jotaiから位置情報を取得
   const router = useRouter(); // ルーターを使用してページ遷移
   const [myId,] = useAtom(studentIdAtom); // jotaiからMyIdを取得
-  const [imageUri, setImageUri] = useState<string | null>(null);
-  const [canView, setCanView] = useState<boolean | null>(null); // 初期はnull
+
 
   const lastDoubleHyphenIndex = studentId.lastIndexOf("--");
   const mainId =
@@ -67,24 +68,6 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
     lastDoubleHyphenIndex !== -1
       ? studentId.slice(lastDoubleHyphenIndex + 2)
       : "";
-
-  // アクセス可能かどうかを判定
-  useEffect(() => {
-    const checkAccess = async () => {
-      const access = await canAccessUserData(myId, studentId);
-      setCanView(access);
-    };
-    checkAccess();
-  }, [myId, studentId]);
-
-  // プロフィール画像取得
-  useEffect(() => {
-    const fetchImage = async () => {
-      const uri = await getProfileImageUriByStudentId(studentId);
-      setImageUri(uri);
-    };
-    fetchImage();
-  }, [studentId]);
 
   const [distanse, setDistanse] = useState<string>('不明');
 
@@ -206,9 +189,11 @@ const StateInCurrentFriend: React.FC<UserCardProps> = ({
           </View>
           <View style={styles.highlightBox}>
             <Text style={styles.highlightLabel}>📏 距離</Text>
+            
             <Text style={styles.highlightText}>
               {canView ? distanse : "非表示"}
             </Text>
+            <Text style={{fontSize:8}}>※不正確な場合も有り</Text>
           </View>
         </View>
       </View>
@@ -362,7 +347,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     margin: "auto",
     marginTop: -5,
+    color: "#ff3b30",
   },
-});
 
-export default StateInCurrentFriend;
+});
+export default StateInCurrentFriend; // Default export

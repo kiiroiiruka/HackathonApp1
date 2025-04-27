@@ -98,24 +98,24 @@ const ChatRoom = () => {
       if (Array.isArray(chats)) {
         const sortedChats = chats.sort((a, b) => a.createdAt - b.createdAt);
         setMessages(sortedChats);
-        
-        const newScrole=() => {
-          if(messages.length > 0){
-            const secondLastMessageId = messages[messages.length-2]?.id;
+
+        const newScrole = () => {
+          if (messages.length > 0) {
+            const secondLastMessageId = messages[messages.length - 2]?.id;
 
             const isSecondLastVisible = viewableItems.some(
-              (item) => item.item.id === secondLastMessageId
+              (item) => item.item.id === secondLastMessageId,
             );
 
-            console.log("スクロール", isSecondLastVisible )
+            console.log("スクロール", isSecondLastVisible);
             if (isSecondLastVisible) {
               setTimeout(() => {
                 flatListRef.current?.scrollToEnd({ animated: true });
               }, 800);
             }
           }
-        }
-        newScrole()
+        };
+        newScrole();
       } else {
         console.error("chatsが配列ではありません:", chats);
       }
@@ -125,7 +125,7 @@ const ChatRoom = () => {
   }, [id]);
 
   useEffect(() => {
-    console.log("is",isshasa);
+    console.log("is", isshasa);
     if (isshasa && messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
       if (lastMessage.createdBy !== userInfo.key) {
@@ -135,7 +135,6 @@ const ChatRoom = () => {
       }
     }
   }, [messages, isshasa]);
-
 
   const sendMessage = async () => {
     if (!input.trim()) {

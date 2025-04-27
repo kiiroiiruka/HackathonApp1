@@ -36,4 +36,3 @@ jobs:
           git add .
           git diff --cached --quiet || git commit -m "ci: auto format"
           git push
-

@@ -27,7 +27,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const filteredStudents = allStudents.filter((id) =>
-    id.toLowerCase().includes(searchQuery.toLowerCase())
+    id.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   // 初回読み込みでデータ取得
@@ -48,6 +48,7 @@ export default function App() {
         errorFlag(false); //falseが返ってきて通信に失敗した場合はerror
       else setAddedStudents(mine); // 追加済みの友達をセット
       //ーーー↑自分が友達に設定しているuserの情報をフロントにセット↑ーーー
+  
     };
     fetchData();
   }, [userId]);
@@ -71,7 +72,7 @@ export default function App() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <SubHeader title="友達の追加・削除" onBack={() => router.back()} />
+      <SubHeader title="友達の追加・削除" onBack={() => {router.back()}} />
       <View style={{ flex: 1 }}>
         <TextInput
           style={styles.searchInput}

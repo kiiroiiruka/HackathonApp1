@@ -209,7 +209,7 @@ const SettingScreen: React.FC = () => {
     </View>
   );
 };
-export default SettingScreen;
+
 const styles = StyleSheet.create({
   toggleContainer: {
     flexDirection: "row",
@@ -348,3 +348,4 @@ const styles = StyleSheet.create({
     textAlign: "center",
   }
 });
+export default SettingScreen;

@@ -120,8 +120,12 @@ export default function ImagePickerScreen() {
 
       // 成功した場合
       if (result.secure_url) {
-        console.log("アップロード成功")
-        await updateProfileImageAndPublicIdByEmail(mail, String(result.secure_url), publicId); // Firestoreに画像URLを保存
+        console.log("アップロード成功");
+        await updateProfileImageAndPublicIdByEmail(
+          mail,
+          String(result.secure_url),
+          publicId,
+        ); // Firestoreに画像URLを保存
         if (Platform.OS !== "web") {
           // Web以外でのみアラートを表示
           Alert.alert(

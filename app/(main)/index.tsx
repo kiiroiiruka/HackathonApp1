@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,13 +7,12 @@ import {
   SafeAreaView,
   TouchableOpacity,
 } from "react-native";
-
-import StateInCurrentFriend from "@/components/ui/card/StateInCurrentFriend";
+import StateInCurrentFriend from "@/components/ui/card/StateInCurrentFriend"; // 友達の状態を表示するコンポーネント
 import { useFriendUserStore } from "@/store/friendData";
 import Header from "@/components/ui/header/Header";
 import SelectTab from "@/components/ui/selectionUi/SelectTab";
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons"; // ← アイコン追加！
+import { Ionicons } from "@expo/vector-icons"; // アイコン追加！
 import { fetchFriendsFromStudentIdArray } from "@/firebase/get/friendInfoAcquisition";
 import { useFocusEffect } from "expo-router"; //expo-routerを活用している場合はこっちをimportすればOK
 import { useCallback } from "react";
@@ -25,17 +24,23 @@ import { errorFlagAtom } from "@/atom/flag/errorFlag";
 import * as Location from "expo-location"; // expo-locationをインポート
 import { updateLocation } from "@/firebase/fetch/fetchLocation"; // 位置情報をFirebaseに送信する関数をインポート
 import { myLocationAtom } from "@/atom/locationAtom"; // 位置情報を管理するatomをインポート
+import { canAccessUserData } from "@/firebase/get/friendFiltering"; // アクセス許可情報の取得
+import { getProfileImageUriByStudentId } from "@/firebase/get/getProfileImageUriByStudentId"; // アイコンの取得
+import { studentIdAtom } from "@/atom/studentIdAtom";
+
 const MainScreen: React.FC = () => {
   const users = useFriendUserStore((state) => state.users);
   const userInfo = useMeInfoStore((state) => state.userInfo);
-  // 🔽 ここで選択状態を管理（デフォルトは「友達」）
   const [selectedTab, setSelectedTab] = useState<string>("友達");
   const [myLocation, setmyLocation] = useAtom(myLocationAtom);
-  const [mail] = useAtom(mailAddressAtom);
+  const [myStudentId]=useAtom(studentIdAtom)
+  const [mail,] = useAtom(mailAddressAtom);
   const [loading, setLoading] = useState(false);
   const [, errorFlag] = useAtom(errorFlagAtom);
   const router = useRouter();
+  const [userData, setUserData] = useState<any[]>([]); // ユーザー情報を保存する状態
   const [errorMsg, setErrorMsg] = useState<string | null>(null); // エラーメッセージの状態管理
+  
   const getLocation = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
@@ -43,26 +48,46 @@ const MainScreen: React.FC = () => {
       return;
     }
     const currentLocation = await Location.getCurrentPositionAsync({accuracy: Location.Accuracy.Highest});
-    console.log("gpsのねで", currentLocation.coords);
     const cor = currentLocation.coords;
     setmyLocation({accuracy: cor.accuracy ?? 0, latitude: cor.latitude, longitude: cor.longitude});
     updateLocation(userInfo.key, currentLocation);
   };
+  
+  const fetchData = async () => {
+  
+    // 位置情報の更新
+
+    setUserData([]); // ←これ追加して「過去のデータをクリア」しておく！
+    if (mail) {
+      const flag = await fetchFriendsFromStudentIdArray(mail); // GPSとアイコン以外の情報を取得して更新
+      if (flag === false) errorFlag(false);
+    }
+    setLoading(true); // ローディング開始
+
+    await getLocation(); // GPS情報を新しい情報に更新させる
+    // ユーザー情報の更新（アイコンとアクセス許可の情報を再取得）
+    const updatedUserData = await Promise.all(
+      users.map(async (user) => {
+        const access = await canAccessUserData(myStudentId, user.uid); // アクセス許可の確認
+        const profileImageUri = await getProfileImageUriByStudentId(user.uid); // プロフィール画像URIの取得
+
+        return {
+          ...user,
+          access,
+          profileImageUri, // アイコン情報を追加
+        };
+      })
+    );
+
+    // 更新されたユーザーデータを状態に保存
+    setUserData(updatedUserData);
+    setTimeout(() => setLoading(false), 1000); // 1秒後にローディング終了
+  };
+  
   useFocusEffect(
     useCallback(() => {
-      const fetchData = async () => {
-        if (mail) {
-          const flag = await fetchFriendsFromStudentIdArray(mail);//GPSとアイコン以外の情報を取得して更新
-          if (flag === false) errorFlag(false);
-        }
-        // 位置情報の取得
-        await getLocation(); // 位置情報取得関数を呼び出し
-      };
-      fetchData(); // 非同期関数を即時呼び出し
-      return () => {
-        // クリーンアップ処理があればここに書く
-      };
-    }, []),
+      fetchData();
+    }, [mail, myStudentId]) // usersも依存関係に含める
   );
 
   return (
@@ -70,28 +95,15 @@ const MainScreen: React.FC = () => {
       <Header title="暇レーダー">
         <View style={{ margin: "auto", flexDirection: "row" }}>
           {/* 🔽 選択肢を SelectTab に渡す */}
-
           <SelectTab
             options={["友達", "暇な奴だけ"]}
             selected={selectedTab}
             setSelected={setSelectedTab}
           />
           <TouchableOpacity
-            onPress={async () => {
-              setLoading(true); // ローディング開始
-              await getLocation()//GPS情報を新しい情報に更新させる。
-              //ーーー↓自分が友達に設定しているuserの情報をフロントにセット↓ーーー
-              const flag = await fetchFriendsFromStudentIdArray(mail); // データ取得
-              if (flag === false) errorFlag(false); //通信エラー
-              console.log(users);
-              //ーーー↑自分が友達に設定しているuserの情報をフロントにセット↑ーーー
-              setTimeout(() => setLoading(false), 1000); // 1秒後に解除
-            }}
+            onPress={async () => fetchData()}
             disabled={loading}
-            style={[
-              styles.reloadButton,
-              loading && styles.reloadButtonDisabled, // ロード中なら薄く
-            ]}
+            style={[styles.reloadButton, loading && styles.reloadButtonDisabled]} // ロード中なら薄く
           >
             {loading ? (
               <ActivityIndicator color="#888" size="small" />
@@ -105,9 +117,10 @@ const MainScreen: React.FC = () => {
       <FlatList
         data={
           selectedTab === "暇な奴だけ"
-            ? users.filter((u) => !u.time.includes("活動中"))
-            : users
+            ? userData.filter((u) => !u.time.includes("活動中"))
+            : userData
         }
+        extraData={loading}
         keyExtractor={(item) => item.uid}
         renderItem={({ item }) => (
           <StateInCurrentFriend
@@ -116,6 +129,8 @@ const MainScreen: React.FC = () => {
             message={item.message}
             time={item.time}
             studentId={item.uid}
+            imageUri={item.profileImageUri}  // アイコン情報を渡す
+            canView={item.access}            // アクセス許可情報を渡す
           />
         )}
         ListEmptyComponent={
@@ -128,20 +143,7 @@ const MainScreen: React.FC = () => {
         contentContainerStyle={styles.listContent}
       />
 
-      {/*}
-      <View style={{ padding: 5 }}>
-        {errorMsg ? (
-          <Text style={{ color: "red" }}>{errorMsg}</Text>
-        ) : location ? (
-          <Text>
-            現在地: 緯度 {myLocation.latitude}, 経度 {myLocation.longitude}
-          </Text>
-        ) : (
-          <Text>位置情報を取得中...</Text>
-        )}
-      </View>
-      */}
-      {/* 🔽 フッターボタン配置 */}
+      {/* フッターボタン配置 */}
       <View style={styles.footer}>
         <TouchableOpacity
           style={styles.settingsButtonSmall}
@@ -183,7 +185,6 @@ const MainScreen: React.FC = () => {
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   emptyContainer: {
     flex: 1,

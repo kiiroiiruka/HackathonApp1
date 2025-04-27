@@ -12,7 +12,7 @@ import { deleteImage } from "../del/delmage"; // ←ファイルパスOK！
 export const updateProfileImageAndPublicIdByEmail = async (
   email: string,
   newImageUri: string,
-  newImagePublicId: string
+  newImagePublicId: string,
 ) => {
   try {
     // usersコレクションからemailフィールドが一致するドキュメントを検索
@@ -21,7 +21,9 @@ export const updateProfileImageAndPublicIdByEmail = async (
     const querySnapshot = await getDocs(q);
 
     if (querySnapshot.empty) {
-      console.warn("指定されたメールアドレスのユーザーが見つかりませんでした。");
+      console.warn(
+        "指定されたメールアドレスのユーザーが見つかりませんでした。",
+      );
       return { success: false, error: "ユーザーが存在しません。" };
     }
 
@@ -49,7 +51,10 @@ export const updateProfileImageAndPublicIdByEmail = async (
     console.log("Profile image URIとPublic IDをFirestoreに更新しました！");
     return { success: true };
   } catch (error) {
-    console.error("プロフィール画像とPublic IDの更新中にエラーが発生しました:", error);
+    console.error(
+      "プロフィール画像とPublic IDの更新中にエラーが発生しました:",
+      error,
+    );
     return { success: false, error };
   }
 };

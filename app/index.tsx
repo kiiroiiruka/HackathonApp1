@@ -1,230 +1,113 @@
-"use client"
+import { useEffect, useState } from "react";
+import { Platform, View, Text, StyleSheet } from "react-native"; // これを使ってプラットフォームを判別
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import { getStudentIdByEmail } from "@/firebase/get/studentNumberAcquisition";
+import { studentIdAtom } from "@/atom/studentIdAtom";
+import { useAtom } from "jotai";
+import { fetchFriendsFromStudentIdArray } from "@/firebase/get/friendInfoAcquisition";
+import { mailAddressAtom } from "@/atom/mailAddressAtom";
+import { errorFlagAtom } from "@/atom/flag/errorFlag";
+import { fetchUserInfoAndSetbyEmail } from "@/firebase/fetch/meDataset";
+const AuthGate = () => {
+  const router = useRouter();
+  const [, setStudentId] = useAtom(studentIdAtom);
+  const [, setMail] = useAtom(mailAddressAtom);
+  const [, errorFlag] = useAtom(errorFlagAtom);
 
-import type React from "react"
-import { useState } from "react"
-import { View, Text, StyleSheet, FlatList, SafeAreaView, TouchableOpacity } from "react-native"
-import StateInCurrentFriend from "@/components/ui/card/StateInCurrentFriend" // 友達の状態を表示するコンポーネント
-import { useFriendUserStore } from "@/store/friendData"
-import Header from "@/components/ui/header/Header"
-import SelectTab from "@/components/ui/selectionUi/SelectTab"
-import { useRouter } from "expo-router"
-import { Ionicons } from "@expo/vector-icons" // アイコン追加！
-import { fetchFriendsFromStudentIdArray } from "@/firebase/get/friendInfoAcquisition"
-import { useFocusEffect } from "expo-router" //expo-routerを活用している場合はこっちをimportすればOK
-import { useCallback } from "react"
-import { useAtom } from "jotai"
-import { useMeInfoStore } from "@/store/meData"
-import { mailAddressAtom } from "@/atom/mailAddressAtom"
-import { ActivityIndicator } from "react-native"
-import { errorFlagAtom } from "@/atom/flag/errorFlag"
-import * as Location from "expo-location" // expo-locationをインポート
-import { updateLocation } from "@/firebase/fetch/fetchLocation" // 位置情報をFirebaseに送信する関数をインポート
-import { myLocationAtom } from "@/atom/locationAtom" // 位置情報を管理するatomをインポート
-import { canAccessUserData } from "@/firebase/get/friendFiltering" // アクセス許可情報の取得
-import { getProfileImageUriByStudentId } from "@/firebase/get/getProfileImageUriByStudentId" // アイコンの取得
-import { studentIdAtom } from "@/atom/studentIdAtom"
+  const [loadingMessage, setLoadingMessage] = useState<string>("ようこそ!");
+  useEffect(() => {
+    const checkStoredCredentials = async () => {
+      try {
+        let storedEmail: string | null = null;
+        let storedPassword: string | null = null;
 
-const MainScreen: React.FC = () => {
-  const users = useFriendUserStore((state) => state.users)
-  const userInfo = useMeInfoStore((state) => state.userInfo)
-  const [selectedTab, setSelectedTab] = useState<string>("友達")
-  const [myLocation, setmyLocation] = useAtom(myLocationAtom)
-  const [myStudentId] = useAtom(studentIdAtom)
-  const [mail] = useAtom(mailAddressAtom)
-  const [loading, setLoading] = useState(false)
-  const [, errorFlag] = useAtom(errorFlagAtom)
-  const router = useRouter()
-  const [userData, setUserData] = useState<any[]>([]) // ユーザー情報を保存する状態
-  const [errorMsg, setErrorMsg] = useState<string | null>(null) // エラーメッセージの状態管理
+        // 1秒待機してから処理を実行
+        await new Promise((resolve) => setTimeout(resolve, 500)); // 0.5秒待機
 
-  const getLocation = async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync()
-    if (status !== "granted") {
-      setErrorMsg("位置情報のアクセスが許可されていません")
-      return
-    }
-    const currentLocation = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest })
-    const cor = currentLocation.coords
-    setmyLocation({ accuracy: cor.accuracy ?? 0, latitude: cor.latitude, longitude: cor.longitude })
-    updateLocation(userInfo.key, currentLocation)
-  }
-
-  const fetchData = async () => {
-    // 位置情報の更新
-
-    setUserData([]) // ←これ追加して「過去のデータをクリア」しておく！
-    if (mail) {
-      const flag = await fetchFriendsFromStudentIdArray(mail) // GPSとアイコン以外の情報を取得して更新
-      if (flag === false) errorFlag(false)
-    }
-    setLoading(true) // ローディング開始
-
-    await getLocation() // GPS情報を新しい情報に更新させる
-    // ユーザー情報の更新（アイコンとアクセス許可の情報を再取得）
-    const updatedUserData = await Promise.all(
-      users.map(async (user) => {
-        const access = await canAccessUserData(myStudentId, user.uid) // アクセス許可の確認
-        const profileImageUri = await getProfileImageUriByStudentId(user.uid) // プロフィール画像URIの取得
-
-        return {
-          ...user,
-          access,
-          profileImageUri, // アイコン情報を追加
+        // Webの場合は localStorage、それ以外は AsyncStorage
+        if (Platform.OS === "web") {
+          // Web専用
+          storedEmail = localStorage.getItem("email");
+          storedPassword = localStorage.getItem("password");
+        } else {
+          // React Native（iOS/Android）
+          storedEmail = await AsyncStorage.getItem("email");
+          storedPassword = await AsyncStorage.getItem("password");
+          console.log(
+            "ローカルストレージ内に入っているメールアドレスは",
+            storedEmail,
+          );
+          console.log(
+            "ローカルstorage内に入っているパスワードは",
+            storedPassword,
+          );
         }
-      }),
-    )
 
-    // 更新されたユーザーデータを状態に保存
-    setUserData(updatedUserData)
-    setTimeout(() => setLoading(false), 1000) // 1秒後にローディング終了
-  }
+        if (storedEmail && storedPassword) {
+          //ここでメールアドレスを引数的に受け取って、返り値でそのメールアドレスに対応する学籍番号を返す関数を起動
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchData()
-    }, [mail, myStudentId]), // usersも依存関係に含める
-  )
+          //ーーー↓メールアドレスの情報を基に自分の学籍番号をフロントにセット↓ーーー
+          const studentId = await getStudentIdByEmail(storedEmail);
+          if (studentId === false)
+            errorFlag(false); //通信エラー
+          else setStudentId(studentId); //データのセット
+          //ーーー↑メールアドレスの情報を基に自分の学籍番号をフロントにセット↑ーーー
+
+          //ーーー↓自分が友達に設定しているuserの情報をフロントにセット↓ーーー
+          const flag = await fetchFriendsFromStudentIdArray(storedEmail); //ここでFriendでつながっている友達の情報をフロントにセットさせる
+          if (flag === false) errorFlag(false); //通信エラー
+          //ーーー↑自分が友達に設定しているuserの情報をフロントにセット↑ーーー
+
+          //ーーー↓自分の位置情報の設定情報をフロントにセット↓ーーー
+          const flag2 = await fetchUserInfoAndSetbyEmail(storedEmail);
+          if (flag2 === false) errorFlag(false); //通信エラー
+          //ーーー↑自分の位置情報の設定情報をフロントにセット↑ーーー
+
+          setMail(storedEmail); //メールアドレスフロントにセット
+          console.log("取得した学籍番号:", studentId);
+          // ホームへ遷移（履歴を置き換える）
+          router.replace("./(main)"); // 修正: これが適切なパスの形式か確認
+        } else {
+          // ログインへ遷移
+          router.replace("./(login)"); // 修正: 同様にログインパスも確認
+        }
+      } catch (error) {
+        console.error("Storage check failed", error);
+        router.replace("./(login)"); // 修正: ログインに遷移
+      }
+    };
+
+    // ローディングメッセージを1.5秒表示
+    const timeoutId = setTimeout(() => {
+      setLoadingMessage("少々お待ちください...");
+    }, 1500);
+
+    checkStoredCredentials();
+
+    // クリーンアップ
+    return () => clearTimeout(timeoutId);
+  }, []); // 空の依存配列
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Header title="暇レーダー">
-        <View style={{ margin: "auto", flexDirection: "row" }}>
-          {/* 🔽 選択肢を SelectTab に渡す */}
-          <SelectTab options={["友達", "暇な奴だけ"]} selected={selectedTab} setSelected={setSelectedTab} />
-          <TouchableOpacity
-            onPress={async () => fetchData()}
-            disabled={loading}
-            style={[styles.reloadButton, loading && styles.reloadButtonDisabled]} // ロード中なら薄く
-          >
-            {loading ? (
-              <ActivityIndicator color="#888" size="small" />
-            ) : (
-              <Text style={styles.reloadText}>リロードする</Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      </Header>
-      {/* 🔽 選択状態に応じて表示を切り替えることもできる（任意） */}
-      <FlatList
-        data={selectedTab === "暇な奴だけ" ? userData.filter((u) => !u.time.includes("活動中")) : userData}
-        extraData={loading}
-        keyExtractor={(item) => item.uid}
-        renderItem={({ item }) => (
-          <StateInCurrentFriend
-            username={item.username}
-            location={item.location}
-            message={item.message}
-            time={item.time}
-            studentId={item.uid}
-            imageUri={item.profileImageUri} // アイコン情報を渡す
-            canView={item.access} // アクセス許可情報を渡す
-          />
-        )}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>条件に当てはまるユーザーが存在しません</Text>
-          </View>
-        }
-        contentContainerStyle={styles.listContent}
-      />
+    <View style={styles.container}>
+      <Text style={styles.loadingText}>{loadingMessage}</Text>
+    </View>
+  );
+};
 
-      {/* フッターボタン配置 */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.settingsButtonSmall} onPress={() => router.push("./(setting)")}>
-          <Ionicons name="settings-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
-          <Text style={styles.settingsButtonTextSmall}>暇情報設定</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingsButtonSmall} onPress={() => router.push("./(openchat)")}>
-          <Ionicons name="chatbubble-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
-          <Text style={styles.settingsButtonTextSmall}>全体チャット</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingsButtonSmall} onPress={() => router.push("./(addFriend)")}>
-          <Ionicons name="person-add-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
-          <Text style={styles.settingsButtonTextSmall}>友達追加</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingsButtonSmall} onPress={() => router.push("./(map)")}>
-          <Ionicons name="map-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
-          <Text style={styles.settingsButtonTextSmall}>マップ</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
-  )
-}
 const styles = StyleSheet.create({
-  emptyContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 40,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: "#888",
-  },
-  reloadButton: {
-    backgroundColor: "#f0f0f0",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 10,
-    marginLeft: 10,
-    marginBottom: 10,
-  },
-  reloadButtonDisabled: {
-    opacity: 0.5,
-  },
-  reloadText: {
-    fontSize: 14,
-    color: "#333",
-  },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 8,
-    borderTopWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#fff",
-  },
-  settingsButtonSmall: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "center",
-    backgroundColor: "#007AFF",
-    paddingVertical: 6,
-
-    paddingHorizontal: 8,
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 3,
-  },
-
-  settingsButtonTextSmall: {
-    color: "#fff",
-    fontWeight: "500",
-    fontSize: 12,
-  },
   container: {
     flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: "#fff",
   },
-  chatButton: {
-    marginVertical: 10,
-    padding: 10,
-    backgroundColor: "#007bff",
-    borderRadius: 5,
-    alignItems: "center",
+  loadingText: {
+    fontSize: 24,
+    fontWeight: "600",
+    textAlign: "center",
   },
-  chatButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  listContent: {
-    paddingBottom: 20,
-  },
-})
+});
 
-export default MainScreen
+export default AuthGate;
